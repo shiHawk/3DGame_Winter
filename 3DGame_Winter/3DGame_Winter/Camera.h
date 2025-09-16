@@ -8,6 +8,8 @@ public:
 	void Init();
 	void End();
 	void Update();
+	void SetPlayerPosition(const VECTOR& pos) { m_playerPos = pos; };
+	float GetHorizonrtalAngle() { return m_cameraAngleHorizontal; }
 private:
 	void RadianTranslation();
 	int m_lightHandle;
@@ -23,5 +25,6 @@ private:
 	float m_targetAngleVertical;   // “ü—Í‚ÅŒˆ’è‚³‚ê‚½–Ú•W‚Ì‚’¼Šp“x
 	DINPUT_JOYSTATE m_input;
 	float m_viewRadianAngle;
+	VECTOR m_playerPos;
 };
 

@@ -24,24 +24,28 @@ GameScene::GameScene():
 void GameScene::Init()
 {
 	m_pCamera = std::make_shared<Camera>();
+	m_pPlayer = std::make_shared<Player>();
 	m_pCamera->Init();
+	m_pPlayer->Init(m_pCamera);
 }
 
 void GameScene::End()
 {
 	m_pCamera->End();
+	m_pPlayer->End();
 }
 
 SceneBase* GameScene::Update()
 {
 	m_pCamera->Update();
+	m_pPlayer->Update();
+	m_pCamera->SetPlayerPosition(m_pPlayer->GetPlayerPos());
 	return this;
 }
 
 void GameScene::Draw()
 {
-	//DrawTriangle3D(kTrianglePos1, kTrianglePos2, kTrianglePos3, kTriangleColor,false);
-	DrawSphere3D(kSpherePos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor,true);
+	m_pPlayer->Draw();
 	DrawSphere3D(kSpherePos2, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor,true);
 	DrawGrid();
 }

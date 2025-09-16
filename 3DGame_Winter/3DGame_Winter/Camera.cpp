@@ -35,7 +35,8 @@ Camera::Camera():
 	m_input({ 0,0,0,0,0,0,{0,0},{0xFF, 0xFF, 0xFF, 0xFF},0 }),
 	m_viewRadianAngle(0.0f),
 	m_targetAngleHorizontal(0.0f),
-	m_targetAngleVertical(0.0f)
+	m_targetAngleVertical(0.0f),
+	m_playerPos({0.0f,0.0f,0.0f})
 {
 }
 
@@ -51,7 +52,6 @@ void Camera::Init()
 	SetLightSpcColor(GetColorF(kRed, kGreen, kBlue, 0.0f));
 
 	// カメラの位置の初期化を行う
-
 	// カメラ(始点)の位置
 	m_cameraPos = kDefaultCameraPos;
 
@@ -78,6 +78,7 @@ void Camera::End()
 
 void Camera::Update()
 {
+	m_cameraTarget = VAdd(m_playerPos,VGet(0.0f, kCameraTarget.y,0.0f));
 	// 入力状態を取得
 	GetJoypadDirectInputState(DX_INPUT_PAD1, &m_input);
 
@@ -86,11 +87,11 @@ void Camera::Update()
 	{
 		m_targetAngleHorizontal += kCameraAngleSpeed;
 	}
-	else if(m_input.Rx < 0)
+	if(m_input.Rx < 0)
 	{
 		m_targetAngleHorizontal -= kCameraAngleSpeed;
 	}
-	else if (m_input.Ry < 0)
+	if (m_input.Ry < 0)
 	{
 		m_targetAngleVertical += kCameraAngleSpeed;
 		if (m_targetAngleVertical > DX_PI_F * 0.5f - kAngleLimitVertical) // ある一定の角度以上にはならないようにする
@@ -98,7 +99,7 @@ void Camera::Update()
 			m_targetAngleVertical = DX_PI_F * 0.5f - kAngleLimitVertical;
 		}
 	}
-	else if (m_input.Ry > 0)
+	if (m_input.Ry > 0)
 	{
 		m_targetAngleVertical -= kCameraAngleSpeed;
 		if (m_targetAngleVertical < -DX_PI_F * 0.5f + kAngleLimitVertical) // ある一定の角度以下にはならないようにする

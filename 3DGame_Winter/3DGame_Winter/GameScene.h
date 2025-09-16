@@ -1,6 +1,7 @@
 #pragma once
 #include "SceneBase.h"
 #include "Camera.h"
+#include "Player.h"
 #include <memory>
 class GameScene :public SceneBase
 {
@@ -15,5 +16,6 @@ private:
 	void DrawGrid();
 	int m_temp;
 	std::shared_ptr<Camera> m_pCamera;
+	std::shared_ptr<Player> m_pPlayer;
 };
 
