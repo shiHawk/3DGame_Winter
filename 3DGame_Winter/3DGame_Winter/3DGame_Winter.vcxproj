@@ -107,7 +107,7 @@
       <AdditionalIncludeDirectories>"C:\Users\志鷹瑛仁\Documents\GitHub\3DGame_Winter\Dxlib_VC"</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>"C:\Users\志鷹瑛仁\Documents\GitHub\3DGame_Winter\Dxlib_VC"</AdditionalLibraryDirectories>
     </Link>
@@ -129,14 +129,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Pad.cpp" />
     <ClCompile Include="SceneBase.cpp" />
     <ClCompile Include="SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="Pad.h" />
     <ClInclude Include="SceneBase.h" />
     <ClInclude Include="SceneManager.h" />
   </ItemGroup>

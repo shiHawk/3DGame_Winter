@@ -1,5 +1,7 @@
 #pragma once
 #include "SceneBase.h"
+#include "Camera.h"
+#include <memory>
 class GameScene :public SceneBase
 {
 public:
@@ -11,5 +13,6 @@ public:
 	virtual void Draw() override;
 private:
 	int m_temp;
+	std::shared_ptr<Camera> m_pCamera;
 };
 

@@ -7,11 +7,11 @@ public:
 	SceneManager();
 	virtual ~SceneManager() {};
 
-	void Init();
-	void End();
+	virtual void Init() override;
+	virtual void End() override;
 
-	void Updata();
-	void Draw();
+	virtual SceneBase* Update() override;
+	virtual void Draw() override;
 private:
 	SceneBase* m_pScene;
 };
