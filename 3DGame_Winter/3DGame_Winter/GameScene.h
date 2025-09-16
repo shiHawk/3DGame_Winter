@@ -12,6 +12,7 @@ public:
 	virtual SceneBase* Update() override;
 	virtual void Draw() override;
 private:
+	void DrawGrid();
 	int m_temp;
 	std::shared_ptr<Camera> m_pCamera;
 };
