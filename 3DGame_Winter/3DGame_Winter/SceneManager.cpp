@@ -35,7 +35,6 @@ SceneBase* SceneManager::Update()
 		m_pScene = pScene;
 		m_pScene->Init();
 	}
-	m_pScene->Update();
 	return this;
 }
 

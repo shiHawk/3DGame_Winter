@@ -7,7 +7,7 @@ namespace
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x000fff;
 	constexpr int kSphereSpcColor = 0xffffff;
-	constexpr float kMoveSpeed = 3.5f;
+	constexpr float kMoveSpeed = 7.0f;
 	// 減速
 	constexpr float kMoveDecRate = 0.80f;
 }
@@ -48,25 +48,26 @@ void Player::Update()
         m_pos = VAdd(m_pos, m_vec);
         return;
     }
+    else
+    {
+        // 入力を正規化
+        VECTOR inputVec = VNorm(VGet(inputX, 0.0f, inputZ));
 
-    // 入力を正規化
-    VECTOR inputVec = VNorm(VGet(inputX, 0.0f, inputZ));
+        // カメラ角度で回転補正
+        float cameraYaw = -m_pCamera->GetHorizonrtalAngle();
+        float cosY = cosf(cameraYaw);
+        float sinY = sinf(cameraYaw);
 
-    // --- カメラ角度で回転補正 ---
-    float cameraYaw = -m_pCamera->GetHorizonrtalAngle();
-    float cosY = cosf(cameraYaw);
-    float sinY = sinf(cameraYaw);
+        VECTOR moveDir;
+        moveDir.x = inputVec.x * cosY - inputVec.z * sinY;
+        moveDir.z = inputVec.x * sinY + inputVec.z * cosY;
+        moveDir.y = 0.0f;
 
-    VECTOR moveDir;
-    moveDir.x = inputVec.x * cosY - inputVec.z * sinY;
-    moveDir.z = inputVec.x * sinY + inputVec.z * cosY;
-    moveDir.y = 0.0f;
-
-    // 移動ベクトルを更新
-    m_vec = VScale(moveDir, kMoveSpeed);
-
-	m_vec.x *= kMoveDecRate;
-	m_vec.z *= kMoveDecRate;
+        // 移動ベクトルを更新
+        m_vec = VScale(moveDir, kMoveSpeed);
+    }
+    
+	
 	m_pos = VAdd(m_pos, m_vec);
 }
 

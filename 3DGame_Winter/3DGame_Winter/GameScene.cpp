@@ -14,10 +14,9 @@ namespace
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kGridSize = 1000.0f;   // グリッド全体の半径
 	constexpr float kGridInterval = 100.0f; // 線と線の間隔
-	constexpr int kGridColor = 0xAAAAAA;    // グリッドの色
+	constexpr int kGridColor = 0xffffff;    // グリッドの色
 }
-GameScene::GameScene():
-	m_temp(0)
+GameScene::GameScene()
 {
 }
 

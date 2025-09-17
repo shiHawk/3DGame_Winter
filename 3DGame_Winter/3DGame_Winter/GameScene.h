@@ -14,7 +14,6 @@ public:
 	virtual void Draw() override;
 private:
 	void DrawGrid();
-	int m_temp;
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<Player> m_pPlayer;
 };

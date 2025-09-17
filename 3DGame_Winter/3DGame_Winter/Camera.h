@@ -19,12 +19,12 @@ private:
 	VECTOR m_cameraTarget;
 	// カメラの目標移動位置
 	VECTOR m_cameraMoveTargetPos;
-	float m_cameraAngleHorizontal;
-	float m_cameraAngleVertical;
+	float m_cameraAngleHorizontal; // 水平角度
+	float m_cameraAngleVertical; // 垂直角度
 	float m_targetAngleHorizontal; // 入力で決定された目標の水平角度
 	float m_targetAngleVertical;   // 入力で決定された目標の垂直角度
-	DINPUT_JOYSTATE m_input;
-	float m_viewRadianAngle;
+	DINPUT_JOYSTATE m_input; // コントローラーの入力
+	float m_viewRadianAngle; // 視野角
 	VECTOR m_playerPos;
 };
 

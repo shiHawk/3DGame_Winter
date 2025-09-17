@@ -3,7 +3,7 @@
 #include "Pad.h"
 namespace
 {
-	constexpr float kLerpSpeed = 0.055f;
+	constexpr float kLerpSpeed = 0.200f;
 	constexpr float kOffSetPos = 200.0f;
 	constexpr VECTOR kSecondLight = { -0.577f, -0.577f, 0.577f };
 	constexpr float kRightLimitCamera = 4807.0f;
@@ -12,18 +12,20 @@ namespace
 	constexpr VECTOR kDefaultCameraPos = { 0.0f,300.0f,-540.0f };
 	constexpr VECTOR kCameraTarget = { 0.0f,200.0f,0.0f };
 	// カメラの視野角
-	constexpr float kViewAngle = 1.396f; // 視野角(度数) DX_PI_F / 180.0f * 80
+	constexpr float kDegreesPerCircle = 180.0f; // 一周当たりの度数
+	constexpr float kViewAngle = 80.0f; // 視野角(度数) 
 	// nearとfarの位置
 	constexpr float kCameraNearClip = 10.0f;
 	constexpr float kCameraFarClip = 3000.0f;
 	// ライトのカラー
 	constexpr float kRed = 1.0f;
-	constexpr float kGreen = 0.647f;
-	constexpr float kBlue = 0.0f;
+	constexpr float kGreen = 1.0f;
+	constexpr float kBlue = 1.0f;
 	// カメラの旋回
 	constexpr float kCameraAngleSpeed = 0.01f;
 	constexpr float kCameraSphereLength = 540.0f;
 	constexpr float kAngleLimitVertical = 0.6f;
+	constexpr float kCameraPitchDownLimit = -0.3f;
 }
 Camera::Camera():
 	m_cameraPos({0.0f,0.0f,0.0f}),
@@ -61,7 +63,7 @@ void Camera::Init()
 	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget);
 	RadianTranslation();
 	// カメラの視野角を設定する
-	SetupCamera_Perspective(kViewAngle);
+	SetupCamera_Perspective(m_viewRadianAngle);
 	// カメラのnear,farを設定する
 	// 画面に表示される距離の範囲を設定する
 	// カメラからnear以上離れていてfarより近くにあるものが
@@ -72,6 +74,7 @@ void Camera::Init()
 
 void Camera::End()
 {
+	// カメラの位置、注視点をリセットする
 	m_cameraPos = kDefaultCameraPos;
 	m_cameraTarget = kCameraTarget;
 }
@@ -102,11 +105,12 @@ void Camera::Update()
 	if (m_input.Ry > 0)
 	{
 		m_targetAngleVertical -= kCameraAngleSpeed;
-		if (m_targetAngleVertical < -DX_PI_F * 0.5f + kAngleLimitVertical) // ある一定の角度以下にはならないようにする
+		if (m_targetAngleVertical < kCameraPitchDownLimit) // カメラが地面の下に行かないように制限
 		{
-			m_targetAngleVertical = -DX_PI_F * 0.5f + kAngleLimitVertical;
+			m_targetAngleVertical = kCameraPitchDownLimit;
 		}
 	}
+	printfDx(L"m_targetAngleVertical:%f\nm_targetAngleHorizontal:%f\n", m_targetAngleVertical, m_targetAngleHorizontal);
 	m_cameraAngleHorizontal = std::lerp(m_cameraAngleHorizontal,m_targetAngleHorizontal, kLerpSpeed);
 	m_cameraAngleVertical = std::lerp(m_cameraAngleVertical,m_targetAngleVertical, kLerpSpeed);
 	MATRIX rotX,rotY; // カメラの回転行列
@@ -124,5 +128,5 @@ void Camera::Update()
 
 void Camera::RadianTranslation()
 {
-	m_viewRadianAngle = (DX_PI_F / 180.0f) * kViewAngle;
+	m_viewRadianAngle = kViewAngle * (DX_PI_F / kDegreesPerCircle);
 }
