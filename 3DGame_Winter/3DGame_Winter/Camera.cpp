@@ -34,7 +34,7 @@ Camera::Camera():
 	m_lightHandle(-1),
 	m_cameraAngleHorizontal(0.0f),
 	m_cameraAngleVertical(0.0f),
-	m_input({ 0,0,0,0,0,0,{0,0},{0xFF, 0xFF, 0xFF, 0xFF},0 }),
+	m_input({ 0,0,0,0,0,0,{0,0},{0xff, 0xff, 0xff, 0xff},0 }),
 	m_viewRadianAngle(0.0f),
 	m_targetAngleHorizontal(0.0f),
 	m_targetAngleVertical(0.0f),
@@ -105,7 +105,7 @@ void Camera::Update()
 	if (m_input.Ry > 0)
 	{
 		m_targetAngleVertical -= kCameraAngleSpeed;
-		if (m_targetAngleVertical < kCameraPitchDownLimit) // カメラが地面の下に行かないように制限
+		if (m_targetAngleVertical < kCameraPitchDownLimit) // カメラが下限より下に行かないように制限
 		{
 			m_targetAngleVertical = kCameraPitchDownLimit;
 		}
