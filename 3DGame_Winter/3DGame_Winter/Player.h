@@ -16,5 +16,6 @@ private:
 	VECTOR m_pos;
 	VECTOR m_vec;
 	std::shared_ptr<Camera> m_pCamera;
+	float m_angleY;
 };
 

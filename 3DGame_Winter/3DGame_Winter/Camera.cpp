@@ -5,7 +5,7 @@ namespace
 {
 	constexpr float kLerpSpeed = 0.200f;
 	constexpr float kOffSetPos = 200.0f;
-	constexpr VECTOR kSecondLight = { -0.577f, -0.577f, 0.577f };
+	constexpr VECTOR kSecondLight = { -0.577f, -0.577f, -0.577f };
 	constexpr float kRightLimitCamera = 4807.0f;
 	constexpr float kLeftLimitCamera = -2355.0f;
 	// カメラの位置と注視点
@@ -26,6 +26,7 @@ namespace
 	constexpr float kCameraSphereLength = 540.0f;
 	constexpr float kAngleLimitVertical = 0.6f;
 	constexpr float kCameraPitchDownLimit = -0.3f;
+	constexpr float kCameraPitchUpLimit = 0.97f;
 }
 Camera::Camera():
 	m_cameraPos({0.0f,0.0f,0.0f}),
@@ -52,6 +53,7 @@ void Camera::Init()
 
 	// ライトの色を変更する
 	SetLightSpcColor(GetColorF(kRed, kGreen, kBlue, 0.0f));
+	m_lightHandle = CreateDirLightHandle(kSecondLight);
 
 	// カメラの位置の初期化を行う
 	// カメラ(始点)の位置
@@ -77,6 +79,7 @@ void Camera::End()
 	// カメラの位置、注視点をリセットする
 	m_cameraPos = kDefaultCameraPos;
 	m_cameraTarget = kCameraTarget;
+	DeleteLightHandle(m_lightHandle);
 }
 
 void Camera::Update()
@@ -97,9 +100,9 @@ void Camera::Update()
 	if (m_input.Ry < 0)
 	{
 		m_targetAngleVertical += kCameraAngleSpeed;
-		if (m_targetAngleVertical > DX_PI_F * 0.5f - kAngleLimitVertical) // ある一定の角度以上にはならないようにする
+		if (m_targetAngleVertical > kCameraPitchUpLimit) // カメラが上限より上に行かないように制限
 		{
-			m_targetAngleVertical = DX_PI_F * 0.5f - kAngleLimitVertical;
+			m_targetAngleVertical = kCameraPitchUpLimit;
 		}
 	}
 	if (m_input.Ry > 0)
