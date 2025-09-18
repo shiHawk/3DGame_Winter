@@ -24,6 +24,12 @@ Animation::~Animation()
 
 void Animation::Init()
 {
+	m_animTotalTime = 0.0f;
+	m_playTime = 0.0f;
+	m_isLoop = true;
+	m_isEnd = false;
+	m_timeIncrement = 0.0f;
+	m_isNowPlaying = false;
 }
 
 void Animation::AttachAnim(int modelHandle, int animNo)

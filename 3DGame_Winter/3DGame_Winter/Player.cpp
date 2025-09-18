@@ -17,7 +17,7 @@ namespace
     constexpr float kForwardLineLength = 100.0f;
     // アナログスティックのデッドゾーン
     constexpr double kAnalogDeadZone = 0.25;
-    constexpr float kRotateSpeed = 0.1f;
+    constexpr float kRotateSpeed = 0.2f;
 }
 
 Player::Player():
@@ -46,9 +46,9 @@ void Player::Update()
     int stickY = 0;
     GetJoypadAnalogInput(&stickX, &stickY, DX_INPUT_PAD1);
     // 入力値を-1.0fから1.0fの範囲に正規化
-    float inputX = static_cast<float>(stickX) / 1000.0f;
+    float inputX = stickX / 1000.0f;
     // ゲームの座標系に合わせてY軸の符号を反転（スティック上が奥方向）
-    float inputZ = -static_cast<float>(stickY) / 1000.0f;
+    float inputZ = -stickY / 1000.0f;
 
     // デッドゾーン処理
     // スティックのわずかな傾きを無視する
