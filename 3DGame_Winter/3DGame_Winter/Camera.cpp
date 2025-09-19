@@ -100,7 +100,7 @@ void Camera::Update()
 	if (m_input.Ry < 0)
 	{
 		m_targetAngleVertical += kCameraAngleSpeed;
-		if (m_targetAngleVertical > kCameraPitchUpLimit) // カメラが上限より上に行かないように制限
+		if (m_targetAngleVertical > kCameraPitchUpLimit) // カメラが上限を超えないように制限
 		{
 			m_targetAngleVertical = kCameraPitchUpLimit;
 		}
@@ -108,7 +108,7 @@ void Camera::Update()
 	if (m_input.Ry > 0)
 	{
 		m_targetAngleVertical -= kCameraAngleSpeed;
-		if (m_targetAngleVertical < kCameraPitchDownLimit) // カメラが下限より下に行かないように制限
+		if (m_targetAngleVertical < kCameraPitchDownLimit) // カメラが下限を下回らないように制限
 		{
 			m_targetAngleVertical = kCameraPitchDownLimit;
 		}

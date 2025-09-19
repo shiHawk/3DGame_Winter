@@ -9,7 +9,7 @@ namespace
 	constexpr int kSphereDifColor = 0x000fff;
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kMoveSpeed = 7.0f;
-    constexpr float kJumpPower = 7.0f;
+    constexpr float kJumpPower = 10.0f;
     constexpr float kGravity = -0.5f;
 	// Œ¸‘¬
 	constexpr float kMoveDecRate = 0.80f;
@@ -23,7 +23,8 @@ namespace
 Player::Player():
 	m_pos({0.0f,0.0f,0.0f}),
 	m_vec({ 0.0f,0.0f,0.0f }),
-    m_angleY(0.0f)
+    m_angleY(0.0f),
+    m_isJump(false)
 {
 }
 
@@ -33,6 +34,7 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
 	m_pos = { 0.0f,0.0f,0.0f };
 	m_vec = { 0.0f,0.0f,0.0f };
     m_angleY = 0.0f;
+    m_isJump = false;
 }
 
 void Player::End()
@@ -49,62 +51,74 @@ void Player::Update()
     float inputX = stickX / 1000.0f;
     // ƒQ[ƒ€‚ÌÀ•WŒn‚É‡‚í‚¹‚ÄYŽ²‚Ì•„†‚ð”½“]iƒXƒeƒBƒbƒNã‚ª‰œ•ûŒüj
     float inputZ = -stickY / 1000.0f;
-
     // ƒfƒbƒhƒ][ƒ“ˆ—
     // ƒXƒeƒBƒbƒN‚Ì‚í‚¸‚©‚ÈŒX‚«‚ð–³Ž‹‚·‚é
     VECTOR rawInput = VGet(inputX, 0.0f, inputZ);
     SetJoypadDeadZone(DX_INPUT_PAD1, kAnalogDeadZone);
-    // “ü—Í‚ª‚È‚¯‚ê‚ÎŒ¸‘¬‚¾‚¯‚µ‚ÄI—¹
-    if (inputX == 0.0f && inputZ == 0.0f)
+    // “ü—Í‚ð³‹K‰»
+    VECTOR inputVec = VNorm(VGet(inputX, 0.0f, inputZ));
+    VECTOR moveDir = VGet(0.0f,0.0f,0.0f);
+    if (inputX != 0.0f || inputZ != 0.0f)
+    {
+        // ƒJƒƒ‰Šp“x‚Å‰ñ“]•â³
+        float cameraYaw = -m_pCamera->GetHorizonrtalAngle();
+        float cosY = cosf(cameraYaw);
+        float sinY = sinf(cameraYaw);
+        moveDir.x = inputVec.x * cosY - inputVec.z * sinY;
+        moveDir.z = inputVec.x * sinY + inputVec.z * cosY;
+        // 1. ƒXƒeƒBƒbƒN‚Ì“ü—Í•ûŒü‚©‚çu–Ú•WŠp“xv‚ðŒvŽZ
+        float targetAngle = atan2f(moveDir.x, moveDir.z);
+        // 2. Œ»Ý‚ÌŠp“x‚Æ–Ú•WŠp“x‚Ì·‚ðŒvŽZ
+        float diff = targetAngle - m_angleY;
+        // 3. Šp“x‚Ì·‚ª180“x (-DX_PI_F) ` 180“x (DX_PI_F) ‚Ì”ÍˆÍ‚ÉŽû‚Ü‚é‚æ‚¤‚É•â³iÅ’ZŒo˜H‚ðŒvŽZj
+        if (diff > DX_PI_F)
+        {
+            diff -= 2.0f * DX_PI_F;
+        }
+        else if (diff < -DX_PI_F)
+        {
+            diff += 2.0f * DX_PI_F;
+        }
+        // 4. ·‚Éˆê’è‚ÌŠ„‡‚ðŠ|‚¯‚ÄAŒ»Ý‚ÌŠp“x‚ðŠŠ‚ç‚©‚É–Ú•WŠp“x‚Ö‹ß‚Ã‚¯‚é
+        m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
+        // 5. m_angleY ‚Ì’l‚ð -DX_PI_F ` DX_PI_F ‚Ì”ÍˆÍ‚É³‹K‰»‚·‚é
+        if (m_angleY > DX_PI_F)
+        {
+            m_angleY -= 2.0f * DX_PI_F;
+        }
+        else if (m_angleY < -DX_PI_F)
+        {
+            m_angleY += 2.0f * DX_PI_F;
+        }
+        // ˆÚ“®ƒxƒNƒgƒ‹‚ðXV
+        m_vec.x = moveDir.x * kMoveSpeed;
+        m_vec.z = moveDir.z * kMoveSpeed;
+    }
+    else
     {
         m_vec.x *= kMoveDecRate;
         m_vec.z *= kMoveDecRate;
-        m_pos = VAdd(m_pos, m_vec);
-        return;
-    }
-    // “ü—Í‚ð³‹K‰»
-    VECTOR inputVec = VNorm(VGet(inputX, 0.0f, inputZ));
-
-    // ƒJƒƒ‰Šp“x‚Å‰ñ“]•â³
-    float cameraYaw = -m_pCamera->GetHorizonrtalAngle();
-    float cosY = cosf(cameraYaw);
-    float sinY = sinf(cameraYaw);
-
-    VECTOR moveDir;
-    moveDir.x = inputVec.x * cosY - inputVec.z * sinY;
-    moveDir.z = inputVec.x * sinY + inputVec.z * cosY;
-    moveDir.y = 0.0f;
-    // 1. ƒXƒeƒBƒbƒN‚Ì“ü—Í•ûŒü‚©‚çu–Ú•WŠp“xv‚ðŒvŽZ
-    float targetAngle = atan2f(moveDir.x, moveDir.z);
-
-    // 2. Œ»Ý‚ÌŠp“x‚Æ–Ú•WŠp“x‚Ì·‚ðŒvŽZ
-    float diff = targetAngle - m_angleY;
-
-    // 3. Šp“x‚Ì·‚ª180“x (-DX_PI_F) ` 180“x (DX_PI_F) ‚Ì”ÍˆÍ‚ÉŽû‚Ü‚é‚æ‚¤‚É•â³iÅ’ZŒo˜H‚ðŒvŽZj
-    if (diff > DX_PI_F) 
-    {
-        diff -= 2.0f * DX_PI_F;
-    }
-    else if (diff < -DX_PI_F) 
-    {
-        diff += 2.0f * DX_PI_F;
     }
 
-    // 4. ·‚Éˆê’è‚ÌŠ„‡‚ðŠ|‚¯‚ÄAŒ»Ý‚ÌŠp“x‚ðŠŠ‚ç‚©‚É–Ú•WŠp“x‚Ö‹ß‚Ã‚¯‚é
-    m_angleY += diff * kRotateSpeed;
-    // 5. m_angleY ‚Ì’l‚ð -DX_PI_F ` DX_PI_F ‚Ì”ÍˆÍ‚É³‹K‰»‚·‚é
-    if (m_angleY > DX_PI_F) 
+    if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
     {
-        m_angleY -= 2.0f * DX_PI_F;
+        m_vec.y = kJumpPower;
+        m_isJump = true;
     }
-    else if (m_angleY < -DX_PI_F)
+    m_vec.y += kGravity;
+    if (m_pos.y + m_vec.y < 0.0f)
     {
-        m_angleY += 2.0f * DX_PI_F;
+        m_pos.y = 0.0f;   // ’n–Ê‚ÉŒÅ’è
+        m_vec.y = 0.0f;   // c‘¬“x‚ðƒ[ƒ
+        m_isJump = false; // ’…’n
+    }
+    else
+    {
+        m_pos.y += m_vec.y;
     }
     
-    // ˆÚ“®ƒxƒNƒgƒ‹‚ðXV
-    m_vec = VScale(moveDir, kMoveSpeed);
-	m_pos = VAdd(m_pos, m_vec);
+    m_pos.x += m_vec.x;
+    m_pos.z += m_vec.z;
 }
 
 void Player::Draw()

@@ -17,5 +17,6 @@ private:
 	VECTOR m_vec;
 	std::shared_ptr<Camera> m_pCamera;
 	float m_angleY;
+	bool m_isJump;
 };
 
