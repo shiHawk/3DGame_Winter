@@ -79,7 +79,7 @@ void Player::Update()
         {
             diff += 2.0f * DX_PI_F;
         }
-        // 4. ·‚Éˆê’è‚ÌŠ„‡‚ðŠ|‚¯‚ÄAŒ»Ý‚ÌŠp“x‚ðŠŠ‚ç‚©‚É–Ú•WŠp“x‚Ö‹ß‚Ã‚¯‚é
+        // 4. üŒ`•âŠÔ‚ðs‚¢AŒ»Ý‚ÌŠp“x‚ðŠŠ‚ç‚©‚É–Ú•WŠp“x‚Ö‹ß‚Ã‚¯‚é
         m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
         // 5. m_angleY ‚Ì’l‚ð -DX_PI_F ` DX_PI_F ‚Ì”ÍˆÍ‚É³‹K‰»‚·‚é
         if (m_angleY > DX_PI_F)
