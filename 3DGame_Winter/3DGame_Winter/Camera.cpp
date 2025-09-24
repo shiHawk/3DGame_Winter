@@ -113,7 +113,7 @@ void Camera::Update()
 			m_targetAngleVertical = kCameraPitchDownLimit;
 		}
 	}
-	printfDx(L"m_targetAngleVertical:%f\nm_targetAngleHorizontal:%f\n", m_targetAngleVertical, m_targetAngleHorizontal);
+	//printfDx(L"m_targetAngleVertical:%f\nm_targetAngleHorizontal:%f\n", m_targetAngleVertical, m_targetAngleHorizontal);
 	m_cameraAngleHorizontal = std::lerp(m_cameraAngleHorizontal,m_targetAngleHorizontal, kLerpSpeed);
 	m_cameraAngleVertical = std::lerp(m_cameraAngleVertical,m_targetAngleVertical, kLerpSpeed);
 	MATRIX rotX,rotY; // カメラの回転行列
@@ -123,7 +123,7 @@ void Camera::Update()
 	cameraToPlayerLength = kCameraSphereLength; // カメラからプレイヤーまでの初期の距離をセット
 	// カメラの座標を算出
 	// Z軸にカメラとプレイヤーとの距離分だけ伸びたベクトルを
-	// 垂直方向回転( X軸回転 )させたあと水平方向回転( Ｙ軸回転 )して更に
+	// 垂直方向回転(X軸回転)させたあと水平方向回転(Y軸回転)して更に
 	// 注視点の座標を足したものがカメラの座標
 	m_cameraPos = VAdd(VTransform(VTransform(VGet(0.0f, 0.0f, -cameraToPlayerLength), rotX), rotY), m_cameraTarget);
 	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget); // カメラを計算した位置に設定する

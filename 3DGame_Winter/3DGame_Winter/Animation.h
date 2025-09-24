@@ -12,7 +12,9 @@ public:
 	bool GetIsAnimEnd();
 	int GetAttachAnimNo() { return m_attachAnimNo; }
 	float GetPlayTime() { return m_currentPlayTime; }
+	void UpdateBlendAnim(int modelHandle, int animNo);
 private:
+	void StartBlending();
 	// 総再生時間
 	float m_animTotalTime;
 	// 再生時間
@@ -35,5 +37,7 @@ private:
 	float m_timeIncrement;
 	bool m_isNowPlaying; // 現在アニメーションを再生中か
 	int m_attachAnimNo; // 現在アタッチされているアニメーションの番号
+	float m_blendRate;
+	bool m_isBlending;
 };
 

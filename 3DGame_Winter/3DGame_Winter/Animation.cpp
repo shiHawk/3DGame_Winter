@@ -1,6 +1,11 @@
 #include "Animation.h"
 #include "DxLib.h"
 
+namespace
+{
+	constexpr float kBlendRateIncrement = 0.01f;
+}
+
 Animation::Animation() :
 	m_animTotalTime(0),
 	m_playTime(0.0f),
@@ -14,7 +19,9 @@ Animation::Animation() :
 	m_isNowPlaying(false),
 	m_currentPlayTime(0.0f),
 	m_nextPlayTime(0.0f),
-	m_attachAnimNo(-1)
+	m_attachAnimNo(-1),
+	m_blendRate(0.0f),
+	m_isBlending(false)
 {
 }
 
@@ -45,7 +52,10 @@ void Animation::UpdateAnim()
 	m_currentPlayTime += m_timeIncrement;
 	// Ä¶ŽžŠÔ‚ðƒZƒbƒg‚·‚é
 	MV1SetAttachAnimTime(m_modelHandle, m_currentAttachNo, m_currentPlayTime);
-	
+	if (m_isBlending)
+	{
+		//UpdateBlendAnim(m_modelHandle, m_nextAttachNo);
+	}
 	if (m_currentPlayTime >= m_animTotalTime)
 	{
 		if (m_isLoop)
@@ -83,4 +93,25 @@ bool Animation::GetIsAnimEnd()
 {
 	if (m_currentAttachNo == -1) return false;
 	return m_currentPlayTime >= m_animTotalTime;
+}
+
+void Animation::UpdateBlendAnim(int modelHandle, int animNo)
+{
+	if (!m_isBlending) return;
+	m_blendRate += 0.01;
+	if (m_blendRate > 1.0f)
+	{
+		m_blendRate = kBlendRateIncrement;
+		m_isBlending = false;
+		m_nextPlayTime += m_timeIncrement;
+		MV1SetAttachAnimTime(m_modelHandle, animNo, m_nextPlayTime);
+	}
+	MV1SetAttachAnimBlendRate(m_modelHandle, m_currentAttachNo, 1.0f - m_blendRate);
+	MV1SetAttachAnimBlendRate(m_modelHandle, animNo, m_blendRate);
+}
+
+void Animation::StartBlending()
+{
+	m_isBlending = true;
+	m_blendRate = 0.0f;
 }

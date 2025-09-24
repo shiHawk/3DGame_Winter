@@ -13,6 +13,8 @@ public:
 	void Draw();
 	VECTOR GetPlayerPos() { return m_pos; }
 private:
+	VECTOR HandleInput();
+	void UpdateMovement(const VECTOR& moveDir);
 	VECTOR m_pos;
 	VECTOR m_vec;
 	std::shared_ptr<Camera> m_pCamera;

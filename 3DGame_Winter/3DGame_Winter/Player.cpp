@@ -43,63 +43,8 @@ void Player::End()
 
 void Player::Update()
 {
-    // アナログスティックの入力を取得
-    int stickX = 0;
-    int stickY = 0;
-    GetJoypadAnalogInput(&stickX, &stickY, DX_INPUT_PAD1);
-    // 入力値を-1.0fから1.0fの範囲に正規化
-    float inputX = stickX / 1000.0f;
-    // ゲームの座標系に合わせてY軸の符号を反転（スティック上が奥方向）
-    float inputZ = -stickY / 1000.0f;
-    // デッドゾーン処理
-    // スティックのわずかな傾きを無視する
-    VECTOR rawInput = VGet(inputX, 0.0f, inputZ);
-    SetJoypadDeadZone(DX_INPUT_PAD1, kAnalogDeadZone);
-    // 入力を正規化
-    VECTOR inputVec = VNorm(VGet(inputX, 0.0f, inputZ));
-    VECTOR moveDir = VGet(0.0f,0.0f,0.0f);
-    if (inputX != 0.0f || inputZ != 0.0f)
-    {
-        // カメラ角度で回転補正
-        float cameraYaw = -m_pCamera->GetHorizonrtalAngle();
-        float cosY = cosf(cameraYaw);
-        float sinY = sinf(cameraYaw);
-        moveDir.x = inputVec.x * cosY - inputVec.z * sinY;
-        moveDir.z = inputVec.x * sinY + inputVec.z * cosY;
-        // 1. スティックの入力方向から「目標角度」を計算
-        float targetAngle = atan2f(moveDir.x, moveDir.z);
-        // 2. 現在の角度と目標角度の差を計算
-        float diff = targetAngle - m_angleY;
-        // 3. 角度の差が180度 (-DX_PI_F) ～ 180度 (DX_PI_F) の範囲に収まるように補正（最短経路を計算）
-        if (diff > DX_PI_F)
-        {
-            diff -= 2.0f * DX_PI_F;
-        }
-        else if (diff < -DX_PI_F)
-        {
-            diff += 2.0f * DX_PI_F;
-        }
-        // 4. 線形補間を行い、現在の角度を滑らかに目標角度へ近づける
-        m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
-        // 5. m_angleY の値を -DX_PI_F ～ DX_PI_F の範囲に正規化する
-        if (m_angleY > DX_PI_F)
-        {
-            m_angleY -= 2.0f * DX_PI_F;
-        }
-        else if (m_angleY < -DX_PI_F)
-        {
-            m_angleY += 2.0f * DX_PI_F;
-        }
-        // 移動ベクトルを更新
-        m_vec.x = moveDir.x * kMoveSpeed;
-        m_vec.z = moveDir.z * kMoveSpeed;
-    }
-    else
-    {
-        m_vec.x *= kMoveDecRate;
-        m_vec.z *= kMoveDecRate;
-    }
-
+    VECTOR moveInput = HandleInput();
+    UpdateMovement(moveInput);
     if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
     {
         m_vec.y = kJumpPower;
@@ -134,4 +79,70 @@ void Player::Draw()
 
 	DrawSphere3D(m_pos,kSphereRadius,kDivNum,kSphereDifColor,kSphereSpcColor,true);
     DrawLine3D(lineStart, lineEnd, kSphereDifColor);
+}
+
+VECTOR Player::HandleInput()
+{
+    // アナログスティックの入力を取得
+    int stickX = 0;
+    int stickY = 0;
+    GetJoypadAnalogInput(&stickX, &stickY, DX_INPUT_PAD1);
+    SetJoypadDeadZone(DX_INPUT_PAD1, kAnalogDeadZone);
+
+    // 入力値を-1.0fから1.0fの範囲に正規化
+    float inputX = stickX / 1000.0f;
+    float inputZ = -stickY / 1000.0f; // Y軸をZ軸に(奥方向)
+
+    // 入力がない場合はゼロベクトルを返す
+    if (inputX == 0.0f && inputZ == 0.0f)
+    {
+        return VGet(0.0f, 0.0f, 0.0f);
+    }
+
+    // 入力ベクトルを正規化
+    VECTOR inputVec = VNorm(VGet(inputX, 0.0f, inputZ));
+
+    // カメラの向きに合わせて入力ベクトルを回転
+    float cameraYaw = -m_pCamera->GetHorizonrtalAngle();
+    float cosY = cosf(cameraYaw);
+    float sinY = sinf(cameraYaw);
+
+    VECTOR moveDir;
+    moveDir.x = inputVec.x * cosY - inputVec.z * sinY;
+    moveDir.z = inputVec.x * sinY + inputVec.z * cosY;
+    moveDir.y = 0.0f;
+
+    return moveDir;
+}
+
+void Player::UpdateMovement(const VECTOR& moveDir)
+{
+    // moveDirの長さが0より大きいか（入力があるか）で判断
+    if (VSize(moveDir) > 0.0f)
+    {
+        // 1. スティックの入力方向から「目標角度」を計算
+        float targetAngle = atan2f(moveDir.x, moveDir.z);
+
+        // 2. 現在の角度と目標角度の差を最短で計算
+        float diff = targetAngle - m_angleY;
+        if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
+        else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+
+        // 3. 線形補間で滑らかに回転
+        m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
+
+        // 4. 角度を -PI ~ PI の範囲に正規化
+        if (m_angleY > DX_PI_F)      m_angleY -= 2.0f * DX_PI_F;
+        else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
+
+        // 5. 移動ベクトルを更新
+        m_vec.x = moveDir.x * kMoveSpeed;
+        m_vec.z = moveDir.z * kMoveSpeed;
+    }
+    else // 入力がない場合
+    {
+        // 減速処理
+        m_vec.x *= kMoveDecRate;
+        m_vec.z *= kMoveDecRate;
+    }
 }
