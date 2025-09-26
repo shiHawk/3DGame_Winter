@@ -11,7 +11,10 @@ public:
 	void SetPlayerPosition(const VECTOR& pos) { m_playerPos = pos; };
 	float GetHorizonrtalAngle() { return m_cameraAngleHorizontal; }
 private:
-	void RadianTranslation();
+	// 度数をラジアンに変換する
+	void RadianTranslation(); 
+	// カメラの移動距離を制限(カメラとステージの当たり判定の仮実装)
+	void ResolveCollisionWithStage(); 
 	int m_lightHandle;
 	// カメラの位置
 	VECTOR m_cameraPos;

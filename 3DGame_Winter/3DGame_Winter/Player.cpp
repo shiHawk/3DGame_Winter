@@ -18,6 +18,11 @@ namespace
     // アナログスティックのデッドゾーン
     constexpr double kAnalogDeadZone = 0.25;
     constexpr float kRotateSpeed = 0.2f;
+    constexpr float kFrontLimit = -1000.0f; // ステージ奥
+    constexpr float kBackLimit = 1000.0f;   // ステージ手前
+    constexpr float kLeftLimit = -1000.0f;   // ステージ左
+    constexpr float kRightLimit = 1000.0f;   // ステージ右
+    constexpr float kWallOffset = 0.001f;
 }
 
 Player::Player():
@@ -61,9 +66,34 @@ void Player::Update()
     {
         m_pos.y += m_vec.y;
     }
-    
-    m_pos.x += m_vec.x;
-    m_pos.z += m_vec.z;
+
+    VECTOR nextPos = VAdd(m_pos, m_vec); // 仮の次の位置
+    // Z方向（前後）制限
+    if (nextPos.z >= kBackLimit - kWallOffset)
+    {
+        nextPos.z = kBackLimit - kWallOffset;
+        m_vec.z = 0.0f;
+    }
+    else if (nextPos.z <= kFrontLimit + kWallOffset)
+    {
+        nextPos.z = kFrontLimit + kWallOffset;
+        m_vec.z = 0.0f;
+    }
+
+    // X方向（左右）制限
+    if(nextPos.x <= kLeftLimit + kWallOffset)
+    {
+        nextPos.x = kLeftLimit + kWallOffset;
+        m_vec.x = 0.0f;
+    }
+    else if(nextPos.x >= kRightLimit - kWallOffset) 
+    {
+        nextPos.x = kRightLimit - kWallOffset;
+        m_vec.x = 0.0f;
+    }
+    /*m_pos.x += m_vec.x;
+    m_pos.z += m_vec.z;*/
+    m_pos = nextPos;
 }
 
 void Player::Draw()
@@ -125,15 +155,27 @@ void Player::UpdateMovement(const VECTOR& moveDir)
 
         // 2. 現在の角度と目標角度の差を最短で計算
         float diff = targetAngle - m_angleY;
-        if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
-        else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+        if (diff > DX_PI_F)
+        {
+            diff -= 2.0f * DX_PI_F;
+        }
+        else if (diff < -DX_PI_F)
+        {
+            diff += 2.0f * DX_PI_F;
+        }
 
         // 3. 線形補間で滑らかに回転
         m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
 
         // 4. 角度を -PI ~ PI の範囲に正規化
-        if (m_angleY > DX_PI_F)      m_angleY -= 2.0f * DX_PI_F;
-        else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
+        if (m_angleY > DX_PI_F)
+        {
+            m_angleY -= 2.0f * DX_PI_F;
+        }
+        else if (m_angleY < -DX_PI_F) 
+        {
+            m_angleY += 2.0f * DX_PI_F;
+        } 
 
         // 5. 移動ベクトルを更新
         m_vec.x = moveDir.x * kMoveSpeed;
