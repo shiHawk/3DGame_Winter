@@ -33,6 +33,8 @@ namespace
 	constexpr float kStageMinZ = -1000.0f;
 	constexpr float kStageMaxZ = 1000.0f;
 	constexpr float kCameraRadius = 20.0f; // カメラの当たり判定用半径
+
+	constexpr VECTOR kSpherePos2 = { 600.0f,0.0f,500.0f };
 }
 Camera::Camera():
 	m_cameraPos({0.0f,0.0f,0.0f}),
@@ -45,7 +47,8 @@ Camera::Camera():
 	m_viewRadianAngle(0.0f),
 	m_targetAngleHorizontal(0.0f),
 	m_targetAngleVertical(0.0f),
-	m_playerPos({0.0f,0.0f,0.0f})
+	m_playerPos({0.0f,0.0f,0.0f}),
+	m_isLockOn(false)
 {
 }
 
@@ -78,6 +81,7 @@ void Camera::Init()
 	// ゲーム画面に表示される
 	// farはあまり大きすぎる数字を設定しないように気を付ける(表示バグに繋がる)
 	SetCameraNearFar(kCameraNearClip, kCameraFarClip);
+	m_isLockOn = false;
 }
 
 void Camera::End()
@@ -90,7 +94,11 @@ void Camera::End()
 
 void Camera::Update()
 {
-	m_cameraTarget = VAdd(m_playerPos,VGet(0.0f, kCameraTarget.y,0.0f));
+	if (!m_isLockOn)
+	{
+		m_cameraTarget = VAdd(m_playerPos, VGet(0.0f, kCameraTarget.y, 0.0f));
+	}
+	
 	// 入力状態を取得
 	GetJoypadDirectInputState(DX_INPUT_PAD1, &m_input);
 
@@ -133,6 +141,15 @@ void Camera::Update()
 	// 注視点の座標を足したものがカメラの座標
 	m_cameraPos = VAdd(VTransform(VTransform(VGet(0.0f, 0.0f, -cameraToPlayerLength), rotX), rotY), m_cameraTarget);
 	ResolveCollisionWithStage();
+	if (Pad::isPress(PAD_INPUT_6) && !m_isLockOn)
+	{
+		m_cameraTarget = kSpherePos2;
+		m_isLockOn = true;
+	}
+	if (Pad::isPress(PAD_INPUT_6) && m_isLockOn)
+	{
+		m_isLockOn = false;
+	}
 	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget); // カメラを計算した位置に設定する
 }
 

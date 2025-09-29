@@ -29,5 +29,6 @@ private:
 	DINPUT_JOYSTATE m_input; // コントローラーの入力
 	float m_viewRadianAngle; // 視野角
 	VECTOR m_playerPos;
+	bool m_isLockOn;
 };
 

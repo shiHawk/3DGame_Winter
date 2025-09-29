@@ -68,7 +68,7 @@ void Player::Update()
     }
 
     VECTOR nextPos = VAdd(m_pos, m_vec); // 仮の次の位置
-    // Z方向（前後）制限
+    // Z方向(前後)制限
     if (nextPos.z >= kBackLimit - kWallOffset)
     {
         nextPos.z = kBackLimit - kWallOffset;
@@ -80,7 +80,7 @@ void Player::Update()
         m_vec.z = 0.0f;
     }
 
-    // X方向（左右）制限
+    // X方向(左右)制限
     if(nextPos.x <= kLeftLimit + kWallOffset)
     {
         nextPos.x = kLeftLimit + kWallOffset;
@@ -147,13 +147,13 @@ VECTOR Player::HandleInput()
 
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
-    // moveDirの長さが0より大きいか（入力があるか）で判断
+    // moveDirの長さが0より大きいか(入力があるか)で判断
     if (VSize(moveDir) > 0.0f)
     {
-        // 1. スティックの入力方向から「目標角度」を計算
+        // 1.スティックの入力方向から「目標角度」を計算
         float targetAngle = atan2f(moveDir.x, moveDir.z);
 
-        // 2. 現在の角度と目標角度の差を最短で計算
+        // 2.現在の角度と目標角度の差を最短で計算
         float diff = targetAngle - m_angleY;
         if (diff > DX_PI_F)
         {
@@ -164,10 +164,10 @@ void Player::UpdateMovement(const VECTOR& moveDir)
             diff += 2.0f * DX_PI_F;
         }
 
-        // 3. 線形補間で滑らかに回転
+        // 3.線形補間で滑らかに回転
         m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
 
-        // 4. 角度を -PI ~ PI の範囲に正規化
+        // 4.角度を -PI ~ PI の範囲に正規化
         if (m_angleY > DX_PI_F)
         {
             m_angleY -= 2.0f * DX_PI_F;
@@ -177,7 +177,7 @@ void Player::UpdateMovement(const VECTOR& moveDir)
             m_angleY += 2.0f * DX_PI_F;
         } 
 
-        // 5. 移動ベクトルを更新
+        // 5.移動ベクトルを更新
         m_vec.x = moveDir.x * kMoveSpeed;
         m_vec.z = moveDir.z * kMoveSpeed;
     }
