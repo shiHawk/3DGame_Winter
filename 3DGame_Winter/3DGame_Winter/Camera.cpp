@@ -9,8 +9,9 @@ namespace
 	constexpr float kRightLimitCamera = 4807.0f;
 	constexpr float kLeftLimitCamera = -2355.0f;
 	// カメラの位置と注視点
-	constexpr VECTOR kDefaultCameraPos = { 0.0f,300.0f,-540.0f };
+	constexpr VECTOR kDefaultCameraPos = { 0.0f,200.0f,-540.0f };
 	constexpr VECTOR kCameraTarget = { 0.0f,200.0f,0.0f };
+	constexpr float kMinTargetToPlayerDistance = 500.0f;
 	// カメラの視野角
 	constexpr float kDegreesPerCircle = 180.0f; // 一周当たりの度数
 	constexpr float kViewAngle = 80.0f; // 視野角(度数) 
@@ -23,7 +24,7 @@ namespace
 	constexpr float kBlue = 1.0f;
 	// カメラの旋回
 	constexpr float kCameraAngleSpeed = 0.01f;
-	constexpr float kCameraSphereLength = 540.0f;
+	constexpr float kCameraToPlayerLength = 540.0f;
 	constexpr float kAngleLimitVertical = 0.6f;
 	constexpr float kCameraPitchDownLimit = -0.3f;
 	constexpr float kCameraPitchUpLimit = 0.97f;
@@ -34,7 +35,7 @@ namespace
 	constexpr float kStageMaxZ = 1000.0f;
 	constexpr float kCameraRadius = 20.0f; // カメラの当たり判定用半径
 
-	constexpr VECTOR kSpherePos2 = { 600.0f,0.0f,500.0f };
+	constexpr VECTOR kSpherePos2 = { 600.0f,30.0f,500.0f };
 }
 Camera::Camera():
 	m_cameraPos({0.0f,0.0f,0.0f}),
@@ -48,7 +49,10 @@ Camera::Camera():
 	m_targetAngleHorizontal(0.0f),
 	m_targetAngleVertical(0.0f),
 	m_playerPos({0.0f,0.0f,0.0f}),
-	m_isLockOn(false)
+	m_isLockOn(false),
+	m_targetToPlayer({ 0.0f,0.0f,0.0f }),
+	m_targetToPlayerDistance(0.0f),
+	m_targetToPlayerDir({0.0f,0.0f,0.0f})
 {
 }
 
@@ -94,13 +98,12 @@ void Camera::End()
 
 void Camera::Update()
 {
+	// 入力状態を取得
+	GetJoypadDirectInputState(DX_INPUT_PAD1, &m_input);
 	if (!m_isLockOn)
 	{
 		m_cameraTarget = VAdd(m_playerPos, VGet(0.0f, kCameraTarget.y, 0.0f));
 	}
-	
-	// 入力状態を取得
-	GetJoypadDirectInputState(DX_INPUT_PAD1, &m_input);
 
 	// カメラの角度の計算
 	if (m_input.Rx > 0)
@@ -134,22 +137,27 @@ void Camera::Update()
 	float cameraToPlayerLength;
 	rotY = MGetRotY(m_cameraAngleHorizontal); // 水平方向の回転はY軸回転
 	rotX = MGetRotX(m_cameraAngleVertical); // 垂直方向の回転はX軸回転
-	cameraToPlayerLength = kCameraSphereLength; // カメラからプレイヤーまでの初期の距離をセット
+	cameraToPlayerLength = kCameraToPlayerLength; // カメラからプレイヤーまでの初期の距離をセット
+
 	// カメラの座標を算出
 	// Z軸にカメラとプレイヤーとの距離分だけ伸びたベクトルを
 	// 垂直方向回転(X軸回転)させたあと水平方向回転(Y軸回転)して更に
 	// 注視点の座標を足したものがカメラの座標
-	m_cameraPos = VAdd(VTransform(VTransform(VGet(0.0f, 0.0f, -cameraToPlayerLength), rotX), rotY), m_cameraTarget);
-	ResolveCollisionWithStage();
-	if (Pad::isPress(PAD_INPUT_6) && !m_isLockOn)
+	m_cameraPos = VAdd(VTransform(VTransform(VGet(0.0f, 0.0f, -kCameraToPlayerLength), rotX), rotY), VGet(m_playerPos.x,m_playerPos.y+ kDefaultCameraPos.y,m_playerPos.z));
+	//ResolveCollisionWithStage();
+	if (Pad::isTrigger(PAD_INPUT_6))
 	{
-		m_cameraTarget = kSpherePos2;
-		m_isLockOn = true;
+		if (!m_isLockOn)
+		{
+			m_cameraTarget = kSpherePos2;
+			m_isLockOn = true;
+		}
+		else
+		{
+			m_isLockOn = false;
+		}
 	}
-	if (Pad::isPress(PAD_INPUT_6) && m_isLockOn)
-	{
-		m_isLockOn = false;
-	}
+
 	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget); // カメラを計算した位置に設定する
 }
 
@@ -176,3 +184,5 @@ void Camera::ResolveCollisionWithStage()
 		m_cameraPos.z = kStageMaxZ - kCameraRadius;
 	}
 }
+
+
