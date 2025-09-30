@@ -157,7 +157,8 @@ void Camera::Update()
 			m_isLockOn = false;
 		}
 	}
-
+	
+	DrawFormatString(0,0,0xffffff,L"m_cameraPos.z:%f", m_cameraPos.z);
 	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget); // ƒJƒƒ‰‚ğŒvZ‚µ‚½ˆÊ’u‚Éİ’è‚·‚é
 }
 

@@ -10,6 +10,7 @@ public:
 	void Update();
 	void SetPlayerPosition(const VECTOR& pos) { m_playerPos = pos; };
 	float GetHorizonrtalAngle() { return m_cameraAngleHorizontal; }
+	bool IsLockOn() { return m_isLockOn; }
 private:
 	// “x”‚ğƒ‰ƒWƒAƒ“‚É•ÏŠ·‚·‚é
 	void RadianTranslation(); 

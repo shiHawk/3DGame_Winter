@@ -94,6 +94,7 @@ void Player::Update()
     /*m_pos.x += m_vec.x;
     m_pos.z += m_vec.z;*/
     m_pos = nextPos;
+    DrawFormatString(0, 15, 0xffffff, L"m_pos.z:%f", m_pos.z);
 }
 
 void Player::Draw()
