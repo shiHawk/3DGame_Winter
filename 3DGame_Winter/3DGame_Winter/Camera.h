@@ -9,6 +9,7 @@ public:
 	void End();
 	void Update();
 	void SetPlayerPosition(const VECTOR& pos) { m_playerPos = pos; };
+	void SetPlayerBackLineEnd(VECTOR lineEnd) { m_lockOnCameraPos = lineEnd; }
 	float GetHorizonrtalAngle() { return m_cameraAngleHorizontal; }
 	bool IsLockOn() { return m_isLockOn; }
 private:
@@ -33,6 +34,6 @@ private:
 	bool m_isLockOn; // ÉçÉbÉNÉIÉìíÜÇ©
 	VECTOR m_targetToPlayer;
 	float m_targetToPlayerDistance;
-	VECTOR m_targetToPlayerDir;
+	VECTOR m_lockOnCameraPos;
 };
 

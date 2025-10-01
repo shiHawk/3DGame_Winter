@@ -15,6 +15,7 @@ namespace
 	constexpr float kMoveDecRate = 0.80f;
     // 線分の長さ
     constexpr float kForwardLineLength = 100.0f;
+    constexpr float kBackLineLength = 540.0f;
     // アナログスティックのデッドゾーン
     constexpr double kAnalogDeadZone = 0.25;
     constexpr float kRotateSpeed = 0.2f;
@@ -29,7 +30,9 @@ Player::Player():
 	m_pos({0.0f,0.0f,0.0f}),
 	m_vec({ 0.0f,0.0f,0.0f }),
     m_angleY(0.0f),
-    m_isJump(false)
+    m_isJump(false),
+    m_forwardDir({0.0f,0.0f,0.0f}),
+    m_backDir({ 0.0f,0.0f,0.0f })
 {
 }
 
@@ -94,22 +97,30 @@ void Player::Update()
     /*m_pos.x += m_vec.x;
     m_pos.z += m_vec.z;*/
     m_pos = nextPos;
-    DrawFormatString(0, 15, 0xffffff, L"m_pos.z:%f", m_pos.z);
+    //DrawFormatString(0, 15, 0xffffff, L"m_pos.z:%f", m_pos.z);
 }
 
 void Player::Draw()
 {
     // 向きに合わせて線分を描画
-    VECTOR forwardDir;
-    forwardDir.x = sinf(m_angleY) * kForwardLineLength;
-    forwardDir.y = 0.0f;
-    forwardDir.z = cosf(m_angleY) * kForwardLineLength;
-
+    m_forwardDir.x = sinf(m_angleY) * kForwardLineLength;
+    m_forwardDir.y = 0.0f;
+    m_forwardDir.z = cosf(m_angleY) * kForwardLineLength;
+    //printfDx(L"m_forwardDir.z:%f\n", m_forwardDir.z);
     VECTOR lineStart = VGet(m_pos.x, m_pos.y + kSphereRadius / 2, m_pos.z);
-    VECTOR lineEnd = VAdd(lineStart, forwardDir);
+    VECTOR lineEnd = VAdd(lineStart, m_forwardDir);
 
 	DrawSphere3D(m_pos,kSphereRadius,kDivNum,kSphereDifColor,kSphereSpcColor,true);
     DrawLine3D(lineStart, lineEnd, kSphereDifColor);
+}
+
+VECTOR Player::GetBackLineEnd()
+{
+    VECTOR lineStart = VGet(m_pos.x, m_pos.y + kSphereRadius / 2, m_pos.z);
+    m_backDir.x = -sinf(m_angleY) * kBackLineLength;
+    m_backDir.y = 200.0f;
+    m_backDir.z = -cosf(m_angleY) * kBackLineLength;
+    return VAdd(lineStart, m_backDir);
 }
 
 VECTOR Player::HandleInput()

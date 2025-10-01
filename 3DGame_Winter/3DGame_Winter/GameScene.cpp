@@ -39,13 +39,14 @@ SceneBase* GameScene::Update()
 	m_pCamera->Update();
 	m_pPlayer->Update();
 	m_pCamera->SetPlayerPosition(m_pPlayer->GetPlayerPos());
+	m_pCamera->SetPlayerBackLineEnd(m_pPlayer->GetBackLineEnd());
 	return this;
 }
 
 void GameScene::Draw()
 {
 	m_pPlayer->Draw();
-	DrawSphere3D(kSpherePos2, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor,true);
+	DrawSphere3D(kSpherePos2, kSphereRadius, kDivNum, 0xffffff, kSphereSpcColor,true);
 	DrawGrid();
 }
 

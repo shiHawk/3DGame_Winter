@@ -52,7 +52,7 @@ Camera::Camera():
 	m_isLockOn(false),
 	m_targetToPlayer({ 0.0f,0.0f,0.0f }),
 	m_targetToPlayerDistance(0.0f),
-	m_targetToPlayerDir({0.0f,0.0f,0.0f})
+	m_lockOnCameraPos({ 0.0f,0.0f,0.0f })
 {
 }
 
@@ -143,13 +143,13 @@ void Camera::Update()
 	// Z軸にカメラとプレイヤーとの距離分だけ伸びたベクトルを
 	// 垂直方向回転(X軸回転)させたあと水平方向回転(Y軸回転)して更に
 	// 注視点の座標を足したものがカメラの座標
-	m_cameraPos = VAdd(VTransform(VTransform(VGet(0.0f, 0.0f, -kCameraToPlayerLength), rotX), rotY), VGet(m_playerPos.x,m_playerPos.y+ kDefaultCameraPos.y,m_playerPos.z));
+	m_cameraPos = VAdd(VTransform(VTransform(VGet(0.0f, 0.0f, -kCameraToPlayerLength), rotX), rotY), VGet(m_playerPos.x,m_playerPos.y + kDefaultCameraPos.y,m_playerPos.z));
 	//ResolveCollisionWithStage();
 	if (Pad::isTrigger(PAD_INPUT_6))
 	{
 		if (!m_isLockOn)
 		{
-			m_cameraTarget = kSpherePos2;
+			m_cameraTarget = VAdd(m_playerPos, VScale(VSub(kSpherePos2, m_playerPos), 0.5f));
 			m_isLockOn = true;
 		}
 		else
@@ -158,7 +158,7 @@ void Camera::Update()
 		}
 	}
 	
-	DrawFormatString(0,0,0xffffff,L"m_cameraPos.z:%f", m_cameraPos.z);
+	DrawFormatString(0,0,0xffffff,L"m_cameraPos.x:%f,m_cameraPos.y:%f,m_cameraPos.z:%f", m_cameraPos.x,m_cameraPos.y,m_cameraPos.z);
 	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget); // カメラを計算した位置に設定する
 }
 
@@ -170,18 +170,22 @@ void Camera::RadianTranslation()
 void Camera::ResolveCollisionWithStage()
 {
 	// X方向の壁判定
-	if (m_cameraPos.x < kStageMinX + kCameraRadius) {
+	if (m_cameraPos.x < kStageMinX + kCameraRadius) 
+	{
 		m_cameraPos.x = kStageMinX + kCameraRadius;
 	}
-	else if (m_cameraPos.x > kStageMaxX - kCameraRadius) {
+	else if (m_cameraPos.x > kStageMaxX - kCameraRadius) 
+	{
 		m_cameraPos.x = kStageMaxX - kCameraRadius;
 	}
 
 	// Z方向の壁判定
-	if (m_cameraPos.z < kStageMinZ + kCameraRadius) {
+	if (m_cameraPos.z < kStageMinZ + kCameraRadius) 
+	{
 		m_cameraPos.z = kStageMinZ + kCameraRadius;
 	}
-	else if (m_cameraPos.z > kStageMaxZ - kCameraRadius) {
+	else if (m_cameraPos.z > kStageMaxZ - kCameraRadius) 
+	{
 		m_cameraPos.z = kStageMaxZ - kCameraRadius;
 	}
 }
