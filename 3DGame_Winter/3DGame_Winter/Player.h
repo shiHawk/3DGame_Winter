@@ -1,23 +1,22 @@
 #pragma once
 #include "DxLib.h"
 #include <memory>
+#include "CharacterBase.h"
 class Camera;
-class Player
+class Player:public CharacterBase
 {
 public:
 	Player();
 	~Player() {};
 	void Init(std::shared_ptr<Camera> pCamera);
 	void End();
-	void Update();
+	virtual void Update()override;
 	void Draw();
 	VECTOR GetPlayerPos() { return m_pos; }
 	VECTOR GetBackLineEnd();
 private:
 	VECTOR HandleInput();
 	void UpdateMovement(const VECTOR& moveDir);
-	VECTOR m_pos;
-	VECTOR m_vec;
 	std::shared_ptr<Camera> m_pCamera;
 	float m_angleY;
 	bool m_isJump;

@@ -9,7 +9,7 @@ public:
 	void End();
 	void Update();
 	void SetPlayerPosition(const VECTOR& pos) { m_playerPos = pos; };
-	void SetPlayerBackLineEnd(VECTOR lineEnd) { m_lockOnCameraPos = lineEnd; }
+	void SetLockOnPosition(VECTOR lockOnPos) { m_lockOnCameraPos = lockOnPos; }
 	float GetHorizonrtalAngle() { return m_cameraAngleHorizontal; }
 	bool IsLockOn() { return m_isLockOn; }
 private:
@@ -30,7 +30,7 @@ private:
 	float m_targetAngleVertical;   // 入力で決定された目標の垂直角度
 	DINPUT_JOYSTATE m_input; // コントローラーの入力
 	float m_viewRadianAngle; // 視野角
-	VECTOR m_playerPos;
+	VECTOR m_playerPos; // プレイヤーの位置
 	bool m_isLockOn; // ロックオン中か
 	VECTOR m_targetToPlayer;
 	float m_targetToPlayerDistance;

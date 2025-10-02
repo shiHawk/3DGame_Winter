@@ -24,29 +24,33 @@ void GameScene::Init()
 {
 	m_pCamera = std::make_shared<Camera>();
 	m_pPlayer = std::make_shared<Player>();
+	m_pEnemy = std::make_shared<Enemy>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
+	m_pEnemy->Init(m_pPlayer);
 }
 
 void GameScene::End()
 {
 	m_pCamera->End();
 	m_pPlayer->End();
+	m_pEnemy->End();
 }
 
 SceneBase* GameScene::Update()
 {
 	m_pCamera->Update();
 	m_pPlayer->Update();
-	m_pCamera->SetPlayerPosition(m_pPlayer->GetPlayerPos());
-	m_pCamera->SetPlayerBackLineEnd(m_pPlayer->GetBackLineEnd());
+	m_pEnemy->Update();
+	m_pCamera->SetPlayerPosition(m_pPlayer->GetPos());
+	m_pCamera->SetLockOnPosition(m_pEnemy->GetPos());
 	return this;
 }
 
 void GameScene::Draw()
 {
 	m_pPlayer->Draw();
-	DrawSphere3D(kSpherePos2, kSphereRadius, kDivNum, 0xffffff, kSphereSpcColor,true);
+	m_pEnemy->Draw();
 	DrawGrid();
 }
 

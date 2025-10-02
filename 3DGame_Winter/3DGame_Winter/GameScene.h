@@ -2,6 +2,7 @@
 #include "SceneBase.h"
 #include "Camera.h"
 #include "Player.h"
+#include "Enemy.h"
 #include <memory>
 class GameScene :public SceneBase
 {
@@ -16,5 +17,6 @@ private:
 	void DrawGrid();
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<Player> m_pPlayer;
+	std::shared_ptr<Enemy> m_pEnemy;
 };
 
