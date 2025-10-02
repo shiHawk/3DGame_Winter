@@ -11,6 +11,7 @@ public:
 	void End();
 	virtual void Update() override;
 	void Draw();
+	virtual void OnAttack() override;
 private:
 	std::shared_ptr<Player> m_pPlayer;
 	// プレイヤーに向かうベクトル

@@ -42,6 +42,7 @@ SceneBase* GameScene::Update()
 	m_pCamera->Update();
 	m_pPlayer->Update();
 	m_pEnemy->Update();
+	m_pPlayer->SetEnemyPos(m_pEnemy->GetPos());
 	m_pCamera->SetPlayerPosition(m_pPlayer->GetPos());
 	m_pCamera->SetLockOnPosition(m_pEnemy->GetPos());
 	return this;

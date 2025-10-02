@@ -4,6 +4,8 @@
 #include <cmath>
 namespace
 {
+    constexpr VECTOR kDefaultPos = { 0.0f,0.0f,0.0f };
+    constexpr VECTOR kDefaultVec = { 0.0f,0.0f,0.0f };
 	constexpr float kSphereRadius = 20.0f;
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x000fff;
@@ -30,15 +32,16 @@ Player::Player():
     m_angleY(0.0f),
     m_isJump(false),
     m_forwardDir({0.0f,0.0f,0.0f}),
-    m_backDir({ 0.0f,0.0f,0.0f })
+    m_backDir({ 0.0f,0.0f,0.0f }),
+    m_enemyPos({ 0.0f,0.0f,0.0f })
 {
 }
 
 void Player::Init(std::shared_ptr<Camera> pCamera)
 {
 	m_pCamera = pCamera;
-	m_pos = { 0.0f,0.0f,0.0f };
-	m_vec = { 0.0f,0.0f,0.0f };
+	m_pos = kDefaultPos;
+	m_vec = kDefaultVec;
     m_angleY = 0.0f;
     m_isJump = false;
 }
@@ -67,7 +70,7 @@ void Player::Update()
     {
         m_pos.y += m_vec.y;
     }
-
+    
     VECTOR nextPos = VAdd(m_pos, m_vec); // 仮の次の位置
     // Z方向(前後)制限
     if (nextPos.z >= kBackLimit - kWallOffset)
@@ -110,13 +113,9 @@ void Player::Draw()
     DrawLine3D(lineStart, lineEnd, kSphereDifColor);
 }
 
-VECTOR Player::GetBackLineEnd()
+void Player::OnAttack()
 {
-    VECTOR lineStart = VGet(m_pos.x, m_pos.y + kSphereRadius / 2, m_pos.z);
-    m_backDir.x = -sinf(m_angleY) * kBackLineLength;
-    m_backDir.y = 200.0f;
-    m_backDir.z = -cosf(m_angleY) * kBackLineLength;
-    return VAdd(lineStart, m_backDir);
+
 }
 
 VECTOR Player::HandleInput()
@@ -155,36 +154,47 @@ VECTOR Player::HandleInput()
 
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
-    // moveDirの長さが0より大きいか(入力があるか)で判断
+    bool isLockOn = Pad::isPress(PAD_INPUT_2);
+
+    // 回転処理
+    // isLockOn の状態に応じて、向きの決め方を変える
+    if (isLockOn)
+    {
+        // 【ロックオン時】敵の方向を向く
+        VECTOR dirToEnemy = VSub(m_enemyPos, m_pos);
+        if (VSize(VGet(dirToEnemy.x, 0.0f, dirToEnemy.z)) > 0.001f)
+        {
+            float targetAngle = atan2f(dirToEnemy.x, dirToEnemy.z);
+            float diff = targetAngle - m_angleY;
+            if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
+            else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+            m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
+
+            if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
+            else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
+        }
+    }
+    else
+    {
+        // 【通常時】スティックの入力方向を向く
+        // 入力がある場合のみ回転処理を行う
+        if (VSize(moveDir) > 0.0f)
+        {
+            float targetAngle = atan2f(moveDir.x, moveDir.z);
+            float diff = targetAngle - m_angleY;
+            if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
+            else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+            m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
+
+            if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
+            else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
+        }
+    }
+
+    // 移動処理
+    // isLockOn の状態に関わらず、スティック入力に応じて移動・減速を制御する
     if (VSize(moveDir) > 0.0f)
     {
-        // 1.スティックの入力方向から「目標角度」を計算
-        float targetAngle = atan2f(moveDir.x, moveDir.z);
-
-        // 2.現在の角度と目標角度の差を最短で計算
-        float diff = targetAngle - m_angleY;
-        if (diff > DX_PI_F)
-        {
-            diff -= 2.0f * DX_PI_F;
-        }
-        else if (diff < -DX_PI_F)
-        {
-            diff += 2.0f * DX_PI_F;
-        }
-
-        // 3.線形補間で滑らかに回転
-        m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
-
-        // 4.角度を -PI ~ PI の範囲に正規化
-        if (m_angleY > DX_PI_F)
-        {
-            m_angleY -= 2.0f * DX_PI_F;
-        }
-        else if (m_angleY < -DX_PI_F) 
-        {
-            m_angleY += 2.0f * DX_PI_F;
-        } 
-
         // 5.移動ベクトルを更新
         m_vec.x = moveDir.x * kMoveSpeed;
         m_vec.z = moveDir.z * kMoveSpeed;

@@ -13,7 +13,8 @@ public:
 	virtual void Update()override;
 	void Draw();
 	VECTOR GetPlayerPos() { return m_pos; }
-	VECTOR GetBackLineEnd();
+	virtual void OnAttack() override;
+	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; };
 private:
 	VECTOR HandleInput();
 	void UpdateMovement(const VECTOR& moveDir);
@@ -22,5 +23,6 @@ private:
 	bool m_isJump;
 	VECTOR m_forwardDir;
 	VECTOR m_backDir;
+	VECTOR m_enemyPos;
 };
 

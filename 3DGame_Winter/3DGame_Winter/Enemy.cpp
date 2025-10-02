@@ -41,3 +41,8 @@ void Enemy::Draw()
 {
 	DrawSphere3D(m_pos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
 }
+
+void Enemy::OnAttack()
+{
+
+}
