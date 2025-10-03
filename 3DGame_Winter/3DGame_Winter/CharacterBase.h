@@ -16,5 +16,13 @@ protected:
 	int m_attackPower;
 	bool m_isDead;
 	int m_modelHandle;
+	struct AttackSphere
+	{
+		float radius; // UŒ‚‚Ì”»’è‚Ì‘å‚«‚³
+		VECTOR pos;
+		bool active; // UŒ‚ó‘Ô
+		float timer; // UŒ‚ŠÔ
+		VECTOR dir;
+	};
 };
 

@@ -16,6 +16,13 @@ public:
 	virtual void OnAttack() override;
 	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; };
 private:
+	enum class PlayerState
+	{
+		NORMAL,
+		ROTATING_TO_ATTACK,
+		ATTACKING,
+	};
+	PlayerState m_playerState;
 	VECTOR HandleInput();
 	void UpdateMovement(const VECTOR& moveDir);
 	std::shared_ptr<Camera> m_pCamera;
@@ -24,5 +31,6 @@ private:
 	VECTOR m_forwardDir;
 	VECTOR m_backDir;
 	VECTOR m_enemyPos;
+	AttackSphere m_attack;
 };
 

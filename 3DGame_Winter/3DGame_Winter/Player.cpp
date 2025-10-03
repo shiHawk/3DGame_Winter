@@ -20,20 +20,27 @@ namespace
     constexpr float kBackLineLength = 540.0f;
     // アナログスティックのデッドゾーン
     constexpr double kAnalogDeadZone = 0.25;
-    constexpr float kRotateSpeed = 0.2f;
+    constexpr float kRotateSpeed = 0.4f; // 方向転換の速度
     constexpr float kFrontLimit = -1000.0f; // ステージ奥
     constexpr float kBackLimit = 1000.0f;   // ステージ手前
     constexpr float kLeftLimit = -1000.0f;   // ステージ左
     constexpr float kRightLimit = 1000.0f;   // ステージ右
     constexpr float kWallOffset = 0.001f;
+
+    constexpr int kAttackPower = 10;
+    constexpr float kAttackRange = 40.0f;
+    constexpr float kAttackDuration = 10.0f;
+    constexpr float kHitFrame = 5.0f;
 }
 
 Player::Player():
+    m_playerState(PlayerState::NORMAL),
     m_angleY(0.0f),
     m_isJump(false),
     m_forwardDir({0.0f,0.0f,0.0f}),
     m_backDir({ 0.0f,0.0f,0.0f }),
-    m_enemyPos({ 0.0f,0.0f,0.0f })
+    m_enemyPos({ 0.0f,0.0f,0.0f }),
+    m_attack(0.0f,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f})
 {
 }
 
@@ -44,6 +51,9 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
 	m_vec = kDefaultVec;
     m_angleY = 0.0f;
     m_isJump = false;
+    m_attackPower = kAttackPower;
+    m_playerState = PlayerState::NORMAL;
+    m_attack.active = false;
 }
 
 void Player::End()
@@ -53,7 +63,54 @@ void Player::End()
 void Player::Update()
 {
     VECTOR moveInput = HandleInput();
-    UpdateMovement(moveInput);
+    switch (m_playerState)
+    {
+    case Player::PlayerState::NORMAL:
+        UpdateMovement(moveInput);
+        if (Pad::isTrigger(PAD_INPUT_2) && !m_attack.active)
+        {
+            m_playerState = PlayerState::ROTATING_TO_ATTACK;
+        }
+        break;
+    case Player::PlayerState::ROTATING_TO_ATTACK:
+    {
+        UpdateMovement(moveInput);
+        // 敵の方向を計算
+        VECTOR dirToEnemy = VSub(m_enemyPos, m_pos);
+        float targetAngle = atan2f(dirToEnemy.x, dirToEnemy.z);
+        float diff = targetAngle - m_angleY;
+
+        // 角度の差を正規化 (-PI ~ PI)
+        if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
+        else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+
+        // 角度の差がごくわずかになったら、攻撃を出す
+        // 閾値(0.1f)は kRotateSpeed の値によって調整してください
+        if (std::abs(diff) < 0.1f)
+        {
+            m_angleY = targetAngle; // 最後に角度をぴったり合わせる
+            OnAttack(); // 攻撃実行
+            m_playerState = PlayerState::ATTACKING; // 攻撃状態へ移行
+        }
+        break;
+    }
+    case Player::PlayerState::ATTACKING:
+        UpdateMovement(moveInput);
+        // 攻撃タイマーを進める
+        if (m_attack.active)
+        {
+            m_attack.timer--;
+            if (m_attack.timer < 0.0f)
+            {
+                m_attack.active = false;
+                m_playerState = PlayerState::NORMAL; // 攻撃が終わったら通常状態へ
+            }
+        }
+        break;
+    default:
+        break;
+    }
+    
     if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
     {
         m_vec.y = kJumpPower;
@@ -70,7 +127,7 @@ void Player::Update()
     {
         m_pos.y += m_vec.y;
     }
-    
+
     VECTOR nextPos = VAdd(m_pos, m_vec); // 仮の次の位置
     // Z方向(前後)制限
     if (nextPos.z >= kBackLimit - kWallOffset)
@@ -111,11 +168,18 @@ void Player::Draw()
 
 	DrawSphere3D(m_pos,kSphereRadius,kDivNum,kSphereDifColor,kSphereSpcColor,true);
     DrawLine3D(lineStart, lineEnd, kSphereDifColor);
+    if (m_attack.active)
+    {
+        DrawSphere3D(m_attack.pos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+    }
 }
 
 void Player::OnAttack()
 {
-
+    m_attack.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
+    m_attack.active = true;
+    m_attack.pos = VAdd(m_pos,VScale(m_attack.dir,kAttackRange));
+    m_attack.timer = kAttackDuration;
 }
 
 VECTOR Player::HandleInput()
@@ -154,7 +218,7 @@ VECTOR Player::HandleInput()
 
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
-    bool isLockOn = Pad::isPress(PAD_INPUT_2);
+    bool isLockOn = (m_playerState == PlayerState::ROTATING_TO_ATTACK || m_playerState == PlayerState::ATTACKING);
 
     // 回転処理
     // isLockOn の状態に応じて、向きの決め方を変える
