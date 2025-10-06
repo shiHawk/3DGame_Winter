@@ -21,6 +21,7 @@ namespace
     // アナログスティックのデッドゾーン
     constexpr double kAnalogDeadZone = 0.25;
     constexpr float kRotateSpeed = 0.4f; // 方向転換の速度
+    constexpr float kAngleThreshold = 0.1f; // 角度の差の閾値
     constexpr float kFrontLimit = -1000.0f; // ステージ奥
     constexpr float kBackLimit = 1000.0f;   // ステージ手前
     constexpr float kLeftLimit = -1000.0f;   // ステージ左
@@ -40,7 +41,8 @@ Player::Player():
     m_forwardDir({0.0f,0.0f,0.0f}),
     m_backDir({ 0.0f,0.0f,0.0f }),
     m_enemyPos({ 0.0f,0.0f,0.0f }),
-    m_attack(0.0f,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f})
+    m_attack(0.0f,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
+    m_dirToEnemy({ 0.0f,0.0f,0.0f })
 {
 }
 
@@ -76,17 +78,16 @@ void Player::Update()
     {
         UpdateMovement(moveInput);
         // 敵の方向を計算
-        VECTOR dirToEnemy = VSub(m_enemyPos, m_pos);
-        float targetAngle = atan2f(dirToEnemy.x, dirToEnemy.z);
+        m_dirToEnemy = VSub(m_enemyPos, m_pos);
+        float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
         float diff = targetAngle - m_angleY;
 
-        // 角度の差を正規化 (-PI ~ PI)
+        // 角度の差を正規化 
         if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
         else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
 
         // 角度の差がごくわずかになったら、攻撃を出す
-        // 閾値(0.1f)は kRotateSpeed の値によって調整してください
-        if (std::abs(diff) < 0.1f)
+        if (std::abs(diff) < kAngleThreshold)
         {
             m_angleY = targetAngle; // 最後に角度をぴったり合わせる
             OnAttack(); // 攻撃実行
@@ -106,8 +107,6 @@ void Player::Update()
                 m_playerState = PlayerState::NORMAL; // 攻撃が終わったら通常状態へ
             }
         }
-        break;
-    default:
         break;
     }
     
@@ -224,11 +223,11 @@ void Player::UpdateMovement(const VECTOR& moveDir)
     // isLockOn の状態に応じて、向きの決め方を変える
     if (isLockOn)
     {
-        // 【ロックオン時】敵の方向を向く
-        VECTOR dirToEnemy = VSub(m_enemyPos, m_pos);
-        if (VSize(VGet(dirToEnemy.x, 0.0f, dirToEnemy.z)) > 0.001f)
+        // ロックオン時 敵の方向を向く
+        m_dirToEnemy = VSub(m_enemyPos, m_pos);
+        if (VSize(VGet(m_dirToEnemy.x, 0.0f, m_dirToEnemy.z)) > 0.001f)
         {
-            float targetAngle = atan2f(dirToEnemy.x, dirToEnemy.z);
+            float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
             float diff = targetAngle - m_angleY;
             if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
             else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
@@ -240,7 +239,7 @@ void Player::UpdateMovement(const VECTOR& moveDir)
     }
     else
     {
-        // 【通常時】スティックの入力方向を向く
+        // 通常時 スティックの入力方向を向く
         // 入力がある場合のみ回転処理を行う
         if (VSize(moveDir) > 0.0f)
         {

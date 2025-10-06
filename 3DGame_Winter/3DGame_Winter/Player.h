@@ -32,5 +32,6 @@ private:
 	VECTOR m_backDir;
 	VECTOR m_enemyPos;
 	AttackSphere m_attack;
+	VECTOR m_dirToEnemy;
 };
 
