@@ -23,7 +23,7 @@ namespace
 	constexpr float kGreen = 1.0f;
 	constexpr float kBlue = 1.0f;
 	// カメラの旋回
-	constexpr float kCameraAngleSpeed = 0.02f;
+	constexpr float kCameraAngleSpeed = 0.015f;
 	constexpr float kCameraToPlayerLength = 540.0f;
 	constexpr float kAngleLimitVertical = 0.6f;
 	constexpr float kCameraPitchDownLimit = -0.3f;
@@ -158,10 +158,12 @@ void Camera::Update()
 	}
 	if (m_isLockOn)
 	{
-		m_cameraTarget = VAdd(m_playerPos, VScale(VSub(m_lockOnCameraPos, m_playerPos), 0.5f));
+		// 本来注視したい位置（プレイヤーとロックオン対象の中間点）
+		VECTOR desiredTarget = VAdd(m_playerPos, VScale(VSub(m_lockOnCameraPos, m_playerPos), 0.5f));
+		m_cameraTarget = VAdd(VScale(m_cameraTarget, 1.0f - kLerpSpeed), VScale(desiredTarget, kLerpSpeed));
 	}
 	
-	DrawFormatString(0,0,0xffffff,L"m_cameraTarget.x:%f,m_cameraTarget.y:%f,m_cameraTarget.z:%f", m_cameraTarget.x, m_cameraTarget.y, m_cameraTarget.z);
+	//DrawFormatString(0,0,0xffffff,L"m_cameraTarget.x:%f,m_cameraTarget.y:%f,m_cameraTarget.z:%f", m_cameraTarget.x, m_cameraTarget.y, m_cameraTarget.z);
 	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget); // カメラを計算した位置に設定する
 }
 

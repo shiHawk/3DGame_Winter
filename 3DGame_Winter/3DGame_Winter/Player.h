@@ -25,6 +25,7 @@ private:
 	PlayerState m_playerState;
 	VECTOR HandleInput();
 	void UpdateMovement(const VECTOR& moveDir);
+	void UpdatePlayerState();
 	std::shared_ptr<Camera> m_pCamera;
 	float m_angleY;
 	bool m_isJump;
@@ -33,5 +34,7 @@ private:
 	VECTOR m_enemyPos;
 	AttackSphere m_attack;
 	VECTOR m_dirToEnemy;
+	VECTOR m_moveInput;
+	float m_distanceToEnemy;
 };
 

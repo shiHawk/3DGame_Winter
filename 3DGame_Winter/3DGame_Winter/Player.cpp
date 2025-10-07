@@ -24,12 +24,13 @@ namespace
     constexpr float kAngleThreshold = 0.1f; // 角度の差の閾値
     constexpr float kFrontLimit = -1000.0f; // ステージ奥
     constexpr float kBackLimit = 1000.0f;   // ステージ手前
-    constexpr float kLeftLimit = -1000.0f;   // ステージ左
-    constexpr float kRightLimit = 1000.0f;   // ステージ右
+    constexpr float kLeftLimit = -1000.0f;  // ステージ左
+    constexpr float kRightLimit = 1000.0f;  // ステージ右
     constexpr float kWallOffset = 0.001f;
 
     constexpr int kAttackPower = 10;
     constexpr float kAttackRange = 40.0f;
+    constexpr float kAutoTurnDistance = 150.0f;
     constexpr float kAttackDuration = 10.0f;
     constexpr float kHitFrame = 5.0f;
 }
@@ -39,10 +40,12 @@ Player::Player():
     m_angleY(0.0f),
     m_isJump(false),
     m_forwardDir({0.0f,0.0f,0.0f}),
-    m_backDir({ 0.0f,0.0f,0.0f }),
-    m_enemyPos({ 0.0f,0.0f,0.0f }),
-    m_attack(0.0f,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
-    m_dirToEnemy({ 0.0f,0.0f,0.0f })
+    m_backDir({0.0f,0.0f,0.0f}),
+    m_enemyPos({0.0f,0.0f,0.0f}),
+    m_attack(30.0f,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
+    m_dirToEnemy({0.0f,0.0f,0.0f}),
+    m_moveInput({ 0.0f,0.0f,0.0f }),
+    m_distanceToEnemy(0.0f)
 {
 }
 
@@ -56,6 +59,7 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
     m_attackPower = kAttackPower;
     m_playerState = PlayerState::NORMAL;
     m_attack.active = false;
+    m_distanceToEnemy = 0.0f;
 }
 
 void Player::End()
@@ -64,52 +68,8 @@ void Player::End()
 
 void Player::Update()
 {
-    VECTOR moveInput = HandleInput();
-    switch (m_playerState)
-    {
-    case Player::PlayerState::NORMAL:
-        UpdateMovement(moveInput);
-        if (Pad::isTrigger(PAD_INPUT_2) && !m_attack.active)
-        {
-            m_playerState = PlayerState::ROTATING_TO_ATTACK;
-        }
-        break;
-    case Player::PlayerState::ROTATING_TO_ATTACK:
-    {
-        UpdateMovement(moveInput);
-        // 敵の方向を計算
-        m_dirToEnemy = VSub(m_enemyPos, m_pos);
-        float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
-        float diff = targetAngle - m_angleY;
-
-        // 角度の差を正規化 
-        if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
-        else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
-
-        // 角度の差がごくわずかになったら、攻撃を出す
-        if (std::abs(diff) < kAngleThreshold)
-        {
-            m_angleY = targetAngle; // 最後に角度をぴったり合わせる
-            OnAttack(); // 攻撃実行
-            m_playerState = PlayerState::ATTACKING; // 攻撃状態へ移行
-        }
-        break;
-    }
-    case Player::PlayerState::ATTACKING:
-        UpdateMovement(moveInput);
-        // 攻撃タイマーを進める
-        if (m_attack.active)
-        {
-            m_attack.timer--;
-            if (m_attack.timer < 0.0f)
-            {
-                m_attack.active = false;
-                m_playerState = PlayerState::NORMAL; // 攻撃が終わったら通常状態へ
-            }
-        }
-        break;
-    }
-    
+    m_moveInput = HandleInput();
+    UpdatePlayerState();
     if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
     {
         m_vec.y = kJumpPower;
@@ -153,6 +113,29 @@ void Player::Update()
     }
     m_pos = nextPos;
     //DrawFormatString(0, 15, 0xffffff, L"m_pos.z:%f", m_pos.z);
+    //DINPUT_JOYSTATE input;
+    //int i;
+    //int Color;
+    //// 入力状態を取得
+    //GetJoypadDirectInputState(DX_INPUT_PAD1, &input);
+
+    //// 画面に構造体の中身を描画
+    //Color = GetColor(255, 255, 255);
+    //DrawFormatString(0, 0, Color, L"X:%d Y:%d Z:%d",
+    //    input.X, input.Y, input.Z);
+    //DrawFormatString(0, 16, Color, L"Rx:%d Ry:%d Rz:%d",
+    //    input.Rx, input.Ry, input.Rz);
+    //DrawFormatString(0, 32, Color, L"Slider 0:%d 1:%d",
+    //    input.Slider[0], input.Slider[1]);
+    //DrawFormatString(0, 48, Color, L"POV 0:%d 1:%d 2:%d 3:%d",
+    //    input.POV[0], input.POV[1],
+    //    input.POV[2], input.POV[3]);
+    //DrawString(0, 64, L"Button", Color);
+    //for (i = 0; i < 32; i++)
+    //{
+    //    DrawFormatString(64 + i % 8 * 64, 64 + i / 8 * 16, Color,
+    //        L"%2d:%d", i, input.Buttons[i]);
+    //}
 }
 
 void Player::Draw()
@@ -169,7 +152,7 @@ void Player::Draw()
     DrawLine3D(lineStart, lineEnd, kSphereDifColor);
     if (m_attack.active)
     {
-        DrawSphere3D(m_attack.pos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+        DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
     }
 }
 
@@ -217,24 +200,28 @@ VECTOR Player::HandleInput()
 
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
-    bool isLockOn = (m_playerState == PlayerState::ROTATING_TO_ATTACK || m_playerState == PlayerState::ATTACKING);
+    bool isInAttackSequence = (m_playerState == PlayerState::ROTATING_TO_ATTACK || m_playerState == PlayerState::ATTACKING);
 
     // 回転処理
     // isLockOn の状態に応じて、向きの決め方を変える
-    if (isLockOn)
+    if (isInAttackSequence)
     {
-        // ロックオン時 敵の方向を向く
-        m_dirToEnemy = VSub(m_enemyPos, m_pos);
-        if (VSize(VGet(m_dirToEnemy.x, 0.0f, m_dirToEnemy.z)) > 0.001f)
+        // 敵との距離がkLockOnRange以下なら敵のほうを向く
+        if (m_distanceToEnemy <= kAutoTurnDistance)
         {
-            float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
-            float diff = targetAngle - m_angleY;
-            if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
-            else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
-            m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
+            // ロックオン時 敵の方向を向く
+            m_dirToEnemy = VSub(m_enemyPos, m_pos);
+            if (VSize(VGet(m_dirToEnemy.x, 0.0f, m_dirToEnemy.z)) > 0.001f)
+            {
+                float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+                float diff = targetAngle - m_angleY;
+                if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
+                else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+                m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
 
-            if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
-            else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
+                if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
+                else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
+            }
         }
     }
     else
@@ -267,5 +254,63 @@ void Player::UpdateMovement(const VECTOR& moveDir)
         // 減速処理
         m_vec.x *= kMoveDecRate;
         m_vec.z *= kMoveDecRate;
+    }
+}
+
+void Player::UpdatePlayerState()
+{
+    switch (m_playerState)
+    {
+    case Player::PlayerState::NORMAL:
+        UpdateMovement(m_moveInput);
+        if (Pad::isTrigger(PAD_INPUT_2) && !m_attack.active)
+        {
+            m_dirToEnemy = VSub(m_enemyPos, m_pos); // 攻撃ボタンを押したら敵との距離を測る
+            m_distanceToEnemy = VSize(m_dirToEnemy);
+            if (m_distanceToEnemy <= kAutoTurnDistance) // 距離がkLockOnRange以下なら敵の方向を向く
+            {
+                m_playerState = PlayerState::ROTATING_TO_ATTACK;
+            }
+            else // 距離が遠いなら方向転換を行わず即攻撃
+            {
+                OnAttack(); // 攻撃実行
+                m_playerState = PlayerState::ATTACKING;
+            }
+        }
+        break;
+    case Player::PlayerState::ROTATING_TO_ATTACK:
+    {
+        UpdateMovement(m_moveInput);
+        // 敵の方向を計算
+        m_dirToEnemy = VSub(m_enemyPos, m_pos);
+        float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+        float diff = targetAngle - m_angleY;
+
+        // 角度の差を正規化 
+        if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
+        else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+
+        // 角度の差がごくわずかになったら、攻撃を出す
+        if (std::abs(diff) < kAngleThreshold)
+        {
+            m_angleY = targetAngle; // 最後に角度をぴったり合わせる
+            OnAttack(); // 攻撃実行
+            m_playerState = PlayerState::ATTACKING; // 攻撃状態へ移行
+        }
+        break;
+    }
+    case Player::PlayerState::ATTACKING:
+        UpdateMovement(m_moveInput);
+        // 攻撃タイマーを進める
+        if (m_attack.active)
+        {
+            m_attack.timer--;
+            if (m_attack.timer < 0.0f)
+            {
+                m_attack.active = false;
+                m_playerState = PlayerState::NORMAL; // 攻撃が終わったら通常状態へ
+            }
+        }
+        break;
     }
 }
