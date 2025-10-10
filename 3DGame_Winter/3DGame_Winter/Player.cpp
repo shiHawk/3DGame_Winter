@@ -40,7 +40,6 @@ Player::Player():
     m_angleY(0.0f),
     m_isJump(false),
     m_forwardDir({0.0f,0.0f,0.0f}),
-    m_backDir({0.0f,0.0f,0.0f}),
     m_enemyPos({0.0f,0.0f,0.0f}),
     m_attack(30.0f,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
     m_dirToEnemy({0.0f,0.0f,0.0f}),

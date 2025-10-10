@@ -30,7 +30,6 @@ private:
 	float m_angleY;
 	bool m_isJump;
 	VECTOR m_forwardDir;
-	VECTOR m_backDir;
 	VECTOR m_enemyPos;
 	AttackSphere m_attack;
 	VECTOR m_dirToEnemy;

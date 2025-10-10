@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "Player.h"
 #include "Enemy.h"
+#include "Companion.h"
 #include <memory>
 class GameScene :public SceneBase
 {
@@ -18,5 +19,6 @@ private:
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Enemy> m_pEnemy;
+	std::shared_ptr<Companion> m_pCompanion;
 };
 
