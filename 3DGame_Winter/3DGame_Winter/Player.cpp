@@ -6,6 +6,7 @@ namespace
 {
     constexpr VECTOR kDefaultPos = { 0.0f,0.0f,0.0f };
     constexpr VECTOR kDefaultVec = { 0.0f,0.0f,0.0f };
+    constexpr VECTOR kRightDir = { 0.0,270.0f * DX_PI_F / 180.0f,0.0f };
 	constexpr float kSphereRadius = 20.0f;
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x000fff;
@@ -14,12 +15,13 @@ namespace
     constexpr float kJumpPower = 10.0f;
     constexpr float kGravity = -0.5f;
 	// 減速
-	constexpr float kMoveDecRate = 0.80f;
+	constexpr float kMoveDecRate = 0.60f;
     // 線分の長さ
     constexpr float kForwardLineLength = 100.0f;
     constexpr float kBackLineLength = 540.0f;
     // アナログスティックのデッドゾーン
     constexpr double kAnalogDeadZone = 0.25;
+    constexpr float kMoveThreshold = 0.1f; // 移動とみなす入力の閾値
     constexpr float kRotateSpeed = 0.4f; // 方向転換の速度
     constexpr float kAngleThreshold = 0.1f; // 角度の差の閾値
     constexpr float kFrontLimit = -1000.0f; // ステージ奥
@@ -33,6 +35,11 @@ namespace
     constexpr float kAutoTurnDistance = 150.0f;
     constexpr float kAttackDuration = 10.0f;
     constexpr float kHitFrame = 5.0f;
+
+    constexpr float kModelScale = 50.0f; // モデルのスケール
+    constexpr int kIdleAnimNo = 1;
+    constexpr int kWalkAnimNo = 3;
+    constexpr float kAnimIncrement = 0.7f; // アニメーションの再生速度
 }
 
 Player::Player():
@@ -59,10 +66,15 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
     m_playerState = PlayerState::NORMAL;
     m_attack.active = false;
     m_distanceToEnemy = 0.0f;
+    m_modelHandle = MV1LoadModel(L"Data/model/Barbarian.mv1");
+    MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
+    MV1SetRotationXYZ(m_modelHandle, kRightDir);
+    AttachAnim(m_modelHandle, kIdleAnimNo);
 }
 
 void Player::End()
 {
+    MV1DeleteModel(m_modelHandle);
 }
 
 void Player::Update()
@@ -111,6 +123,9 @@ void Player::Update()
         m_vec.x = 0.0f;
     }
     m_pos = nextPos;
+    MV1SetPosition(m_modelHandle, m_pos);
+    MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
+    UpdateAnim();
     //DrawFormatString(0, 15, 0xffffff, L"m_pos.z:%f", m_pos.z);
     //DINPUT_JOYSTATE input;
     //int i;
@@ -140,14 +155,15 @@ void Player::Update()
 void Player::Draw()
 {
     // 向きに合わせて線分を描画
-    m_forwardDir.x = sinf(m_angleY) * kForwardLineLength;
+    m_forwardDir.x = sinf(m_angleY+DX_PI_F) * kForwardLineLength;
     m_forwardDir.y = 0.0f;
-    m_forwardDir.z = cosf(m_angleY) * kForwardLineLength;
+    m_forwardDir.z = cosf(m_angleY+DX_PI_F) * kForwardLineLength;
     //printfDx(L"m_forwardDir.z:%f\n", m_forwardDir.z);
     VECTOR lineStart = VGet(m_pos.x, m_pos.y + kSphereRadius / 2, m_pos.z);
     VECTOR lineEnd = VAdd(lineStart, m_forwardDir);
 
-	DrawSphere3D(m_pos,kSphereRadius,kDivNum,kSphereDifColor,kSphereSpcColor,true);
+	//DrawSphere3D(m_pos,kSphereRadius,kDivNum,kSphereDifColor,kSphereSpcColor,true);
+    MV1DrawModel(m_modelHandle);
     DrawLine3D(lineStart, lineEnd, kSphereDifColor);
     if (m_attack.active)
     {
@@ -157,7 +173,7 @@ void Player::Draw()
 
 void Player::OnAttack()
 {
-    m_attack.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
+    m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos,VScale(m_attack.dir,kAttackRange));
     m_attack.timer = kAttackDuration;
@@ -200,7 +216,25 @@ VECTOR Player::HandleInput()
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
     bool isInAttackSequence = (m_playerState == PlayerState::ROTATING_TO_ATTACK || m_playerState == PlayerState::ATTACKING);
-
+    bool isWalkAnim = false;    
+    // 攻撃中でなければ、移動状態に応じてアニメーションを切り替える
+    if (!isInAttackSequence)
+    {
+        if (VSize(VGet(m_vec.x, 0.0f, m_vec.z)) > kMoveThreshold)
+        {
+            // 入力がある場合 → 移動アニメーションへ変更
+            ChangeAnim(m_modelHandle, kWalkAnimNo, true, kAnimIncrement);
+            isWalkAnim = true;
+        }
+        else
+        {
+            // 入力がない場合 → 待機アニメーションへ変更
+            ChangeAnim(m_modelHandle, kIdleAnimNo, true, kAnimIncrement);
+            isWalkAnim = false;
+        }
+        //printfDx(L"isWalkAnim:%d\n", isWalkAnim);
+    }
+    
     // 回転処理
     // isLockOn の状態に応じて、向きの決め方を変える
     if (isInAttackSequence)
@@ -229,7 +263,7 @@ void Player::UpdateMovement(const VECTOR& moveDir)
         // 入力がある場合のみ回転処理を行う
         if (VSize(moveDir) > 0.0f)
         {
-            float targetAngle = atan2f(moveDir.x, moveDir.z);
+            float targetAngle = atan2f(-moveDir.x, -moveDir.z);
             float diff = targetAngle - m_angleY;
             if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
             else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;

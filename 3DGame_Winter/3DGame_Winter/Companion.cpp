@@ -24,6 +24,8 @@ namespace
 	constexpr float kForwardLineLength = 100.0f;
 	constexpr float kBackLineLength = 540.0f;
 	constexpr float kAutoTurnDistance = 300.0f;
+
+	constexpr float kStopDistance = 20.0f * 4.0f;
 }
 
 Companion::Companion():
@@ -50,6 +52,7 @@ void Companion::Init()
 
 void Companion::End()
 {
+	
 }
 
 void Companion::Update()
@@ -74,17 +77,17 @@ void Companion::Update()
 		if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
 		else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
 
-		//if (m_distanceToEnemy > kSphereRadius*2.0f)
-		//{
-		//	m_forwardDir.x = sinf(m_angleY);
-		//	m_forwardDir.z = cosf(m_angleY);
-		//	m_vec = VScale(m_forwardDir,kMoveSpeed);
-		//	m_pos = VAdd(m_pos, m_vec);
-		//}
-		//else
-		//{
-			//m_vec = { 0.0f,0.0f,0.0f };
-		//}
+		if (m_distanceToEnemy > kStopDistance)
+		{
+			m_forwardDir.x = sinf(m_angleY);
+			m_forwardDir.z = cosf(m_angleY);
+			m_vec = VScale(m_forwardDir,kMoveSpeed);
+			m_pos = VAdd(m_pos, m_vec);
+		}
+		else
+		{
+			m_vec = { 0.0f,0.0f,0.0f };
+		}
 	}
 	else
 	{

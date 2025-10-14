@@ -35,5 +35,6 @@ private:
 	VECTOR m_dirToEnemy;
 	VECTOR m_moveInput;
 	float m_distanceToEnemy;
+	bool m_isInAttackSequence; // ƒvƒŒƒCƒ„[‚ªUŒ‚’†‚©•ûŒü•â³’†‚©
 };
 

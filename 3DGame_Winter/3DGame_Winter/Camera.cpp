@@ -9,7 +9,7 @@ namespace
 	constexpr float kRightLimitCamera = 4807.0f;
 	constexpr float kLeftLimitCamera = -2355.0f;
 	// カメラの位置と注視点
-	constexpr VECTOR kDefaultCameraPos = { 0.0f,200.0f,-540.0f };
+	constexpr VECTOR kDefaultCameraPos = { 0.0f,160.0f,-540.0f };
 	constexpr VECTOR kCameraTarget = { 0.0f,200.0f,0.0f };
 	constexpr float kMinTargetToPlayerDistance = 500.0f;
 	// カメラの視野角
@@ -24,7 +24,8 @@ namespace
 	constexpr float kBlue = 1.0f;
 	// カメラの旋回
 	constexpr float kCameraAngleSpeed = 0.015f;
-	constexpr float kCameraToPlayerLength = 540.0f;
+	//constexpr float kCameraToPlayerLength = 540.0f;
+	constexpr float kCameraToPlayerLength = 300.0f;
 	constexpr float kAngleLimitVertical = 0.6f;
 	constexpr float kCameraPitchDownLimit = -0.3f;
 	constexpr float kCameraPitchUpLimit = 0.97f;

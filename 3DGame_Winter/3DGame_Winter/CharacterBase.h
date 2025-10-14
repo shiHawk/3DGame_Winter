@@ -1,6 +1,7 @@
 #pragma once
 #include "DxLib.h"
-class CharacterBase
+#include "Animation.h"
+class CharacterBase :public Animation
 {
 public:
 	CharacterBase();
