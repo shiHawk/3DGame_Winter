@@ -19,27 +19,10 @@ m_toPlayerDistance(0.0f)
 void Enemy::Init(std::shared_ptr<Player> pPlayer)
 {
 	m_pPlayer = pPlayer;
-	m_pos = kSpherePos;
 }
 
 void Enemy::End()
 {
-}
-
-void Enemy::Update()
-{
-	m_toPlayerDistance = VSize(VSub(m_pPlayer->GetPos(), m_pos));
-	m_toPlayerDir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
-	if (m_toPlayerDistance > kSphereRadius)
-	{
-		m_pos.x += m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
-		m_pos.z += m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
-	}
-}
-
-void Enemy::Draw()
-{
-	DrawSphere3D(m_pos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
 }
 
 void Enemy::OnAttack()

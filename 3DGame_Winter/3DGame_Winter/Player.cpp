@@ -31,7 +31,7 @@ namespace
     constexpr float kWallOffset = 0.001f;
 
     constexpr int kAttackPower = 10;
-    constexpr float kAttackRange = 40.0f;
+    constexpr float kAttackRange = 60.0f;
     constexpr float kAutoTurnDistance = 150.0f;
     constexpr float kAttackDuration = 10.0f;
     constexpr float kHitFrame = 5.0f;
@@ -51,7 +51,8 @@ Player::Player():
     m_attack(30.0f,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
     m_dirToEnemy({0.0f,0.0f,0.0f}),
     m_moveInput({ 0.0f,0.0f,0.0f }),
-    m_distanceToEnemy(0.0f)
+    m_distanceToEnemy(0.0f),
+    m_isInAttackSequence(false)
 {
 }
 
@@ -246,7 +247,7 @@ void Player::UpdateMovement(const VECTOR& moveDir)
             m_dirToEnemy = VSub(m_enemyPos, m_pos);
             if (VSize(VGet(m_dirToEnemy.x, 0.0f, m_dirToEnemy.z)) > 0.001f)
             {
-                float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+                float targetAngle = atan2f(-m_dirToEnemy.x, -m_dirToEnemy.z);
                 float diff = targetAngle - m_angleY;
                 if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
                 else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
@@ -316,7 +317,7 @@ void Player::UpdatePlayerState()
         UpdateMovement(m_moveInput);
         // “G‚Ì•ûŒü‚ðŒvŽZ
         m_dirToEnemy = VSub(m_enemyPos, m_pos);
-        float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+        float targetAngle = atan2f(-m_dirToEnemy.x, -m_dirToEnemy.z);
         float diff = targetAngle - m_angleY;
 
         // Šp“x‚Ì·‚ð³‹K‰» 

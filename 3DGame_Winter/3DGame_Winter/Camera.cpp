@@ -25,7 +25,7 @@ namespace
 	// ƒJƒƒ‰‚Ìù‰ñ
 	constexpr float kCameraAngleSpeed = 0.015f;
 	//constexpr float kCameraToPlayerLength = 540.0f;
-	constexpr float kCameraToPlayerLength = 300.0f;
+	constexpr float kCameraToPlayerLength = 360.0f;
 	constexpr float kAngleLimitVertical = 0.6f;
 	constexpr float kCameraPitchDownLimit = -0.3f;
 	constexpr float kCameraPitchUpLimit = 0.97f;

@@ -25,10 +25,12 @@ void GameScene::Init()
 	m_pCamera = std::make_shared<Camera>();
 	m_pPlayer = std::make_shared<Player>();
 	m_pEnemy = std::make_shared<Enemy>();
+	m_pNormalEnemy = std::make_shared<NormalEnemy>();
 	m_pCompanion = std::make_shared<Companion>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
-	m_pEnemy->Init(m_pPlayer);
+	//m_pEnemy->Init(m_pPlayer);
+	m_pNormalEnemy->Init(m_pPlayer);
 	m_pCompanion->Init();
 }
 
@@ -36,7 +38,8 @@ void GameScene::End()
 {
 	m_pCamera->End();
 	m_pPlayer->End();
-	m_pEnemy->End();
+	//m_pEnemy->End();
+	m_pNormalEnemy->End();
 	m_pCompanion->End();
 }
 
@@ -44,19 +47,21 @@ SceneBase* GameScene::Update()
 {
 	m_pCamera->Update();
 	m_pPlayer->Update();
-	m_pEnemy->Update();
+	//m_pEnemy->Update();
+	m_pNormalEnemy->Update();
 	m_pCompanion->Update();
-	m_pPlayer->SetEnemyPos(m_pEnemy->GetPos());
+	m_pPlayer->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pCamera->SetPlayerPosition(m_pPlayer->GetPos());
-	m_pCamera->SetLockOnPosition(m_pEnemy->GetPos());
-	m_pCompanion->SetEnemyPos(m_pEnemy->GetPos());
+	m_pCamera->SetLockOnPosition(m_pNormalEnemy->GetPos());
+	m_pCompanion->SetEnemyPos(m_pNormalEnemy->GetPos());
 	return this;
 }
 
 void GameScene::Draw()
 {
 	m_pPlayer->Draw();
-	m_pEnemy->Draw();
+	//m_pEnemy->Draw();
+	m_pNormalEnemy->Draw();
 	m_pCompanion->Draw();
 	DrawGrid();
 }

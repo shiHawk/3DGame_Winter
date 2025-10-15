@@ -6,13 +6,13 @@ class Enemy :public CharacterBase
 {
 public:
 	Enemy();
-	~Enemy() {};
-	void Init(std::shared_ptr<Player> pPlayer);
-	void End();
-	virtual void Update() override;
-	void Draw();
-	virtual void OnAttack() override;
-private:
+	virtual ~Enemy() = default;
+	virtual void Init(std::shared_ptr<Player> pPlayer);
+	virtual void End();
+	virtual void Update()= 0;
+	virtual void Draw() = 0;
+	virtual void OnAttack();
+protected:
 	std::shared_ptr<Player> m_pPlayer;
 	// プレイヤーに向かうベクトル
 	VECTOR m_toPlayerDir;
