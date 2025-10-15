@@ -24,7 +24,7 @@ void GameScene::Init()
 {
 	m_pCamera = std::make_shared<Camera>();
 	m_pPlayer = std::make_shared<Player>();
-	m_pEnemy = std::make_shared<Enemy>();
+	//m_pEnemy = std::make_shared<Enemy>();
 	m_pNormalEnemy = std::make_shared<NormalEnemy>();
 	m_pCompanion = std::make_shared<Companion>();
 	m_pCamera->Init();

@@ -77,7 +77,7 @@ void Companion::Update()
 		if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
 		else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
 
-		if (m_distanceToEnemy > kStopDistance)
+		/*if (m_distanceToEnemy > kStopDistance)
 		{
 			m_forwardDir.x = sinf(m_angleY);
 			m_forwardDir.z = cosf(m_angleY);
@@ -87,7 +87,7 @@ void Companion::Update()
 		else
 		{
 			m_vec = { 0.0f,0.0f,0.0f };
-		}
+		}*/
 	}
 	else
 	{
