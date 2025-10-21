@@ -1,4 +1,5 @@
 #pragma once
+#include "vector"
 class Unit
 {
 protected:
@@ -23,11 +24,26 @@ private:
 		LORD,THIEF,ARCHER,ARMORKNIGHT,WIZARD,KNIGHT,SOLDIER
 	};
 public:
-	Unit(UnitClass u_class, const Status& base_status);
+	Unit();
 	virtual ~Unit() {};
 	int GetCurrentHp() { return m_currentStatus.currentHp; }
 	int GetPower() { return m_baseStatus.attackPower; }
 	void TakeDamage(int damage);
 	void ResetForBattle();
 	UnitClass m_unitClass;
+	enum class TargetCondition
+	{
+		PRIORITIZE_TARGETING_THE_THIEF, // THIEFを優先して狙う
+		PRIORITIZE_TARGETING_THE_ARMORKNIGHT, // ARMORKNIGHTを優先して狙う
+		PRIORITIZE_TARGETING_THE_KNIGHT, // KNIGHTを優先して狙う
+		ENEMIES_LINED_UP_IN_FRONT_AND_BEHIND, // 前後列に並んだ敵
+		ENEMY_IN_THE_BACK_ROW, // 後列の敵
+		HP_LOWEST_ALLY // 最もHPが少ない味方ユニット
+	};
+	struct Operation
+	{
+		int m_skilIndex; // 実行するスキルID
+		TargetCondition m_condisiton; // ターゲット選択条件
+	};
+	std::vector<Operation> operations; // 作戦リスト
 };

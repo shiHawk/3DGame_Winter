@@ -1,6 +1,6 @@
 #include "Unit.h"
 
-Unit::Unit(UnitClass u_class, const Status& base_status):
+Unit::Unit():
 	m_baseStatus(0,0,0,0,0,0,0,0,0,0),
 	m_currentStatus(0,0,0,0,0,0,0,0,0,0)
 {
