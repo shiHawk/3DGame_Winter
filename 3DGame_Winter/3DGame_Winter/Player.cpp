@@ -217,7 +217,7 @@ VECTOR Player::HandleInput()
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
     bool isInAttackSequence = (m_playerState == PlayerState::ROTATING_TO_ATTACK || m_playerState == PlayerState::ATTACKING);
-    bool isWalkAnim = false;    
+    bool isWalkAnim = false; 
     // 攻撃中でなければ、移動状態に応じてアニメーションを切り替える
     if (!isInAttackSequence)
     {

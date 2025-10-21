@@ -2,7 +2,8 @@
 
 Unit::Unit():
 	m_baseStatus(0,0,0,0,0,0,0,0,0,0),
-	m_currentStatus(0,0,0,0,0,0,0,0,0,0)
+	m_currentStatus(0,0,0,0,0,0,0,0,0,0),
+	m_unitClass(NONE)
 {
 	m_currentStatus.currentHp = m_baseStatus.maxHp;
 	m_currentStatus.currentActivePoint = m_baseStatus.maxActivePoint;

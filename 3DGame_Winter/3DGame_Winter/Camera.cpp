@@ -23,7 +23,7 @@ namespace
 	constexpr float kGreen = 1.0f;
 	constexpr float kBlue = 1.0f;
 	// ƒJƒƒ‰‚Ìù‰ñ
-	constexpr float kCameraAngleSpeed = 0.015f;
+	constexpr float kCameraAngleSpeed = 0.03f;
 	//constexpr float kCameraToPlayerLength = 540.0f;
 	constexpr float kCameraToPlayerLength = 360.0f;
 	constexpr float kAngleLimitVertical = 0.6f;
