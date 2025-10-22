@@ -32,14 +32,17 @@ namespace
 
     constexpr int kAttackPower = 10;
     constexpr float kAttackRange = 60.0f;
-    constexpr float kAutoTurnDistance = 150.0f;
+    constexpr float kAutoTurnDistance = 250.0f;
     constexpr float kAttackDuration = 10.0f;
-    constexpr float kHitFrame = 5.0f;
+    constexpr float kAvoidanceFrame = 15.0f;
+    constexpr float kAvoidanceMoveSpeed = 0.25f;
 
     constexpr float kModelScale = 50.0f; // モデルのスケール
     constexpr int kIdleAnimNo = 1;
     constexpr int kWalkAnimNo = 3;
-    constexpr float kAnimIncrement = 0.7f; // アニメーションの再生速度
+    constexpr int kAttackAnimNo = 31;
+    constexpr int kAvoidanceAnimNo = 15;
+    constexpr float kAnimIncrement = 0.4f; // アニメーションの再生速度
 }
 
 Player::Player():
@@ -52,7 +55,9 @@ Player::Player():
     m_dirToEnemy({0.0f,0.0f,0.0f}),
     m_moveInput({ 0.0f,0.0f,0.0f }),
     m_distanceToEnemy(0.0f),
-    m_isInAttackSequence(false)
+    m_isInAttackSequence(false),
+    m_avoidanceTimer(0.0f),
+    m_isAvoidanceFlag(false)
 {
 }
 
@@ -98,7 +103,24 @@ void Player::Update()
     {
         m_pos.y += m_vec.y;
     }
-
+    if (Pad::isTrigger(PAD_INPUT_3)&&!m_isAvoidanceFlag)
+    {
+        m_avoidanceTimer = kAvoidanceFrame;
+        m_isAvoidanceFlag = true;
+    }
+    if (m_isAvoidanceFlag)
+    {
+        OnAvoidance();
+        // 減速処理
+        m_vec.x *= kMoveDecRate;
+        m_vec.z *= kMoveDecRate;
+        if (m_avoidanceTimer <= 0.0f)
+        {
+            m_vec.x = 0.0f;
+            m_vec.z = 0.0f;
+            m_isAvoidanceFlag = false;
+        }
+    }
     VECTOR nextPos = VAdd(m_pos, m_vec); // 仮の次の位置
     // Z方向(前後)制限
     if (nextPos.z >= kBackLimit - kWallOffset)
@@ -128,29 +150,29 @@ void Player::Update()
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim();
     //DrawFormatString(0, 15, 0xffffff, L"m_pos.z:%f", m_pos.z);
-    //DINPUT_JOYSTATE input;
-    //int i;
-    //int Color;
-    //// 入力状態を取得
-    //GetJoypadDirectInputState(DX_INPUT_PAD1, &input);
+    /*DINPUT_JOYSTATE input;
+    int i;
+    int Color;
+     //入力状態を取得
+    GetJoypadDirectInputState(DX_INPUT_PAD1, &input);
 
-    //// 画面に構造体の中身を描画
-    //Color = GetColor(255, 255, 255);
-    //DrawFormatString(0, 0, Color, L"X:%d Y:%d Z:%d",
-    //    input.X, input.Y, input.Z);
-    //DrawFormatString(0, 16, Color, L"Rx:%d Ry:%d Rz:%d",
-    //    input.Rx, input.Ry, input.Rz);
-    //DrawFormatString(0, 32, Color, L"Slider 0:%d 1:%d",
-    //    input.Slider[0], input.Slider[1]);
-    //DrawFormatString(0, 48, Color, L"POV 0:%d 1:%d 2:%d 3:%d",
-    //    input.POV[0], input.POV[1],
-    //    input.POV[2], input.POV[3]);
-    //DrawString(0, 64, L"Button", Color);
-    //for (i = 0; i < 32; i++)
-    //{
-    //    DrawFormatString(64 + i % 8 * 64, 64 + i / 8 * 16, Color,
-    //        L"%2d:%d", i, input.Buttons[i]);
-    //}
+     //画面に構造体の中身を描画
+    Color = GetColor(255, 255, 255);
+    DrawFormatString(0, 0, Color, L"X:%d Y:%d Z:%d",
+        input.X, input.Y, input.Z);
+    DrawFormatString(0, 16, Color, L"Rx:%d Ry:%d Rz:%d",
+        input.Rx, input.Ry, input.Rz);
+    DrawFormatString(0, 32, Color, L"Slider 0:%d 1:%d",
+        input.Slider[0], input.Slider[1]);
+    DrawFormatString(0, 48, Color, L"POV 0:%d 1:%d 2:%d 3:%d",
+        input.POV[0], input.POV[1],
+        input.POV[2], input.POV[3]);
+    DrawString(0, 64, L"Button", Color);
+    for (i = 0; i < 32; i++)
+    {
+        DrawFormatString(64 + i % 8 * 64, 64 + i / 8 * 16, Color,
+            L"%2d:%d", i, input.Buttons[i]);
+    }*/
 }
 
 void Player::Draw()
@@ -178,6 +200,14 @@ void Player::OnAttack()
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos,VScale(m_attack.dir,kAttackRange));
     m_attack.timer = kAttackDuration;
+}
+
+void Player::OnAvoidance()
+{
+    m_avoidanceTimer--;
+    m_vec.x = m_forwardDir.x * kAvoidanceMoveSpeed;
+    m_vec.z = m_forwardDir.z * kAvoidanceMoveSpeed;
+    ChangeAnim(m_modelHandle,kAvoidanceAnimNo,false,kAnimIncrement);
 }
 
 VECTOR Player::HandleInput()
@@ -217,7 +247,6 @@ VECTOR Player::HandleInput()
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
     bool isInAttackSequence = (m_playerState == PlayerState::ROTATING_TO_ATTACK || m_playerState == PlayerState::ATTACKING);
-    bool isWalkAnim = false; 
     // 攻撃中でなければ、移動状態に応じてアニメーションを切り替える
     if (!isInAttackSequence)
     {
@@ -225,15 +254,12 @@ void Player::UpdateMovement(const VECTOR& moveDir)
         {
             // 入力がある場合 → 移動アニメーションへ変更
             ChangeAnim(m_modelHandle, kWalkAnimNo, true, kAnimIncrement);
-            isWalkAnim = true;
         }
         else
         {
             // 入力がない場合 → 待機アニメーションへ変更
             ChangeAnim(m_modelHandle, kIdleAnimNo, true, kAnimIncrement);
-            isWalkAnim = false;
         }
-        //printfDx(L"isWalkAnim:%d\n", isWalkAnim);
     }
     
     // 回転処理

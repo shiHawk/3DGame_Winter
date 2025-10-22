@@ -36,7 +36,7 @@ namespace
 	constexpr float kStageMaxZ = 1000.0f;
 	constexpr float kCameraRadius = 20.0f; // ƒJƒƒ‰‚Ì“–‚½‚è”»’è—p”¼Œa
 
-	constexpr VECTOR kSpherePos2 = { 600.0f,30.0f,500.0f };
+
 }
 Camera::Camera():
 	m_cameraPos({0.0f,0.0f,0.0f}),
@@ -53,7 +53,8 @@ Camera::Camera():
 	m_isLockOn(false),
 	m_targetToPlayer({ 0.0f,0.0f,0.0f }),
 	m_targetToPlayerDistance(0.0f),
-	m_lockOnCameraPos({ 0.0f,0.0f,0.0f })
+	m_lockOnCameraPos({ 0.0f,0.0f,0.0f }),
+	m_playerDir({ 0.0f,0.0f,0.0f })
 {
 }
 

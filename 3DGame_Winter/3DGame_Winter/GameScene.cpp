@@ -53,6 +53,7 @@ SceneBase* GameScene::Update()
 	m_pPlayer->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pCamera->SetPlayerPosition(m_pPlayer->GetPos());
 	m_pCamera->SetLockOnPosition(m_pNormalEnemy->GetPos());
+	m_pCamera->SetPlayerDir(m_pPlayer->GetPlayerDir());
 	m_pCompanion->SetEnemyPos(m_pNormalEnemy->GetPos());
 	return this;
 }
@@ -61,7 +62,7 @@ void GameScene::Draw()
 {
 	m_pPlayer->Draw();
 	//m_pEnemy->Draw();
-	m_pNormalEnemy->Draw();
+	//m_pNormalEnemy->Draw();
 	//m_pCompanion->Draw();
 	DrawGrid();
 }

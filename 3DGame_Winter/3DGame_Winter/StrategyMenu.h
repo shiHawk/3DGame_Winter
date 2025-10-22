@@ -8,8 +8,11 @@ public:
 	StrategyMenu(Unit unit);
 	~StrategyMenu() {};
 	void Init();
-	Unit m_targetUnit;
+	void Update();
+	void Draw();
+	Unit* m_pTargetUnit;
+	
 private:
-
+	int m_SelectedOperationIndex;
 };
 

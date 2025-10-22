@@ -14,7 +14,9 @@ public:
 	void Draw();
 	VECTOR GetPlayerPos() { return m_pos; }
 	virtual void OnAttack() override;
+	void OnAvoidance();
 	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; };
+	VECTOR GetPlayerDir() { return m_forwardDir; }
 private:
 	enum class PlayerState
 	{
@@ -36,5 +38,7 @@ private:
 	VECTOR m_moveInput;
 	float m_distanceToEnemy;
 	bool m_isInAttackSequence; // ƒvƒŒƒCƒ„[‚ªUŒ‚’†‚©•ûŒü•â³’†‚©
+	float m_avoidanceTimer;
+	bool m_isAvoidanceFlag;
 };
 
