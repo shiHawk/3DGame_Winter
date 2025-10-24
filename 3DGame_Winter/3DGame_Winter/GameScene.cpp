@@ -62,7 +62,7 @@ void GameScene::Draw()
 {
 	m_pPlayer->Draw();
 	//m_pEnemy->Draw();
-	//m_pNormalEnemy->Draw();
+	m_pNormalEnemy->Draw();
 	//m_pCompanion->Draw();
 	DrawGrid();
 }

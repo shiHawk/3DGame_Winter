@@ -53,7 +53,6 @@ void Animation::AttachAnim(int modelHandle, int animNo)
 
 void Animation::UpdateAnim()
 {
-	
 	// Ä¶ŠÔ‚ğƒZƒbƒg‚·‚é
 	MV1SetAttachAnimTime(m_modelHandle, m_currentAttachNo, m_currentPlayTime);
 	if (m_isBlending)

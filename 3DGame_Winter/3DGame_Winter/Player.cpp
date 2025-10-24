@@ -11,7 +11,7 @@ namespace
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x000fff;
 	constexpr int kSphereSpcColor = 0xffffff;
-	constexpr float kMoveSpeed = 7.0f;
+	constexpr float kMoveSpeed = 10.0f;
     constexpr float kJumpPower = 10.0f;
     constexpr float kGravity = -0.5f;
 	// 減速
@@ -33,9 +33,9 @@ namespace
     constexpr int kAttackPower = 10;
     constexpr float kAttackRange = 60.0f;
     constexpr float kAutoTurnDistance = 250.0f;
-    constexpr float kAttackDuration = 10.0f;
+    constexpr float kAttackDuration = 30.0f;
     constexpr float kAvoidanceFrame = 15.0f;
-    constexpr float kAvoidanceMoveSpeed = 0.25f;
+    constexpr float kAvoidanceMoveSpeed = 0.3f;
 
     constexpr float kModelScale = 50.0f; // モデルのスケール
     constexpr int kIdleAnimNo = 1;
@@ -43,6 +43,9 @@ namespace
     constexpr int kAttackAnimNo = 31;
     constexpr int kAvoidanceAnimNo = 15;
     constexpr float kAnimIncrement = 0.4f; // アニメーションの再生速度
+    constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
+    constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
+    constexpr float kAttackAnimIncrement = 0.7f; // 攻撃アニメーションの再生速度
 }
 
 Player::Player():
@@ -52,6 +55,7 @@ Player::Player():
     m_forwardDir({0.0f,0.0f,0.0f}),
     m_enemyPos({0.0f,0.0f,0.0f}),
     m_attack(30.0f,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
+    m_attack2(30.0f,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
     m_dirToEnemy({0.0f,0.0f,0.0f}),
     m_moveInput({ 0.0f,0.0f,0.0f }),
     m_distanceToEnemy(0.0f),
@@ -70,7 +74,7 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
     m_isJump = false;
     m_attackPower = kAttackPower;
     m_playerState = PlayerState::NORMAL;
-    m_attack.active = false;
+    m_attack.active = false;l
     m_distanceToEnemy = 0.0f;
     m_modelHandle = MV1LoadModel(L"Data/model/Barbarian.mv1");
     MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
@@ -153,10 +157,10 @@ void Player::Update()
     /*DINPUT_JOYSTATE input;
     int i;
     int Color;
-     //入力状態を取得
+    //入力状態を取得
     GetJoypadDirectInputState(DX_INPUT_PAD1, &input);
 
-     //画面に構造体の中身を描画
+    //画面に構造体の中身を描画
     Color = GetColor(255, 255, 255);
     DrawFormatString(0, 0, Color, L"X:%d Y:%d Z:%d",
         input.X, input.Y, input.Z);
@@ -200,6 +204,10 @@ void Player::OnAttack()
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos,VScale(m_attack.dir,kAttackRange));
     m_attack.timer = kAttackDuration;
+}
+
+void Player::OnAttack2()
+{
 }
 
 void Player::OnAvoidance()
@@ -253,12 +261,12 @@ void Player::UpdateMovement(const VECTOR& moveDir)
         if (VSize(VGet(m_vec.x, 0.0f, m_vec.z)) > kMoveThreshold)
         {
             // 入力がある場合 → 移動アニメーションへ変更
-            ChangeAnim(m_modelHandle, kWalkAnimNo, true, kAnimIncrement);
+            ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
         }
         else
         {
             // 入力がない場合 → 待機アニメーションへ変更
-            ChangeAnim(m_modelHandle, kIdleAnimNo, true, kAnimIncrement);
+            ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
         }
     }
     
@@ -365,6 +373,7 @@ void Player::UpdatePlayerState()
         if (m_attack.active)
         {
             m_attack.timer--;
+            ChangeAnim(m_modelHandle, kAttackAnimNo, false, kAttackAnimIncrement);
             if (m_attack.timer < 0.0f)
             {
                 m_attack.active = false;

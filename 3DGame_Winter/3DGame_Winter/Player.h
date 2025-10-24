@@ -14,6 +14,7 @@ public:
 	void Draw();
 	VECTOR GetPlayerPos() { return m_pos; }
 	virtual void OnAttack() override;
+	void OnAttack2();
 	void OnAvoidance();
 	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; };
 	VECTOR GetPlayerDir() { return m_forwardDir; }
@@ -23,6 +24,8 @@ private:
 		NORMAL,
 		ROTATING_TO_ATTACK,
 		ATTACKING,
+		ROTATING_TO_ATTACK2,
+		ATTACKING2
 	};
 	PlayerState m_playerState;
 	VECTOR HandleInput();
@@ -34,6 +37,7 @@ private:
 	VECTOR m_forwardDir;
 	VECTOR m_enemyPos;
 	AttackSphere m_attack;
+	AttackSphere m_attack2;
 	VECTOR m_dirToEnemy;
 	VECTOR m_moveInput;
 	float m_distanceToEnemy;
