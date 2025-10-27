@@ -150,7 +150,7 @@ void Player::Update()
             m_isAvoidanceFlag = false;
         }
     }
-    if (m_specialGauge >= kGaugeConsumption && Pad::isTrigger(PAD_INPUT_5))
+    if (m_specialGauge > kGaugeConsumption && Pad::isTrigger(PAD_INPUT_5))
     {
         m_specialGauge -= kGaugeConsumption;
         OnSpecialSkil();
@@ -214,7 +214,6 @@ void Player::Draw()
     m_forwardDir.x = sinf(m_angleY+DX_PI_F) * kForwardLineLength;
     m_forwardDir.y = 0.0f;
     m_forwardDir.z = cosf(m_angleY+DX_PI_F) * kForwardLineLength;
-    //printfDx(L"m_forwardDir.z:%f\n", m_forwardDir.z);
     VECTOR lineStart = VGet(m_pos.x, m_pos.y + kSphereRadius / 2, m_pos.z);
     VECTOR lineEnd = VAdd(lineStart, m_forwardDir);
 
@@ -259,6 +258,7 @@ void Player::OnSpecialSkil()
     m_specialSkil.active = true;
     m_specialSkil.pos = m_pos;
     m_specialSkil.timer = kSpecialSkilDuration;
+    m_playerState = PlayerState::SPECIALSKIL;
 }
 
 void Player::OnAvoidance()
@@ -481,5 +481,17 @@ void Player::UpdatePlayerState()
                 m_playerState = PlayerState::NORMAL;
             }
         }
+        break;
+    case Player::PlayerState::SPECIALSKIL:
+        if (m_specialSkil.active)
+        {
+            m_specialSkil.timer--;
+            if (m_specialSkil.timer < 0.0f)
+            {
+                m_specialSkil.active = false;
+                m_playerState = PlayerState::NORMAL;
+            }
+        }
+        break;
     }
 }

@@ -26,7 +26,8 @@ private:
 		ROTATING_TO_ATTACK,
 		ATTACKING,
 		ROTATING_TO_ATTACK2,
-		ATTACKING2
+		ATTACKING2,
+		SPECIALSKIL
 	};
 	PlayerState m_playerState;
 	VECTOR HandleInput();
