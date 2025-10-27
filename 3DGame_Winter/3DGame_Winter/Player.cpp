@@ -30,22 +30,42 @@ namespace
     constexpr float kRightLimit = 1000.0f;  // ステージ右
     constexpr float kWallOffset = 0.001f;
 
+    // 各攻撃の攻撃力
     constexpr int kAttackPower = 10;
+    constexpr int kStrongAttackPower = 30;
+    constexpr int kSpecialSkilPower = 100;
+
     constexpr float kAttackRange = 60.0f;
     constexpr float kAutoTurnDistance = 250.0f;
+    // 各攻撃の持続時間
     constexpr float kAttackDuration = 30.0f;
+    constexpr float kStrongAttackDuration = 40.0f;
+    constexpr float kSpecialSkilDuration = 50.0f;
+
     constexpr float kAvoidanceFrame = 15.0f;
     constexpr float kAvoidanceMoveSpeed = 0.3f;
+
+    // 各攻撃の攻撃範囲
+    constexpr float kAttackRadius = 30.0f;
+    constexpr float kStrongAttackRadius = 40.0f;
+    constexpr float kSpecialSkilRadius = 300.0f;
+
+    constexpr int kGaugeIncreaseAmount = 5; // 必殺ゲージ増加量
+    constexpr int kMaxGauge = 200; // ゲージの最大量
+    constexpr int kGaugeConsumption = 100; // ゲージの消費量
 
     constexpr float kModelScale = 50.0f; // モデルのスケール
     constexpr int kIdleAnimNo = 1;
     constexpr int kWalkAnimNo = 3;
     constexpr int kAttackAnimNo = 31;
+    constexpr int kStrongAttackAnimNo = 40;
+    constexpr int kSpecialSkilAnimNo = 38; // 必殺技アニメーション
     constexpr int kAvoidanceAnimNo = 15;
     constexpr float kAnimIncrement = 0.4f; // アニメーションの再生速度
     constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
     constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
     constexpr float kAttackAnimIncrement = 0.7f; // 攻撃アニメーションの再生速度
+    constexpr float kStrongAttackAnimIncrement = 0.9f; // 強攻撃アニメーションの再生速度
 }
 
 Player::Player():
@@ -54,14 +74,17 @@ Player::Player():
     m_isJump(false),
     m_forwardDir({0.0f,0.0f,0.0f}),
     m_enemyPos({0.0f,0.0f,0.0f}),
-    m_attack(30.0f,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
-    m_attack2(30.0f,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
+    m_attack(kAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
+    m_attack2(kStrongAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
+    m_specialSkil(kSpecialSkilRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
     m_dirToEnemy({0.0f,0.0f,0.0f}),
     m_moveInput({ 0.0f,0.0f,0.0f }),
     m_distanceToEnemy(0.0f),
     m_isInAttackSequence(false),
     m_avoidanceTimer(0.0f),
-    m_isAvoidanceFlag(false)
+    m_isAvoidanceFlag(false),
+    m_specialGauge(0),
+    m_isSpecialSkilFlag(false)
 {
 }
 
@@ -74,7 +97,9 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
     m_isJump = false;
     m_attackPower = kAttackPower;
     m_playerState = PlayerState::NORMAL;
-    m_attack.active = false;l
+    m_attack.active = false;
+    m_attack2.active = false;
+    m_specialSkil.active = false;
     m_distanceToEnemy = 0.0f;
     m_modelHandle = MV1LoadModel(L"Data/model/Barbarian.mv1");
     MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
@@ -125,6 +150,11 @@ void Player::Update()
             m_isAvoidanceFlag = false;
         }
     }
+    if (m_specialGauge >= kGaugeConsumption && Pad::isTrigger(PAD_INPUT_5))
+    {
+        m_specialGauge -= kGaugeConsumption;
+        OnSpecialSkil();
+    }
     VECTOR nextPos = VAdd(m_pos, m_vec); // 仮の次の位置
     // Z方向(前後)制限
     if (nextPos.z >= kBackLimit - kWallOffset)
@@ -153,7 +183,6 @@ void Player::Update()
     MV1SetPosition(m_modelHandle, m_pos);
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim();
-    //DrawFormatString(0, 15, 0xffffff, L"m_pos.z:%f", m_pos.z);
     /*DINPUT_JOYSTATE input;
     int i;
     int Color;
@@ -196,10 +225,19 @@ void Player::Draw()
     {
         DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
     }
+    if (m_attack2.active)
+    {
+        DrawSphere3D(m_attack2.pos, m_attack2.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+    }
+    if (m_specialSkil.active)
+    {
+        DrawSphere3D(m_specialSkil.pos, m_specialSkil.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+    }
 }
 
 void Player::OnAttack()
 {
+    m_attackPower = kAttackPower;
     m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos,VScale(m_attack.dir,kAttackRange));
@@ -208,6 +246,19 @@ void Player::OnAttack()
 
 void Player::OnAttack2()
 {
+    m_attackPower = kStrongAttackPower;
+    m_attack2.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
+    m_attack2.active = true;
+    m_attack2.pos = VAdd(m_pos, VScale(m_attack2.dir, kAttackRange));
+    m_attack2.timer = kStrongAttackDuration;
+}
+
+void Player::OnSpecialSkil()
+{
+    m_attackPower = kSpecialSkilPower;
+    m_specialSkil.active = true;
+    m_specialSkil.pos = m_pos;
+    m_specialSkil.timer = kSpecialSkilDuration;
 }
 
 void Player::OnAvoidance()
@@ -254,7 +305,8 @@ VECTOR Player::HandleInput()
 
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
-    bool isInAttackSequence = (m_playerState == PlayerState::ROTATING_TO_ATTACK || m_playerState == PlayerState::ATTACKING);
+    bool isInAttackSequence = (m_playerState == PlayerState::ROTATING_TO_ATTACK || m_playerState == PlayerState::ATTACKING
+                               || m_playerState == PlayerState::ROTATING_TO_ATTACK2 || m_playerState == PlayerState::ATTACKING2);
     // 攻撃中でなければ、移動状態に応じてアニメーションを切り替える
     if (!isInAttackSequence)
     {
@@ -331,7 +383,7 @@ void Player::UpdatePlayerState()
     {
     case Player::PlayerState::NORMAL:
         UpdateMovement(m_moveInput);
-        if (Pad::isTrigger(PAD_INPUT_2) && !m_attack.active)
+        if (Pad::isTrigger(PAD_INPUT_4) && !m_attack.active)
         {
             m_dirToEnemy = VSub(m_enemyPos, m_pos); // 攻撃ボタンを押したら敵との距離を測る
             m_distanceToEnemy = VSize(m_dirToEnemy);
@@ -343,6 +395,20 @@ void Player::UpdatePlayerState()
             {
                 OnAttack(); // 攻撃実行
                 m_playerState = PlayerState::ATTACKING;
+            }
+        }
+        if (Pad::isTrigger(PAD_INPUT_2) && !m_attack2.active)
+        {
+            m_dirToEnemy = VSub(m_enemyPos, m_pos); // 攻撃ボタンを押したら敵との距離を測る
+            m_distanceToEnemy = VSize(m_dirToEnemy);
+            if (m_distanceToEnemy <= kAutoTurnDistance) // 距離がkLockOnRange以下なら敵の方向を向く
+            {
+                m_playerState = PlayerState::ROTATING_TO_ATTACK2;
+            }
+            else // 距離が遠いなら方向転換を行わず即攻撃
+            {
+                OnAttack2(); // 攻撃実行
+                m_playerState = PlayerState::ATTACKING2;
             }
         }
         break;
@@ -367,6 +433,27 @@ void Player::UpdatePlayerState()
         }
         break;
     }
+    case Player::PlayerState::ROTATING_TO_ATTACK2:
+    {
+        UpdateMovement(m_moveInput);
+        // 敵の方向を計算
+        m_dirToEnemy = VSub(m_enemyPos, m_pos);
+        float targetAngle = atan2f(-m_dirToEnemy.x, -m_dirToEnemy.z);
+        float diff = targetAngle - m_angleY;
+
+        // 角度の差を正規化 
+        if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
+        else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+
+        // 角度の差がごくわずかになったら、攻撃を出す
+        if (std::abs(diff) < kAngleThreshold)
+        {
+            m_angleY = targetAngle; // 最後に角度をぴったり合わせる
+            OnAttack2(); // 攻撃実行
+            m_playerState = PlayerState::ATTACKING2; // 攻撃状態へ移行
+        }
+        break;
+    }
     case Player::PlayerState::ATTACKING:
         UpdateMovement(m_moveInput);
         // 攻撃タイマーを進める
@@ -381,5 +468,18 @@ void Player::UpdatePlayerState()
             }
         }
         break;
+    case Player::PlayerState::ATTACKING2:
+        UpdateMovement(m_moveInput);
+        // 攻撃タイマーを進める
+        if (m_attack2.active)
+        {
+            m_attack2.timer--;
+            ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, kStrongAttackAnimIncrement);
+            if (m_attack2.timer < 0.0f)
+            {
+                m_attack2.active = false;
+                m_playerState = PlayerState::NORMAL;
+            }
+        }
     }
 }
