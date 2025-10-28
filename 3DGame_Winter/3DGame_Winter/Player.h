@@ -15,6 +15,7 @@ public:
 	VECTOR GetPlayerPos() { return m_pos; }
 	virtual void OnAttack() override;
 	void OnAttack2();
+	void OnCombFinishAttack();
 	void OnSpecialSkil();
 	void OnAvoidance();
 	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; };
@@ -27,6 +28,9 @@ private:
 		ATTACKING,
 		ROTATING_TO_ATTACK2,
 		ATTACKING2,
+		ROTATING_TO_COMBOFINISH,
+		ATTACKING_COMBOFINISH,
+		COMBO_WINDOW,
 		SPECIALSKIL
 	};
 	PlayerState m_playerState;
@@ -40,6 +44,7 @@ private:
 	VECTOR m_enemyPos;
 	AttackSphere m_attack;
 	AttackSphere m_attack2;
+	AttackSphere m_comboFinish;
 	AttackSphere m_specialSkil;
 	VECTOR m_dirToEnemy;
 	VECTOR m_moveInput; 
@@ -47,6 +52,8 @@ private:
 	bool m_isInAttackSequence; // プレイヤーが攻撃中か方向補正中か
 	float m_avoidanceTimer; // 回避時間
 	bool m_isAvoidanceFlag; // 回避のフラグ
+	int m_comboStep; // コンボの段階
+	float m_comboWindowTimer; // コンボの受付時間
 	int m_specialGauge; // 必殺ゲージ
 	bool m_isSpecialSkilFlag; // 必殺技のフラグ
 };

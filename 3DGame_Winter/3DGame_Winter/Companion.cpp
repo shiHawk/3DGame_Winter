@@ -4,6 +4,7 @@ namespace
 {
 	constexpr VECTOR kDefaultPos = { 100.0f,0.0f,-60.0f };
 	constexpr VECTOR kDefaultVec = { 0.0f,0.0f,0.0f };
+	constexpr VECTOR kDefaultDir = { 0.0,270.0f * DX_PI_F / 180.0f,0.0f };
 	constexpr float kSphereRadius = 20.0f;
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x00f000;
@@ -11,6 +12,7 @@ namespace
 	constexpr float kMoveSpeed = 2.0f;
 	constexpr float kJumpPower = 10.0f;
 	constexpr float kGravity = -0.5f;
+	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
 	// 減速
 	constexpr float kMoveDecRate = 0.80f;
 	constexpr float kRotateSpeed = 0.4f; // 方向転換の速度
@@ -20,12 +22,22 @@ namespace
 	constexpr float kLeftLimit = -1000.0f;  // ステージ左
 	constexpr float kRightLimit = 1000.0f;  // ステージ右
 	constexpr float kWallOffset = 0.001f;
+
+	constexpr float kModelScale = 50.0f; // モデルのスケール
+	constexpr int kIdleAnimNo = 1;
+	constexpr int kWalkAnimNo = 3;
+	constexpr int kAttackAnimNo = 31;
+	constexpr int kStrongAttackAnimNo = 40;
+	constexpr float kComboFinishAttackAnimNo = 41;
+	constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
+	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
+
 	// 線分の長さ
 	constexpr float kForwardLineLength = 100.0f;
 	constexpr float kBackLineLength = 540.0f;
 	constexpr float kAutoTurnDistance = 300.0f;
 
-	constexpr float kStopDistance = 20.0f * 4.0f;
+	constexpr float kStopDistance = 80.0f;
 }
 
 Companion::Companion():
@@ -48,11 +60,15 @@ void Companion::Init()
 	m_pos = kDefaultPos;
 	m_vec = kDefaultVec;
 	m_distanceToEnemy = 0.0f;
+	m_modelHandle = MV1LoadModel(L"Data/model/Mage.mv1");
+	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
+	MV1SetRotationXYZ(m_modelHandle,kDefaultDir);
+	AttachAnim(m_modelHandle,kIdleAnimNo);
 }
 
 void Companion::End()
 {
-	
+	MV1DeleteModel(m_modelHandle);
 }
 
 void Companion::Update()
@@ -69,6 +85,7 @@ void Companion::Update()
 	{
 		m_dirToEnemy = VNorm(m_companionToEnemy);
 		float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+		targetAngle += DX_PI_F;
 		float diff = targetAngle - m_angleY;
 		if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
 		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
@@ -120,21 +137,34 @@ void Companion::Update()
 		nextPos.x = kRightLimit - kWallOffset;
 		m_vec.x = 0.0f;
 	}
+	if (VSize(VGet(m_vec.x, 0.0f, m_vec.z)) > kMoveThreshold)
+	{
+		// 入力がある場合 → 移動アニメーションへ変更
+		ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
+	}
+	else
+	{
+		// 入力がない場合 → 待機アニメーションへ変更
+		ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+	}
 	m_pos = nextPos;
+	MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
+	MV1SetPosition(m_modelHandle,m_pos);
 }
 
 void Companion::Draw()
 {
 	// 向きに合わせて線分を描画
-	m_forwardDir.x = sinf(m_angleY) * kForwardLineLength;
+	m_forwardDir.x = sinf(m_angleY+DX_PI_F) * kForwardLineLength;
 	m_forwardDir.y = 0.0f;
-	m_forwardDir.z = cosf(m_angleY) * kForwardLineLength;
+	m_forwardDir.z = cosf(m_angleY+DX_PI_F) * kForwardLineLength;
 	//printfDx(L"m_forwardDir.z:%f\n", m_forwardDir.z);
 	VECTOR lineStart = VGet(m_pos.x, m_pos.y + kSphereRadius / 2, m_pos.z);
 	VECTOR lineEnd = VAdd(lineStart, m_forwardDir);
 
-	DrawSphere3D(m_pos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
+	//DrawSphere3D(m_pos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
 	DrawLine3D(lineStart, lineEnd, kSphereDifColor);
+	MV1DrawModel(m_modelHandle);
 }
 
 void Companion::OnAttack()

@@ -33,14 +33,16 @@ namespace
     // 各攻撃の攻撃力
     constexpr int kAttackPower = 10;
     constexpr int kStrongAttackPower = 30;
-    constexpr int kSpecialSkilPower = 100;
+    constexpr int kComboFinishAttackPower = 45;
+    constexpr int kSpecialSkilPower = 150;
 
     constexpr float kAttackRange = 60.0f;
     constexpr float kAutoTurnDistance = 250.0f;
     // 各攻撃の持続時間
     constexpr float kAttackDuration = 30.0f;
     constexpr float kStrongAttackDuration = 40.0f;
-    constexpr float kSpecialSkilDuration = 50.0f;
+    constexpr float kComboFinishAttackDuration = 40.0f;
+    constexpr float kSpecialSkilDuration = 70.0f;
 
     constexpr float kAvoidanceFrame = 15.0f;
     constexpr float kAvoidanceMoveSpeed = 0.3f;
@@ -48,17 +50,21 @@ namespace
     // 各攻撃の攻撃範囲
     constexpr float kAttackRadius = 30.0f;
     constexpr float kStrongAttackRadius = 40.0f;
+    constexpr float kComboFinishAttackRadius = 50.0f;
     constexpr float kSpecialSkilRadius = 300.0f;
 
     constexpr int kGaugeIncreaseAmount = 5; // 必殺ゲージ増加量
     constexpr int kMaxGauge = 200; // ゲージの最大量
     constexpr int kGaugeConsumption = 100; // ゲージの消費量
 
+    constexpr float kComboWindowTime = 20.0f;
+
     constexpr float kModelScale = 50.0f; // モデルのスケール
     constexpr int kIdleAnimNo = 1;
     constexpr int kWalkAnimNo = 3;
     constexpr int kAttackAnimNo = 31;
     constexpr int kStrongAttackAnimNo = 40;
+    constexpr float kComboFinishAttackAnimNo = 41;
     constexpr int kSpecialSkilAnimNo = 38; // 必殺技アニメーション
     constexpr int kAvoidanceAnimNo = 15;
     constexpr float kAnimIncrement = 0.4f; // アニメーションの再生速度
@@ -66,6 +72,7 @@ namespace
     constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
     constexpr float kAttackAnimIncrement = 0.7f; // 攻撃アニメーションの再生速度
     constexpr float kStrongAttackAnimIncrement = 0.9f; // 強攻撃アニメーションの再生速度
+    constexpr float kComboFinishAttackAnimIncrement = 0.7f; 
 }
 
 Player::Player():
@@ -76,6 +83,7 @@ Player::Player():
     m_enemyPos({0.0f,0.0f,0.0f}),
     m_attack(kAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
     m_attack2(kStrongAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
+    m_comboFinish(kComboFinishAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
     m_specialSkil(kSpecialSkilRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
     m_dirToEnemy({0.0f,0.0f,0.0f}),
     m_moveInput({ 0.0f,0.0f,0.0f }),
@@ -83,6 +91,8 @@ Player::Player():
     m_isInAttackSequence(false),
     m_avoidanceTimer(0.0f),
     m_isAvoidanceFlag(false),
+    m_comboStep(0),
+    m_comboWindowTimer(0.0f),
     m_specialGauge(0),
     m_isSpecialSkilFlag(false)
 {
@@ -99,6 +109,7 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
     m_playerState = PlayerState::NORMAL;
     m_attack.active = false;
     m_attack2.active = false;
+    m_comboFinish.active = false;
     m_specialSkil.active = false;
     m_distanceToEnemy = 0.0f;
     m_modelHandle = MV1LoadModel(L"Data/model/Barbarian.mv1");
@@ -116,6 +127,8 @@ void Player::Update()
 {
     m_moveInput = HandleInput();
     UpdatePlayerState();
+    printfDx(L"m_comboWindowTimer:%f\n", m_comboWindowTimer);
+    //printfDx(L"m_playerState:%d\n", m_playerState);
     if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
     {
         m_vec.y = kJumpPower;
@@ -150,10 +163,18 @@ void Player::Update()
             m_isAvoidanceFlag = false;
         }
     }
-    if (m_specialGauge > kGaugeConsumption && Pad::isTrigger(PAD_INPUT_5))
+    if (m_specialGauge >= kMaxGauge)
+    {
+        m_specialGauge = kMaxGauge;
+    }
+    if (/*m_specialGauge > kGaugeConsumption && */Pad::isTrigger(PAD_INPUT_5))
     {
         m_specialGauge -= kGaugeConsumption;
         OnSpecialSkil();
+    }
+    if (m_specialGauge <= 0)
+    {
+        m_specialGauge = 0;
     }
     VECTOR nextPos = VAdd(m_pos, m_vec); // 仮の次の位置
     // Z方向(前後)制限
@@ -183,6 +204,7 @@ void Player::Update()
     MV1SetPosition(m_modelHandle, m_pos);
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim();
+
     /*DINPUT_JOYSTATE input;
     int i;
     int Color;
@@ -228,6 +250,10 @@ void Player::Draw()
     {
         DrawSphere3D(m_attack2.pos, m_attack2.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
     }
+    if (m_comboFinish.active)
+    {
+        DrawSphere3D(m_comboFinish.pos, m_comboFinish.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+    }
     if (m_specialSkil.active)
     {
         DrawSphere3D(m_specialSkil.pos, m_specialSkil.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
@@ -250,6 +276,15 @@ void Player::OnAttack2()
     m_attack2.active = true;
     m_attack2.pos = VAdd(m_pos, VScale(m_attack2.dir, kAttackRange));
     m_attack2.timer = kStrongAttackDuration;
+}
+
+void Player::OnCombFinishAttack()
+{
+    m_attackPower = kComboFinishAttackPower;
+    m_comboFinish.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
+    m_comboFinish.active = true;
+    m_comboFinish.pos = VAdd(m_pos, VScale(m_comboFinish.dir, kAttackRange));
+    m_comboFinish.timer = kComboFinishAttackDuration;
 }
 
 void Player::OnSpecialSkil()
@@ -299,14 +334,12 @@ VECTOR Player::HandleInput()
     moveDir.x = inputVec.x * cosY - inputVec.z * sinY;
     moveDir.z = inputVec.x * sinY + inputVec.z * cosY;
     moveDir.y = 0.0f;
-
     return moveDir;
 }
 
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
-    bool isInAttackSequence = (m_playerState == PlayerState::ROTATING_TO_ATTACK || m_playerState == PlayerState::ATTACKING
-                               || m_playerState == PlayerState::ROTATING_TO_ATTACK2 || m_playerState == PlayerState::ATTACKING2);
+    bool isInAttackSequence = m_playerState != PlayerState::NORMAL;
     // 攻撃中でなければ、移動状態に応じてアニメーションを切り替える
     if (!isInAttackSequence)
     {
@@ -360,9 +393,8 @@ void Player::UpdateMovement(const VECTOR& moveDir)
             else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
         }
     }
-
     // 移動処理
-    // isLockOn の状態に関わらず、スティック入力に応じて移動・減速を制御する
+    // isLockOn の状態に関わらずスティック入力に応じて移動・減速を制御する
     if (VSize(moveDir) > 0.0f)
     {
         // 5.移動ベクトルを更新
@@ -383,8 +415,10 @@ void Player::UpdatePlayerState()
     {
     case Player::PlayerState::NORMAL:
         UpdateMovement(m_moveInput);
+        m_comboStep = 0; // 通常時はコンボ数をリセット
         if (Pad::isTrigger(PAD_INPUT_4) && !m_attack.active)
         {
+            m_comboStep = 1; // コンボ1段階目
             m_dirToEnemy = VSub(m_enemyPos, m_pos); // 攻撃ボタンを押したら敵との距離を測る
             m_distanceToEnemy = VSize(m_dirToEnemy);
             if (m_distanceToEnemy <= kAutoTurnDistance) // 距離がkLockOnRange以下なら敵の方向を向く
@@ -397,8 +431,9 @@ void Player::UpdatePlayerState()
                 m_playerState = PlayerState::ATTACKING;
             }
         }
-        if (Pad::isTrigger(PAD_INPUT_2) && !m_attack2.active)
+        if (Pad::isTrigger(PAD_INPUT_2) && !m_attack2.active) // 単発強攻撃
         {
+            m_comboStep = 0; // 単発攻撃なのでコンボはリセット
             m_dirToEnemy = VSub(m_enemyPos, m_pos); // 攻撃ボタンを押したら敵との距離を測る
             m_distanceToEnemy = VSize(m_dirToEnemy);
             if (m_distanceToEnemy <= kAutoTurnDistance) // 距離がkLockOnRange以下なら敵の方向を向く
@@ -456,6 +491,25 @@ void Player::UpdatePlayerState()
     }
     case Player::PlayerState::ATTACKING:
         UpdateMovement(m_moveInput);
+        if (Pad::isTrigger(PAD_INPUT_2)) // 攻撃中に強ボタン
+        {
+            m_attack.active = false; // 現在の攻撃をキャンセル
+            m_comboStep = 2;         // コンボ2段階目へ
+
+            // 2段目攻撃 (強A) を開始
+            m_dirToEnemy = VSub(m_enemyPos, m_pos);
+            m_distanceToEnemy = VSize(m_dirToEnemy);
+            if (m_distanceToEnemy <= kAutoTurnDistance)
+            {
+                m_playerState = PlayerState::ROTATING_TO_ATTACK2;
+            }
+            else
+            {
+                OnAttack2();
+                m_playerState = PlayerState::ATTACKING2;
+            }
+            break; // ATTACKING の処理を抜ける
+        }
         // 攻撃タイマーを進める
         if (m_attack.active)
         {
@@ -464,12 +518,34 @@ void Player::UpdatePlayerState()
             if (m_attack.timer < 0.0f)
             {
                 m_attack.active = false;
-                m_playerState = PlayerState::NORMAL; // 攻撃が終わったら通常状態へ
+                // NORMALに戻さず、コンボ受付状態 (WINDOW) へ
+                m_playerState = PlayerState::COMBO_WINDOW;
+                m_comboWindowTimer = kComboWindowTime;
             }
         }
         break;
     case Player::PlayerState::ATTACKING2:
         UpdateMovement(m_moveInput);
+        // m_comboStep == 2 は「弱→強」の連携中である証
+        if (m_comboStep == 2 && Pad::isTrigger(PAD_INPUT_2))
+        {
+            m_attack2.active = false; // 現在の攻撃をキャンセル
+            m_comboStep = 3;          // コンボ3段階目へ
+
+            // 3段目攻撃 (強B) を開始
+            m_dirToEnemy = VSub(m_enemyPos, m_pos);
+            m_distanceToEnemy = VSize(m_dirToEnemy);
+            if (m_distanceToEnemy <= kAutoTurnDistance)
+            {
+                m_playerState = PlayerState::ROTATING_TO_COMBOFINISH;
+            }
+            else
+            {
+                OnCombFinishAttack();
+                m_playerState = PlayerState::ATTACKING_COMBOFINISH;
+            }
+            break; // ATTACKING2 の処理を抜ける
+        }
         // 攻撃タイマーを進める
         if (m_attack2.active)
         {
@@ -478,14 +554,101 @@ void Player::UpdatePlayerState()
             if (m_attack2.timer < 0.0f)
             {
                 m_attack2.active = false;
-                m_playerState = PlayerState::NORMAL;
+                // m_comboStep が 2 ならコンボ受付へ、それ以外 (単発) なら NORMAL へ
+                if (m_comboStep == 2)
+                {
+                    m_playerState = PlayerState::COMBO_WINDOW;
+                    m_comboWindowTimer = kComboWindowTime;
+                }
+                else
+                {
+                    m_playerState = PlayerState::NORMAL;
+                    m_comboStep = 0; // コンボ終了
+                }
             }
+        }
+        break;
+    case Player::PlayerState::ROTATING_TO_COMBOFINISH:
+    {
+        UpdateMovement(m_moveInput);
+        m_dirToEnemy = VSub(m_enemyPos, m_pos);
+        float targetAngle = atan2f(-m_dirToEnemy.x, -m_dirToEnemy.z);
+        float diff = targetAngle - m_angleY;
+
+        if (diff > DX_PI_F)     diff -= 2.0f * DX_PI_F;
+        else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+
+        if (std::abs(diff) < kAngleThreshold)
+        {
+            m_angleY = targetAngle;
+            OnCombFinishAttack(); // 3段目攻撃を実行
+            m_playerState = PlayerState::ATTACKING_COMBOFINISH;
+        }
+        break;
+    }
+    case Player::PlayerState::ATTACKING_COMBOFINISH:
+        UpdateMovement(m_moveInput);
+        // この攻撃からは連携しない
+        if (m_comboFinish.active)
+        {
+            m_comboFinish.timer--;
+            ChangeAnim(m_modelHandle, kComboFinishAttackAnimNo, false, kComboFinishAttackAnimIncrement); // 3段目アニメ
+            if (m_comboFinish.timer < 0.0f)
+            {
+                m_comboFinish.active = false;
+                m_playerState = PlayerState::NORMAL; // 攻撃が終わったら通常状態へ
+                m_comboStep = 0; // コンボ終了
+            }
+        }
+        break;
+    case Player::PlayerState::COMBO_WINDOW:
+        UpdateMovement(m_moveInput);
+        m_comboWindowTimer--;
+        // コンボ受付時間内に次の入力があったか
+        // 1段階目 (弱) の後 -> 強 (PAD_INPUT_2)
+        if (m_comboStep == 1 && Pad::isTrigger(PAD_INPUT_2))
+        {
+            m_comboStep = 2; // 2段階目へ
+            m_dirToEnemy = VSub(m_enemyPos, m_pos);
+            m_distanceToEnemy = VSize(m_dirToEnemy);
+            if (m_distanceToEnemy <= kAutoTurnDistance)
+            {
+                m_playerState = PlayerState::ROTATING_TO_ATTACK2;
+            }
+            else
+            {
+                OnAttack2();
+                m_playerState = PlayerState::ATTACKING2;
+            }
+        }
+        // 2段階目 (強A) の後 -> 強 (PAD_INPUT_2)
+        else if (m_comboStep == 2 && Pad::isTrigger(PAD_INPUT_2))
+        {
+            m_comboStep = 3; // 3段階目へ
+            m_dirToEnemy = VSub(m_enemyPos, m_pos);
+            m_distanceToEnemy = VSize(m_dirToEnemy);
+            if (m_distanceToEnemy <= kAutoTurnDistance)
+            {
+                m_playerState = PlayerState::ROTATING_TO_COMBOFINISH;
+            }
+            else
+            {
+                OnCombFinishAttack();
+                m_playerState = PlayerState::ATTACKING_COMBOFINISH;
+            }
+        }
+        // 時間切れ、または他の行動（ジャンプや回避など）でコンボ中断
+        else if (m_comboWindowTimer <= 0.0f || Pad::isTrigger(PAD_INPUT_1) || Pad::isTrigger(PAD_INPUT_3))
+        {
+            m_playerState = PlayerState::NORMAL;
+            m_comboStep = 0;
         }
         break;
     case Player::PlayerState::SPECIALSKIL:
         if (m_specialSkil.active)
         {
             m_specialSkil.timer--;
+            ChangeAnim(m_modelHandle, kSpecialSkilAnimNo, false, kComboFinishAttackAnimIncrement);
             if (m_specialSkil.timer < 0.0f)
             {
                 m_specialSkil.active = false;

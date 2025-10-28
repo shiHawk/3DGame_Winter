@@ -147,7 +147,7 @@ void Camera::Update()
 	// 注視点の座標を足したものがカメラの座標
 	m_cameraPos = VAdd(VTransform(VTransform(VGet(0.0f, 0.0f, -kCameraToPlayerLength), rotX), rotY), VGet(m_playerPos.x,m_playerPos.y + kDefaultCameraPos.y,m_playerPos.z));
 	//ResolveCollisionWithStage();
-	if (Pad::isTrigger(PAD_INPUT_6))
+	if (Pad::isTrigger(PAD_INPUT_10))
 	{
 		if (!m_isLockOn)
 		{
