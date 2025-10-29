@@ -39,7 +39,7 @@ namespace
     constexpr float kAttackRange = 60.0f;
     constexpr float kAutoTurnDistance = 250.0f;
     // ŠeUŒ‚‚Ì‘±ŠÔ
-    constexpr float kAttackDuration = 30.0f;
+    constexpr float kAttackDuration = 20.0f;
     constexpr float kStrongAttackDuration = 40.0f;
     constexpr float kComboFinishAttackDuration = 40.0f;
     constexpr float kSpecialSkilDuration = 70.0f;
@@ -127,14 +127,22 @@ void Player::Update()
 {
     m_moveInput = HandleInput();
     UpdatePlayerState();
-    printfDx(L"m_comboWindowTimer:%f\n", m_comboWindowTimer);
     //printfDx(L"m_playerState:%d\n", m_playerState);
+    printfDx(L"m_comboWindowTimer:%f\n", m_comboWindowTimer);
     if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
     {
         m_vec.y = kJumpPower;
         m_isJump = true;
     }
-    m_vec.y += kGravity;
+    if (!m_isInAttackSequence)
+    {
+        m_vec.y += kGravity;
+    }
+    /*else
+    {
+        m_vec.y += kGravity * 0.5f;
+    }*/
+    
     if (m_pos.y + m_vec.y < 0.0f)
     {
         m_pos.y = 0.0f;   // ’n–Ê‚ÉŒÅ’è
@@ -145,6 +153,7 @@ void Player::Update()
     {
         m_pos.y += m_vec.y;
     }
+    
     if (Pad::isTrigger(PAD_INPUT_3)&&!m_isAvoidanceFlag)
     {
         m_avoidanceTimer = kAvoidanceFrame;
@@ -204,7 +213,6 @@ void Player::Update()
     MV1SetPosition(m_modelHandle, m_pos);
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim();
-
     /*DINPUT_JOYSTATE input;
     int i;
     int Color;
@@ -267,6 +275,10 @@ void Player::OnAttack()
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos,VScale(m_attack.dir,kAttackRange));
     m_attack.timer = kAttackDuration;
+    if (m_pos.y > 0.0f)
+    {
+        m_vec.y = 0.0f; // ‚’¼‘¬“x‚ğƒ[ƒ‚É‚µAã¸E‰º~‚ğ’â~
+    }
 }
 
 void Player::OnAttack2()
@@ -276,6 +288,10 @@ void Player::OnAttack2()
     m_attack2.active = true;
     m_attack2.pos = VAdd(m_pos, VScale(m_attack2.dir, kAttackRange));
     m_attack2.timer = kStrongAttackDuration;
+    if (m_pos.y > 0.0f)
+    {
+        m_vec.y = 0.0f; // ‚’¼‘¬“x‚ğƒ[ƒ‚É‚µAã¸E‰º~‚ğ’â~
+    }
 }
 
 void Player::OnCombFinishAttack()
@@ -339,9 +355,9 @@ VECTOR Player::HandleInput()
 
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
-    bool isInAttackSequence = m_playerState != PlayerState::NORMAL;
+    m_isInAttackSequence = m_playerState != PlayerState::NORMAL;
     // UŒ‚’†‚Å‚È‚¯‚ê‚ÎAˆÚ“®ó‘Ô‚É‰‚¶‚ÄƒAƒjƒ[ƒVƒ‡ƒ“‚ğØ‚è‘Ö‚¦‚é
-    if (!isInAttackSequence)
+    if (!m_isInAttackSequence)
     {
         if (VSize(VGet(m_vec.x, 0.0f, m_vec.z)) > kMoveThreshold)
         {
@@ -357,7 +373,7 @@ void Player::UpdateMovement(const VECTOR& moveDir)
     
     // ‰ñ“]ˆ—
     // isLockOn ‚Ìó‘Ô‚É‰‚¶‚ÄAŒü‚«‚ÌŒˆ‚ß•û‚ğ•Ï‚¦‚é
-    if (isInAttackSequence)
+    if (m_isInAttackSequence)
     {
         // “G‚Æ‚Ì‹——£‚ªkLockOnRangeˆÈ‰º‚È‚ç“G‚Ì‚Ù‚¤‚ğŒü‚­
         if (m_distanceToEnemy <= kAutoTurnDistance)

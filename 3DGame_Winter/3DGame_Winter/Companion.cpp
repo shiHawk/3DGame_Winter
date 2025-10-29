@@ -11,7 +11,7 @@ namespace
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kMoveSpeed = 2.0f;
 	constexpr float kJumpPower = 10.0f;
-	constexpr float kGravity = -0.5f;
+	constexpr float kGravity = -5.5f;
 	constexpr float kMoveThreshold = 0.1f; // ˆÚ“®‚Æ‚Ý‚È‚·è‡’l
 	// Œ¸‘¬
 	constexpr float kMoveDecRate = 0.80f;
@@ -38,15 +38,22 @@ namespace
 	constexpr float kAutoTurnDistance = 300.0f;
 
 	constexpr float kStopDistance = 80.0f;
+	constexpr float kWarpDistance = 800.0f;
+	constexpr float kPostWarpPosZ = 100.0f;
 }
 
 Companion::Companion():
+	m_companionState(CompanionState::NORMAL),
 	m_forwardDir({0.0f,0.0f,0.0f}),
 	m_enemyPos({ 0.0f,0.0f,0.0f }),
+	m_playerPos({ 0.0f,0.0f,0.0f }),
 	m_dirToEnemy({ 0.0f,0.0f,0.0f }),
+	m_dirToPlayer({ 0.0f,0.0f,0.0f }),
 	m_companionToEnemy({ 0.0f,0.0f,0.0f }),
+	m_companionToPlayer({ 0.0f,0.0f,0.0f }),
 	m_attack(30.0f, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
 	m_distanceToEnemy(0.0f),
+	m_distanceToPlayer(0.0f),
 	m_angleY(0.0f)
 {
 }
@@ -78,41 +85,30 @@ void Companion::Update()
 	{
 		return;
 	}
-
+	//printfDx(L"m_companionState:%d\n", m_companionState);
+	UpdateCompanionState();
 	m_companionToEnemy = VSub(m_enemyPos, m_pos); 
 	m_distanceToEnemy = VSize(m_companionToEnemy);
-	if (m_distanceToEnemy <= kAutoTurnDistance)
+	m_companionToPlayer = VSub(m_playerPos, m_pos);
+	m_distanceToPlayer = VSize(m_companionToPlayer);
+	if (m_distanceToEnemy <= kAutoTurnDistance) // “G‚ÉŒü‚©‚Á‚ÄˆÚ“®‚·‚é
 	{
-		m_dirToEnemy = VNorm(m_companionToEnemy);
-		float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
-		targetAngle += DX_PI_F;
-		float diff = targetAngle - m_angleY;
-		if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
-		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
-		m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
-
-		if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
-		else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
-
-		/*if (m_distanceToEnemy > kStopDistance)
-		{
-			m_forwardDir.x = sinf(m_angleY);
-			m_forwardDir.z = cosf(m_angleY);
-			m_vec = VScale(m_forwardDir,kMoveSpeed);
-			m_pos = VAdd(m_pos, m_vec);
-		}
-		else
-		{
-			m_vec = { 0.0f,0.0f,0.0f };
-		}*/
+		m_companionState = CompanionState::TRACK_ENEMY;
 	}
-	else
+	else // ƒvƒŒƒCƒ„[‚É’Ç]‚·‚é
 	{
-		// “G‚ª‰“‚¢ê‡‚ÍŒ¸‘¬‚µ‚Ä’âŽ~
-		m_vec = VScale(m_vec, kMoveDecRate);
-		m_pos = VAdd(m_pos, m_vec);
+		m_companionState = CompanionState::FOLLOW_PLAYER;
 	}
-	 
+	if (m_distanceToPlayer > kWarpDistance)
+	{
+		m_pos = VGet(m_playerPos.x,m_playerPos.y,m_playerPos.z- kPostWarpPosZ);
+	 }
+	m_vec.y += kGravity;
+	if (m_pos.y + m_vec.y < 0.0f)
+	{
+		m_pos.y = 0.0f;   // ’n–Ê‚ÉŒÅ’è
+		m_vec.y = 0.0f;   // c‘¬“x‚ðƒ[ƒ
+	}
 	VECTOR nextPos = VAdd(m_pos, m_vec); // ‰¼‚ÌŽŸ‚ÌˆÊ’u
 	// Z•ûŒü(‘OŒã)§ŒÀ
 	if (nextPos.z >= kBackLimit - kWallOffset)
@@ -137,6 +133,7 @@ void Companion::Update()
 		nextPos.x = kRightLimit - kWallOffset;
 		m_vec.x = 0.0f;
 	}
+
 	if (VSize(VGet(m_vec.x, 0.0f, m_vec.z)) > kMoveThreshold)
 	{
 		// “ü—Í‚ª‚ ‚éê‡ ¨ ˆÚ“®ƒAƒjƒ[ƒVƒ‡ƒ“‚Ö•ÏX
@@ -148,16 +145,17 @@ void Companion::Update()
 		ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 	}
 	m_pos = nextPos;
-	MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
+	MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY+DX_PI_F, 0.0f));
 	MV1SetPosition(m_modelHandle,m_pos);
+	UpdateAnim();
 }
 
 void Companion::Draw()
 {
 	// Œü‚«‚É‡‚í‚¹‚Äü•ª‚ð•`‰æ
-	m_forwardDir.x = sinf(m_angleY+DX_PI_F) * kForwardLineLength;
+	m_forwardDir.x = sinf(m_angleY) * kForwardLineLength;
 	m_forwardDir.y = 0.0f;
-	m_forwardDir.z = cosf(m_angleY+DX_PI_F) * kForwardLineLength;
+	m_forwardDir.z = cosf(m_angleY) * kForwardLineLength;
 	//printfDx(L"m_forwardDir.z:%f\n", m_forwardDir.z);
 	VECTOR lineStart = VGet(m_pos.x, m_pos.y + kSphereRadius / 2, m_pos.z);
 	VECTOR lineEnd = VAdd(lineStart, m_forwardDir);
@@ -170,4 +168,76 @@ void Companion::Draw()
 void Companion::OnAttack()
 {
 
+}
+
+void Companion::UpdateCompanionState()
+{
+	switch (m_companionState)
+	{
+	case Companion::CompanionState::NORMAL:
+	{
+		// “G‚ª‰“‚¢ê‡‚ÍŒ¸‘¬‚µ‚Ä’âŽ~
+		m_vec = VScale(m_vec, kMoveDecRate);
+		break;
+	}
+	case Companion::CompanionState::FOLLOW_PLAYER:
+	{
+		m_dirToPlayer = VNorm(m_companionToPlayer);
+		float targetAngle = atan2f(m_dirToPlayer.x, m_dirToPlayer.z);
+		//targetAngle += DX_PI_F;
+		float diff = targetAngle - m_angleY;
+		if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
+		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+		m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
+
+		if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
+		else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
+
+		if (m_distanceToPlayer > kStopDistance)
+		{
+			m_forwardDir.x = sinf(m_angleY);
+			m_forwardDir.z = cosf(m_angleY);
+			m_vec = VScale(m_forwardDir, kMoveSpeed);
+		}
+		else
+		{
+			m_vec = { 0.0f,0.0f,0.0f };
+		}
+		break;
+	}
+	case Companion::CompanionState::TRACK_ENEMY:
+	{
+		m_dirToEnemy = VNorm(m_companionToEnemy);
+		float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+		//targetAngle += DX_PI_F;
+		float diff = targetAngle - m_angleY;
+		if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
+		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+		m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
+
+		if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
+		else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
+
+		if (m_distanceToEnemy > kStopDistance)
+		{
+			m_forwardDir.x = sinf(m_angleY);
+			m_forwardDir.z = cosf(m_angleY);
+			m_vec = VScale(m_forwardDir, kMoveSpeed);
+		}
+		else
+		{
+			m_vec = { 0.0f,0.0f,0.0f };
+			m_companionState = CompanionState::NORMAL;
+		}
+		break;
+	}
+	case Companion::CompanionState::NORML_ATTACK:
+		break;
+	case Companion::CompanionState::STRONG_ATTACK:
+		break;
+	case Companion::CompanionState::SPECIALSKIL:
+		break;
+	default:
+		break;
+	}
 }
