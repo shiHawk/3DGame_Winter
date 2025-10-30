@@ -31,6 +31,14 @@ namespace
 	constexpr float kComboFinishAttackAnimNo = 41;
 	constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
+	constexpr float kAttackAnimIncrement = 0.5f; // 攻撃アニメーションの再生速度
+
+	constexpr int kAttackPower = 10;
+	constexpr int kStrongAttackPower = 30;
+	constexpr float kAttackDuration = 30.0f;
+	constexpr float kStrongAttackDuration = 40.0f;
+	constexpr float kAttackRange = 60.0f;
+	constexpr float kAttackCoolTime = 40.0f;
 
 	// 線分の長さ
 	constexpr float kForwardLineLength = 100.0f;
@@ -40,6 +48,8 @@ namespace
 	constexpr float kStopDistance = 80.0f;
 	constexpr float kWarpDistance = 800.0f;
 	constexpr float kPostWarpPosZ = 100.0f;
+
+	constexpr float kStrongAttackBulletSpeed = 5.0f; // 弾の速度
 }
 
 Companion::Companion():
@@ -52,9 +62,11 @@ Companion::Companion():
 	m_companionToEnemy({ 0.0f,0.0f,0.0f }),
 	m_companionToPlayer({ 0.0f,0.0f,0.0f }),
 	m_attack(30.0f, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
+	m_strongAttack(30.0f, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
 	m_distanceToEnemy(0.0f),
 	m_distanceToPlayer(0.0f),
-	m_angleY(0.0f)
+	m_angleY(0.0f),
+	m_attackCoolTimer(0.0f)
 {
 }
 
@@ -67,6 +79,7 @@ void Companion::Init()
 	m_pos = kDefaultPos;
 	m_vec = kDefaultVec;
 	m_distanceToEnemy = 0.0f;
+	m_attack.active = false;
 	m_modelHandle = MV1LoadModel(L"Data/model/Mage.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
 	MV1SetRotationXYZ(m_modelHandle,kDefaultDir);
@@ -85,24 +98,28 @@ void Companion::Update()
 	{
 		return;
 	}
-	//printfDx(L"m_companionState:%d\n", m_companionState);
-	UpdateCompanionState();
+	printfDx(L"m_attackCoolTimer:%f\n", m_attackCoolTimer);
 	m_companionToEnemy = VSub(m_enemyPos, m_pos); 
 	m_distanceToEnemy = VSize(m_companionToEnemy);
 	m_companionToPlayer = VSub(m_playerPos, m_pos);
 	m_distanceToPlayer = VSize(m_companionToPlayer);
-	if (m_distanceToEnemy <= kAutoTurnDistance) // 敵に向かって移動する
+	if (m_companionState == CompanionState::NORMAL)
 	{
-		m_companionState = CompanionState::TRACK_ENEMY;
+		if (m_distanceToEnemy <= kAutoTurnDistance) // 敵に向かって移動する
+		{
+			m_companionState = CompanionState::TRACK_ENEMY;
+		}
+		else // プレイヤーに追従する
+		{
+			m_companionState = CompanionState::FOLLOW_PLAYER;
+		}
 	}
-	else // プレイヤーに追従する
+	UpdateCompanionState();
+	if (m_distanceToPlayer > kWarpDistance) // プレイヤーと離れすぎたらプレイヤーの近くにワープする
 	{
+		m_pos = VGet(m_playerPos.x,m_playerPos.y,m_playerPos.z - kPostWarpPosZ);
 		m_companionState = CompanionState::FOLLOW_PLAYER;
 	}
-	if (m_distanceToPlayer > kWarpDistance)
-	{
-		m_pos = VGet(m_playerPos.x,m_playerPos.y,m_playerPos.z- kPostWarpPosZ);
-	 }
 	m_vec.y += kGravity;
 	if (m_pos.y + m_vec.y < 0.0f)
 	{
@@ -134,15 +151,18 @@ void Companion::Update()
 		m_vec.x = 0.0f;
 	}
 
-	if (VSize(VGet(m_vec.x, 0.0f, m_vec.z)) > kMoveThreshold)
+	if (m_companionState != CompanionState::NORMAL_ATTACK)
 	{
-		// 入力がある場合 → 移動アニメーションへ変更
-		ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
-	}
-	else
-	{
-		// 入力がない場合 → 待機アニメーションへ変更
-		ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+		if (VSize(VGet(m_vec.x, 0.0f, m_vec.z)) > kMoveThreshold)
+		{
+			// 入力がある場合 → 移動アニメーションへ変更
+			ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
+		}
+		else
+		{
+			// 入力がない場合 → 待機アニメーションへ変更
+			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+		}
 	}
 	m_pos = nextPos;
 	MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY+DX_PI_F, 0.0f));
@@ -161,17 +181,37 @@ void Companion::Draw()
 	VECTOR lineEnd = VAdd(lineStart, m_forwardDir);
 
 	//DrawSphere3D(m_pos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
+	if (m_attack.active)
+	{
+		DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+	}
 	DrawLine3D(lineStart, lineEnd, kSphereDifColor);
 	MV1DrawModel(m_modelHandle);
 }
 
 void Companion::OnAttack()
 {
+	m_attackPower = kAttackPower;
+	m_attack.dir = VNorm(VGet(sinf(m_angleY ), 0.0f, cosf(m_angleY )));
+	m_attack.active = true;
+	m_attack.pos = VAdd(m_pos, VScale(m_attack.dir, kAttackRange));
+	m_attack.timer = kAttackDuration;
+}
 
+void Companion::OnStrongAttack()
+{
+	m_attackPower = kStrongAttackPower;
+	m_strongAttack.timer = kStrongAttackDuration;
+	m_strongAttack.active = true;
+	m_strongAttack.dir = m_dirToEnemy;
 }
 
 void Companion::UpdateCompanionState()
 {
+	if (m_attackCoolTimer > 0.0f)
+	{
+		m_attackCoolTimer--;
+	}
 	switch (m_companionState)
 	{
 	case Companion::CompanionState::NORMAL:
@@ -202,6 +242,7 @@ void Companion::UpdateCompanionState()
 		else
 		{
 			m_vec = { 0.0f,0.0f,0.0f };
+			m_companionState = CompanionState::NORMAL;
 		}
 		break;
 	}
@@ -227,13 +268,42 @@ void Companion::UpdateCompanionState()
 		else
 		{
 			m_vec = { 0.0f,0.0f,0.0f };
-			m_companionState = CompanionState::NORMAL;
+			if (m_attackCoolTimer <= 0.0f) // クールタイムが終わっているかチェック
+			{
+				OnAttack();
+				m_companionState = CompanionState::NORMAL_ATTACK;
+			}
+			else
+			{
+				m_companionState = CompanionState::NORMAL;
+			}
 		}
 		break;
 	}
-	case Companion::CompanionState::NORML_ATTACK:
+	case Companion::CompanionState::NORMAL_ATTACK:
+		if (m_attack.active)
+		{
+			m_attack.timer--;
+			ChangeAnim(m_modelHandle, kAttackAnimNo, false, kAttackAnimIncrement);
+			if (m_attack.timer <= 0.0f)
+			{
+				m_attack.active = false;
+				m_companionState = CompanionState::NORMAL;
+				m_attackCoolTimer = kAttackCoolTime;
+			}
+		}
 		break;
 	case Companion::CompanionState::STRONG_ATTACK:
+		if (m_strongAttack.active)
+		{
+			m_strongAttack.timer--;
+			m_strongAttack.dir = m_dirToEnemy;
+			if (m_strongAttack.timer <= 0.0f)
+			{
+				m_strongAttack.active = false;
+				m_companionState = CompanionState::NORMAL;
+			}
+		}
 		break;
 	case Companion::CompanionState::SPECIALSKIL:
 		break;

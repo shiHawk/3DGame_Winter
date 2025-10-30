@@ -31,7 +31,7 @@ namespace
     constexpr float kWallOffset = 0.001f;
 
     // äeçUåÇÇÃçUåÇóÕ
-    constexpr int kAttackPower = 10;
+    constexpr int kAttackPower = 15;
     constexpr int kStrongAttackPower = 30;
     constexpr int kComboFinishAttackPower = 45;
     constexpr int kSpecialSkilPower = 150;
@@ -128,7 +128,7 @@ void Player::Update()
     m_moveInput = HandleInput();
     UpdatePlayerState();
     //printfDx(L"m_playerState:%d\n", m_playerState);
-    printfDx(L"m_comboWindowTimer:%f\n", m_comboWindowTimer);
+    //printfDx(L"m_comboWindowTimer:%f\n", m_comboWindowTimer);
     if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
     {
         m_vec.y = kJumpPower;
