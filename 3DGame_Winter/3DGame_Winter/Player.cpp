@@ -127,7 +127,7 @@ void Player::Update()
 {
     m_moveInput = HandleInput();
     UpdatePlayerState();
-    //printfDx(L"m_playerState:%d\n", m_playerState);
+    //printfDx(L"m_isJump:%d\n", m_isJump);
     //printfDx(L"m_comboWindowTimer:%f\n", m_comboWindowTimer);
     if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
     {
@@ -409,19 +409,28 @@ void Player::UpdateMovement(const VECTOR& moveDir)
             else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
         }
     }
+    bool isAerialAttack = m_isInAttackSequence && m_isJump;
     // 移動処理
     // isLockOn の状態に関わらずスティック入力に応じて移動・減速を制御する
-    if (VSize(moveDir) > 0.0f)
+    if (isAerialAttack)
     {
-        // 5.移動ベクトルを更新
-        m_vec.x = moveDir.x * kMoveSpeed;
-        m_vec.z = moveDir.z * kMoveSpeed;
+        m_vec.x = 0.0f;
+        m_vec.z = 0.0f;
     }
-    else // 入力がない場合
+    else
     {
-        // 減速処理
-        m_vec.x *= kMoveDecRate;
-        m_vec.z *= kMoveDecRate;
+        if (VSize(moveDir) > 0.0f)
+        {
+            // 5.移動ベクトルを更新
+            m_vec.x = moveDir.x * kMoveSpeed;
+            m_vec.z = moveDir.z * kMoveSpeed;
+        }
+        else // 入力がない場合
+        {
+            // 減速処理
+            m_vec.x *= kMoveDecRate;
+            m_vec.z *= kMoveDecRate;
+        }
     }
 }
 

@@ -15,6 +15,7 @@ public:
 	void SetPlayerPos(VECTOR playerPos) { m_playerPos = playerPos; };
 	virtual void OnAttack() override;
 	void OnStrongAttack();
+	void OnSpecialSkil();
 	void UpdateCompanionState();
 private:
 	enum class CompanionState
@@ -36,9 +37,12 @@ private:
 	VECTOR m_companionToPlayer;
 	AttackSphere m_attack;
 	AttackSphere m_strongAttack;
+	AttackSphere m_specialSkil;
 	float m_distanceToEnemy;
 	float m_distanceToPlayer;
 	float m_angleY;
+	float m_specialGauge;
 	float m_attackCoolTimer;
+	bool m_isInAttackSequence;
 };
 
