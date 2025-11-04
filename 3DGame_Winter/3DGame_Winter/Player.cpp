@@ -76,6 +76,7 @@ namespace
 }
 
 Player::Player():
+    m_controlMode(ControlMode::PLAYER),
     m_playerState(PlayerState::NORMAL),
     m_angleY(0.0f),
     m_isJump(false),

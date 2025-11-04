@@ -27,7 +27,7 @@ namespace
 	constexpr int kIdleAnimNo = 1;
 	constexpr int kWalkAnimNo = 3;
 	constexpr int kAttackAnimNo = 31;
-	constexpr int kStrongAttackAnimNo = 61;
+	constexpr int kStrongAttackAnimNo = 60;
 	constexpr int kSpecialSkilAnimNo = 62;
 	constexpr float kComboFinishAttackAnimNo = 41;
 	constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
@@ -53,11 +53,14 @@ namespace
 	constexpr float kBackLineLength = 540.0f;
 	constexpr float kAutoTurnDistance = 300.0f;
 
-	constexpr float kStopDistance = 80.0f;
+	constexpr float kStopDistance = 160.0f; // プレイヤーや敵への追跡を止める距離
+	constexpr float kLongRangeAttackDistance = 400.0f;
+	constexpr float kCloseRangeAttackDistance = kStopDistance * 0.5f; // 近距離攻撃のみを行う距離
+	constexpr float kEnemyLeashDistance = 600.0f; // 敵への追跡を諦める距離
 	constexpr float kWarpDistance = 800.0f;
 	constexpr float kPostWarpPosZ = 100.0f;
 
-	constexpr float kStrongAttackBulletSpeed = 3.0f; // 弾の速度
+	constexpr float kStrongAttackBulletSpeed = 6.0f; // 弾の速度
 }
 
 Companion::Companion():
@@ -111,14 +114,14 @@ void Companion::Update()
 	{
 		return;
 	}
-	//printfDx(L"m_attackCoolTimer:%f\n", m_attackCoolTimer);
+	printfDx(L"m_distanceToEnemy:%f\n", m_distanceToEnemy);
 	m_companionToEnemy = VSub(m_enemyPos, m_pos);
 	m_distanceToEnemy = VSize(m_companionToEnemy);
 	m_companionToPlayer = VSub(m_playerPos, m_pos);
 	m_distanceToPlayer = VSize(m_companionToPlayer);
 	if (m_companionState == CompanionState::NORMAL)
 	{
-		if (m_distanceToEnemy <= kAutoTurnDistance) // 敵に向かって移動する
+		if (m_distanceToEnemy <= kEnemyLeashDistance) // 敵に向かって移動する
 		{
 			m_companionState = CompanionState::TRACK_ENEMY;
 		}
@@ -228,7 +231,7 @@ void Companion::OnStrongAttack()
 	m_strongAttack.dir = VNorm(m_dirToEnemy);
 	VECTOR forwardVec = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
 	m_strongAttack.pos = VAdd(m_pos,VScale(forwardVec,kSphereRadius*2.0f));
-	m_strongAttack.pos.y = m_pos.y + kSpecialSkilRadius;
+	m_strongAttack.pos.y = m_pos.y;
 }
 
 void Companion::OnSpecialSkil()
@@ -256,6 +259,11 @@ void Companion::UpdateCompanionState()
 	}
 	case Companion::CompanionState::FOLLOW_PLAYER:
 	{
+		if (m_distanceToEnemy <= kEnemyLeashDistance) // プレイヤーの追従中に射程内に敵が入ったら敵の追跡に移行する
+		{
+			m_companionState = CompanionState::TRACK_ENEMY;
+			break; // このフレームでのFOLLOW_PLAYERの処理は中断
+		}
 		m_dirToPlayer = VNorm(m_companionToPlayer);
 		float targetAngle = atan2f(m_dirToPlayer.x, m_dirToPlayer.z);
 		//targetAngle += DX_PI_F;
@@ -292,23 +300,37 @@ void Companion::UpdateCompanionState()
 		if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
 		else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
 
-		if (m_distanceToEnemy > kStopDistance) // コンパニオンと敵の距離がkStopDistance以下になるまで追跡
+		if (m_distanceToEnemy > kEnemyLeashDistance) // kEnemyLeashDistanceより敵が離れたら追跡をやめる
+		{
+			m_vec = { 0.0f,0.0f,0.0f };
+			m_companionState = CompanionState::FOLLOW_PLAYER;
+		}
+		else if (m_distanceToEnemy > kLongRangeAttackDistance) // 遠距離攻撃の射程に入るまで追跡する
 		{
 			m_forwardDir.x = sinf(m_angleY);
 			m_forwardDir.z = cosf(m_angleY);
 			m_vec = VScale(m_forwardDir, kMoveSpeed);
 		}
-		else // コンパニオンと敵の距離がkStopDistance以下になったら
+		else if (m_distanceToEnemy > kCloseRangeAttackDistance) // 近距離攻撃の範囲に近づくまで遠距離攻撃
+		{
+			m_vec = { 0.0f,0.0f,0.0f }; // 移動を停止
+			if (m_attackCoolTimer <= 0.0f) // クールタイムが終わっているかチェック
+			{
+				OnStrongAttack();
+				m_companionState = CompanionState::STRONG_ATTACK;
+			}
+			else
+			{
+				m_companionState = CompanionState::NORMAL;
+			}
+		}
+		else
 		{
 			m_vec = { 0.0f,0.0f,0.0f }; // 移動を停止
 			if (m_attackCoolTimer <= 0.0f) // クールタイムが終わっているかチェック
 			{
 				OnAttack();
 				m_companionState = CompanionState::NORMAL_ATTACK;
-				/*OnStrongAttack();
-				m_companionState = CompanionState::STRONG_ATTACK;*/
-				/*OnSpecialSkil();
-				m_companionState = CompanionState::SPECIALSKIL;*/
 			}
 			else
 			{

@@ -3,6 +3,11 @@
 #include <memory>
 #include "CharacterBase.h"
 class Camera;
+enum class ControlMode
+{
+	PLAYER,
+	COMPANION
+};
 class Player:public CharacterBase
 {
 public:
@@ -18,8 +23,9 @@ public:
 	void OnCombFinishAttack();
 	void OnSpecialSkil();
 	void OnAvoidance();
-	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; };
+	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; }
 	VECTOR GetPlayerDir() { return m_forwardDir; }
+	void SetControlMode(ControlMode mode) { m_controlMode = mode; }
 private:
 	enum class PlayerState
 	{
@@ -33,6 +39,8 @@ private:
 		COMBO_WINDOW,
 		SPECIALSKIL
 	};
+	
+	ControlMode m_controlMode;
 	PlayerState m_playerState;
 	VECTOR HandleInput();
 	void UpdateMovement(const VECTOR& moveDir);
