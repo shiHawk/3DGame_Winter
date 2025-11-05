@@ -3,11 +3,7 @@
 #include <memory>
 #include "CharacterBase.h"
 class Camera;
-enum class ControlMode
-{
-	PLAYER,
-	COMPANION
-};
+
 class Player:public CharacterBase
 {
 public:
@@ -58,6 +54,7 @@ private:
 	VECTOR m_dirToEnemy;
 	VECTOR m_moveInput; 
 	float m_distanceToEnemy; // エネミーまでの距離の長さ
+	float m_distanceToFollowTarget;
 	bool m_isInAttackSequence; // プレイヤーが攻撃中か方向補正中か
 	float m_avoidanceTimer; // 回避時間
 	bool m_isAvoidanceFlag; // 回避のフラグ
@@ -65,7 +62,21 @@ private:
 	float m_comboWindowTimer; // コンボの受付時間
 	int m_specialGauge; // 必殺ゲージ
 	bool m_isSpecialSkilFlag; // 必殺技のフラグ
+	bool m_aiWillDo3HitCombo; // AIが3コンボ攻撃をするかどうかのフラグ
+
+	// ステートごとのハンドラ関数
+	void HandleStateNormal(bool aiWantsToAttack);
+	void HandleStateAttacking();
+	void HandleStateAttacking2();
+	void HandleStateComboWindow();
+	void HandleStateSpecialSkil();
+
+	// AI / プレイヤーの分岐を持つハンドラ
+	void HandleAIComboWindow();
+	void HandlePlayerComboWindow();
 	void RotatingToAttackAndAttack(void (Player::* attackFunc)(), PlayerState nextState);
+	// 攻撃開始の共通処理（ヘルパー関数）
+	void TryStartAttack(void(Player::* onAttackFunc)(), PlayerState rotationState, PlayerState attackState);
 	void UpdateAttackState(AttackSphere& attackData, int animNo, float animInc, PlayerState nextState);
 };
 

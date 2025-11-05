@@ -55,7 +55,7 @@ namespace
 
 	constexpr float kStopDistance = 160.0f; // ƒvƒŒƒCƒ„[‚â“G‚Ö‚Ì’ÇÕ‚ðŽ~‚ß‚é‹——£
 	constexpr float kLongRangeAttackDistance = 400.0f;
-	constexpr float kCloseRangeAttackDistance = kStopDistance * 0.5f; // ‹ß‹——£UŒ‚‚Ì‚Ý‚ðs‚¤‹——£
+	constexpr float kCloseRangeAttackDistance = kStopDistance * 0.7f; // ‹ß‹——£UŒ‚‚Ì‚Ý‚ðs‚¤‹——£
 	constexpr float kEnemyLeashDistance = 600.0f; // “G‚Ö‚Ì’ÇÕ‚ð’ú‚ß‚é‹——£
 	constexpr float kWarpDistance = 800.0f;
 	constexpr float kPostWarpPosZ = 100.0f;
@@ -64,6 +64,7 @@ namespace
 }
 
 Companion::Companion():
+	m_controlMode(ControlMode::COMPANION),
 	m_companionState(CompanionState::NORMAL),
 	m_forwardDir({0.0f,0.0f,0.0f}),
 	m_enemyPos({ 0.0f,0.0f,0.0f }),
@@ -197,7 +198,6 @@ void Companion::Draw()
 	VECTOR lineStart = VGet(m_pos.x, m_pos.y + kSphereRadius *0.5f, m_pos.z);
 	VECTOR lineEnd = VAdd(lineStart, m_forwardDir);
 
-	//DrawSphere3D(m_pos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
 	if (m_attack.active)
 	{
 		DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
@@ -266,7 +266,6 @@ void Companion::UpdateCompanionState()
 		}
 		m_dirToPlayer = VNorm(m_companionToPlayer);
 		float targetAngle = atan2f(m_dirToPlayer.x, m_dirToPlayer.z);
-		//targetAngle += DX_PI_F;
 		float diff = targetAngle - m_angleY;
 		if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
 		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
@@ -370,15 +369,13 @@ void Companion::UpdateCompanionState()
 		if (m_specialSkil.active)
 		{
 			m_specialSkil.timer--;
-			ChangeAnim(m_modelHandle, kSpecialSkilAnimNo, false, kSpecialSkilAnimIncriment);
+			ChangeAnim(m_modelHandle, kSpecialSkilAnimNo, false, kSpecialSkilAnimIncriment); 
 			if (m_specialSkil.timer < 0.0f)
 			{
 				m_specialSkil.active = false;
 				m_companionState = CompanionState::NORMAL;
 			}
 		}
-		break;
-	default:
 		break;
 	}
 }

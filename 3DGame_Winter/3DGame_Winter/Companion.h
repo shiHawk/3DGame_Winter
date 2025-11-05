@@ -2,6 +2,7 @@
 #include <memory>
 #include "DxLib.h"
 #include "CharacterBase.h"
+
 class Companion :public CharacterBase
 {
 public:
@@ -27,6 +28,7 @@ private:
 		STRONG_ATTACK,
 		SPECIALSKIL
 	};
+	ControlMode m_controlMode;
 	CompanionState m_companionState;
 	VECTOR m_forwardDir;
 	VECTOR m_enemyPos;

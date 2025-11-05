@@ -11,6 +11,11 @@ public:
 	VECTOR GetPos() { return m_pos; }
 protected:
 	virtual void OnAttack() abstract;
+	enum class ControlMode
+	{
+		PLAYER,
+		COMPANION
+	};
 	VECTOR m_pos;
 	VECTOR m_vec;
 	int m_hp;

@@ -51,6 +51,7 @@ SceneBase* GameScene::Update()
 	m_pNormalEnemy->Update();
 	m_pCompanion->Update();
 	m_pPlayer->SetEnemyPos(m_pNormalEnemy->GetPos());
+	m_pPlayer->SetFollowTargetPos(m_pCompanion->GetPos());
 	m_pCamera->SetPlayerPosition(m_pPlayer->GetPos());
 	m_pCamera->SetLockOnPosition(m_pNormalEnemy->GetPos());
 	m_pCamera->SetPlayerDir(m_pPlayer->GetPlayerDir());
