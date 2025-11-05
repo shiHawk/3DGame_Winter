@@ -26,6 +26,7 @@ public:
 	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; }
 	VECTOR GetPlayerDir() { return m_forwardDir; }
 	void SetControlMode(ControlMode mode) { m_controlMode = mode; }
+	void SetFollowTargetPos(VECTOR targetPos) { m_followTargetPos = targetPos; } // AI操作時に追従する対象（＝プレイヤー）の座標をセットする
 private:
 	enum class PlayerState
 	{
@@ -39,7 +40,6 @@ private:
 		COMBO_WINDOW,
 		SPECIALSKIL
 	};
-	
 	ControlMode m_controlMode;
 	PlayerState m_playerState;
 	VECTOR HandleInput();
@@ -50,6 +50,7 @@ private:
 	bool m_isJump;
 	VECTOR m_forwardDir;
 	VECTOR m_enemyPos;
+	VECTOR m_followTargetPos; // AI時に追従する対象（プレイヤー）の座標
 	AttackSphere m_attack;
 	AttackSphere m_attack2;
 	AttackSphere m_comboFinish;
@@ -64,5 +65,7 @@ private:
 	float m_comboWindowTimer; // コンボの受付時間
 	int m_specialGauge; // 必殺ゲージ
 	bool m_isSpecialSkilFlag; // 必殺技のフラグ
+	void RotatingToAttackAndAttack(void (Player::* attackFunc)(), PlayerState nextState);
+	void UpdateAttackState(AttackSphere& attackData, int animNo, float animInc, PlayerState nextState);
 };
 

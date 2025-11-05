@@ -64,7 +64,7 @@ namespace
     constexpr int kWalkAnimNo = 3;
     constexpr int kAttackAnimNo = 31;
     constexpr int kStrongAttackAnimNo = 40;
-    constexpr float kComboFinishAttackAnimNo = 41;
+    constexpr int kComboFinishAttackAnimNo = 41;
     constexpr int kSpecialSkilAnimNo = 38; // 必殺技アニメーション
     constexpr int kAvoidanceAnimNo = 15;
     constexpr float kAnimIncrement = 0.4f; // アニメーションの再生速度
@@ -73,6 +73,10 @@ namespace
     constexpr float kAttackAnimIncrement = 0.7f; // 攻撃アニメーションの再生速度
     constexpr float kStrongAttackAnimIncrement = 0.9f; // 強攻撃アニメーションの再生速度
     constexpr float kComboFinishAttackAnimIncrement = 0.7f; 
+
+    constexpr float kEnemyLeashDistance = 500.0f; // これ以上敵から離れたら、追跡をやめてプレイヤーの元に戻る距離
+    constexpr float kNearAttackDistance = kAttackRange * 1.5f; // 近距離攻撃のために、敵にこの距離まで近づく (kAttackRange より少し広め)
+    constexpr float kFollowTargetDistance = 160.0f; // 追従対象（プレイヤー）の、この距離まで近づいたら停止する
 }
 
 Player::Player():
@@ -82,6 +86,7 @@ Player::Player():
     m_isJump(false),
     m_forwardDir({0.0f,0.0f,0.0f}),
     m_enemyPos({0.0f,0.0f,0.0f}),
+    m_followTargetPos(0.0f,0.0f,0.0f),
     m_attack(kAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
     m_attack2(kStrongAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
     m_comboFinish(kComboFinishAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
@@ -129,7 +134,7 @@ void Player::Update()
     m_moveInput = HandleInput();
     UpdatePlayerState();
     //printfDx(L"m_isJump:%d\n", m_isJump);
-    //printfDx(L"m_comboWindowTimer:%f\n", m_comboWindowTimer);
+    printfDx(L"m_comboWindowTimer:%f\n", m_comboWindowTimer);
     if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
     {
         m_vec.y = kJumpPower;
@@ -323,6 +328,45 @@ void Player::OnAvoidance()
 
 VECTOR Player::HandleInput()
 {
+    if (m_controlMode == ControlMode::COMPANION)
+    {
+        // 敵との距離を計算し、メンバー変数に保存
+        m_dirToEnemy = VSub(m_enemyPos, m_pos);
+        m_dirToEnemy.y = 0.0f; // 高低差は無視
+        m_distanceToEnemy = VSize(m_dirToEnemy);
+
+        // 追従対象（プレイヤー）との距離を計算
+        VECTOR dirToTarget = VSub(m_followTargetPos, m_pos);
+        dirToTarget.y = 0.0f;
+        float distanceToTarget = VSize(dirToTarget);
+
+        //距離に基づいた移動判断
+        // 敵が非常に遠い(kEnemyLeashDistance)場合、プレイヤーを追従する
+        if (m_distanceToEnemy > kEnemyLeashDistance)
+        {
+            // プレイヤーを追従
+            if (distanceToTarget > kFollowTargetDistance) // プレイヤーから離れていたら近づく
+            {
+                return VNorm(dirToTarget);
+            }
+            else
+            {
+                return VGet(0.0f, 0.0f, 0.0f); // プレイヤーの近くで停止
+            }
+        }
+        // 敵が近距離攻撃の間合い (kNearAttackDistance) の外にいる場合
+        else if (m_distanceToEnemy > kNearAttackDistance)
+        {
+            // 敵を追跡する
+            return VNorm(m_dirToEnemy); // 正規化した敵への方向を返す
+        }
+        else
+        {
+            // 敵が近距離攻撃の間合いに入った場合、停止する
+            // (攻撃の実行は UpdatePlayerState が担当)
+            return VGet(0.0f, 0.0f, 0.0f);
+        }
+    }
     // アナログスティックの入力を取得
     int stickX = 0;
     int stickY = 0;
@@ -437,12 +481,23 @@ void Player::UpdateMovement(const VECTOR& moveDir)
 
 void Player::UpdatePlayerState()
 {
+    // AI用の攻撃開始トリガー
+    bool aiWantsToAttack = false;
+    if (m_controlMode == ControlMode::COMPANION && m_playerState == PlayerState::NORMAL)
+    {
+        // HandleInput で計算済みの距離 m_distanceToEnemy を使う
+        // 敵が攻撃範囲内 (kNearAttackDistance) にいたら攻撃開始
+        if (m_distanceToEnemy <= kNearAttackDistance && !m_attack.active)
+        {
+            aiWantsToAttack = true;
+        }
+    }
     switch (m_playerState)
     {
     case Player::PlayerState::NORMAL:
         UpdateMovement(m_moveInput);
         m_comboStep = 0; // 通常時はコンボ数をリセット
-        if (Pad::isTrigger(PAD_INPUT_4) && !m_attack.active)
+        if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_4) && !m_attack.active)
         {
             m_comboStep = 1; // コンボ1段階目
             m_dirToEnemy = VSub(m_enemyPos, m_pos); // 攻撃ボタンを押したら敵との距離を測る
@@ -454,6 +509,19 @@ void Player::UpdatePlayerState()
             else // 距離が遠いなら方向転換を行わず即攻撃
             {
                 OnAttack(); // 攻撃実行
+                m_playerState = PlayerState::ATTACKING;
+            }
+        }
+        else if (m_controlMode == ControlMode::COMPANION && aiWantsToAttack)
+        {
+            m_comboStep = 1;
+            if (m_distanceToEnemy <= kAutoTurnDistance)
+            {
+                m_playerState = PlayerState::ROTATING_TO_ATTACK;
+            }
+            else
+            {
+                OnAttack();
                 m_playerState = PlayerState::ATTACKING;
             }
         }
@@ -475,44 +543,12 @@ void Player::UpdatePlayerState()
         break;
     case Player::PlayerState::ROTATING_TO_ATTACK:
     {
-        UpdateMovement(m_moveInput);
-        // 敵の方向を計算
-        m_dirToEnemy = VSub(m_enemyPos, m_pos);
-        float targetAngle = atan2f(-m_dirToEnemy.x, -m_dirToEnemy.z);
-        float diff = targetAngle - m_angleY;
-
-        // 角度の差を正規化 
-        if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
-        else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
-
-        // 角度の差がごくわずかになったら、攻撃を出す
-        if (std::abs(diff) < kAngleThreshold)
-        {
-            m_angleY = targetAngle; // 最後に角度をぴったり合わせる
-            OnAttack(); // 攻撃実行
-            m_playerState = PlayerState::ATTACKING; // 攻撃状態へ移行
-        }
+        RotatingToAttackAndAttack(&Player::OnAttack,PlayerState::ATTACKING);
         break;
     }
     case Player::PlayerState::ROTATING_TO_ATTACK2:
     {
-        UpdateMovement(m_moveInput);
-        // 敵の方向を計算
-        m_dirToEnemy = VSub(m_enemyPos, m_pos);
-        float targetAngle = atan2f(-m_dirToEnemy.x, -m_dirToEnemy.z);
-        float diff = targetAngle - m_angleY;
-
-        // 角度の差を正規化 
-        if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
-        else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
-
-        // 角度の差がごくわずかになったら、攻撃を出す
-        if (std::abs(diff) < kAngleThreshold)
-        {
-            m_angleY = targetAngle; // 最後に角度をぴったり合わせる
-            OnAttack2(); // 攻撃実行
-            m_playerState = PlayerState::ATTACKING2; // 攻撃状態へ移行
-        }
+        RotatingToAttackAndAttack(&Player::OnAttack2, PlayerState::ATTACKING2);
         break;
     }
     case Player::PlayerState::ATTACKING:
@@ -536,19 +572,7 @@ void Player::UpdatePlayerState()
             }
             break; // ATTACKING の処理を抜ける
         }
-        // 攻撃タイマーを進める
-        if (m_attack.active)
-        {
-            m_attack.timer--;
-            ChangeAnim(m_modelHandle, kAttackAnimNo, false, kAttackAnimIncrement);
-            if (m_attack.timer < 0.0f)
-            {
-                m_attack.active = false;
-                // NORMALに戻さず、コンボ受付状態 (WINDOW) へ
-                m_playerState = PlayerState::COMBO_WINDOW;
-                m_comboWindowTimer = kComboWindowTime;
-            }
-        }
+        UpdateAttackState(m_attack, kAttackAnimNo, kAttackAnimIncrement, PlayerState::COMBO_WINDOW);// NORMALに戻さず、コンボ受付状態 (WINDOW) へ
         break;
     case Player::PlayerState::ATTACKING2:
         UpdateMovement(m_moveInput);
@@ -572,60 +596,18 @@ void Player::UpdatePlayerState()
             }
             break; // ATTACKING2 の処理を抜ける
         }
-        // 攻撃タイマーを進める
-        if (m_attack2.active)
-        {
-            m_attack2.timer--;
-            ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, kStrongAttackAnimIncrement);
-            if (m_attack2.timer < 0.0f)
-            {
-                m_attack2.active = false;
-                // m_comboStep が 2 ならコンボ受付へ、それ以外 (単発) なら NORMAL へ
-                if (m_comboStep == 2)
-                {
-                    m_playerState = PlayerState::COMBO_WINDOW;
-                    m_comboWindowTimer = kComboWindowTime;
-                }
-                else
-                {
-                    m_playerState = PlayerState::NORMAL;
-                    m_comboStep = 0; // コンボ終了
-                }
-            }
-        }
+        // m_comboStep が 2 ならコンボ受付へ、それ以外 (単発) なら NORMAL へ
+        UpdateAttackState(m_attack2, kStrongAttackAnimNo, kStrongAttackAnimIncrement, (m_comboStep == 2) ? PlayerState::COMBO_WINDOW : PlayerState::NORMAL);
         break;
     case Player::PlayerState::ROTATING_TO_COMBOFINISH:
     {
-        UpdateMovement(m_moveInput);
-        m_dirToEnemy = VSub(m_enemyPos, m_pos);
-        float targetAngle = atan2f(-m_dirToEnemy.x, -m_dirToEnemy.z);
-        float diff = targetAngle - m_angleY;
-
-        if (diff > DX_PI_F)     diff -= 2.0f * DX_PI_F;
-        else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
-
-        if (std::abs(diff) < kAngleThreshold)
-        {
-            m_angleY = targetAngle;
-            OnCombFinishAttack(); // 3段目攻撃を実行
-            m_playerState = PlayerState::ATTACKING_COMBOFINISH;
-        }
+        RotatingToAttackAndAttack(&Player::OnCombFinishAttack, PlayerState::ATTACKING_COMBOFINISH);
         break;
     }
     case Player::PlayerState::ATTACKING_COMBOFINISH:
         UpdateMovement(m_moveInput);
         // この攻撃からは連携しない
-        if (m_comboFinish.active)
-        {
-            m_comboFinish.timer--;
-            ChangeAnim(m_modelHandle, kComboFinishAttackAnimNo, false, kComboFinishAttackAnimIncrement); // 3段目アニメ
-            if (m_comboFinish.timer < 0.0f)
-            {
-                m_comboFinish.active = false;
-                m_playerState = PlayerState::NORMAL; // 攻撃が終わったら通常状態へ
-                m_comboStep = 0; // コンボ終了
-            }
-        }
+        UpdateAttackState(m_comboFinish, kComboFinishAttackAnimNo, kComboFinishAttackAnimIncrement, PlayerState::NORMAL); // 攻撃が終わったら通常状態へ
         break;
     case Player::PlayerState::COMBO_WINDOW:
         UpdateMovement(m_moveInput);
@@ -682,5 +664,42 @@ void Player::UpdatePlayerState()
             }
         }
         break;
+    }
+}
+
+void Player::RotatingToAttackAndAttack(void(Player::* attackFunc)(), PlayerState nextState)
+{
+    UpdateMovement(m_moveInput);
+    // 敵の方向を計算
+    m_dirToEnemy = VSub(m_enemyPos, m_pos);
+    float targetAngle = atan2f(-m_dirToEnemy.x, -m_dirToEnemy.z);
+    float diff = targetAngle - m_angleY;
+
+    // 角度の差を正規化 
+    if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
+    else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+
+    // 角度の差がごくわずかになったら、攻撃を出す
+    if (std::abs(diff) < kAngleThreshold)
+    {
+        m_angleY = targetAngle; // 最後に角度をぴったり合わせる
+        (this->*attackFunc)(); // ← メンバ関数ポインタ呼び出し
+        m_playerState = nextState; // 攻撃状態へ移行
+    }
+}
+
+void Player::UpdateAttackState(AttackSphere& attackData, int animNo, float animInc, PlayerState nextState)
+{
+    // 攻撃タイマーを進める
+    if (attackData.active)
+    {
+        attackData.timer--;
+        ChangeAnim(m_modelHandle, animNo, false, animInc);
+        if (attackData.timer < 0.0f)
+        {
+            attackData.active = false;
+            m_playerState = nextState;
+            m_comboWindowTimer = kComboWindowTime; // コンボ受付時間を設定
+        }
     }
 }

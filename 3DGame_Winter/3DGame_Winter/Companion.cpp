@@ -114,7 +114,7 @@ void Companion::Update()
 	{
 		return;
 	}
-	printfDx(L"m_distanceToEnemy:%f\n", m_distanceToEnemy);
+	//printfDx(L"m_distanceToEnemy:%f\n", m_distanceToEnemy);
 	m_companionToEnemy = VSub(m_enemyPos, m_pos);
 	m_distanceToEnemy = VSize(m_companionToEnemy);
 	m_companionToPlayer = VSub(m_playerPos, m_pos);
@@ -324,7 +324,7 @@ void Companion::UpdateCompanionState()
 				m_companionState = CompanionState::NORMAL;
 			}
 		}
-		else
+		else // 近距離攻撃の範囲に入ったら近距離攻撃
 		{
 			m_vec = { 0.0f,0.0f,0.0f }; // 移動を停止
 			if (m_attackCoolTimer <= 0.0f) // クールタイムが終わっているかチェック
