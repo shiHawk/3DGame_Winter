@@ -61,6 +61,7 @@ namespace
 	constexpr float kPostWarpPosZ = 100.0f;
 
 	constexpr float kStrongAttackBulletSpeed = 6.0f; // 弾の速度
+	constexpr double kAnalogDeadZone = 0.25; // アナログスティックのデッドゾーン
 }
 
 Companion::Companion():
@@ -80,8 +81,7 @@ Companion::Companion():
 	m_distanceToPlayer(0.0f),
 	m_angleY(0.0f),
 	m_specialGauge(0.0f),
-	m_attackCoolTimer(0.0f),
-	m_isInAttackSequence(false)
+	m_attackCoolTimer(0.0f)
 {
 }
 
@@ -89,8 +89,9 @@ Companion::~Companion()
 {
 }
 
-void Companion::Init()
+void Companion::Init(std::shared_ptr<Camera> pCamera)
 {
+	m_pCamera = pCamera;
 	m_pos = kDefaultPos;
 	m_vec = kDefaultVec;
 	m_distanceToEnemy = 0.0f;
@@ -116,6 +117,31 @@ void Companion::Update()
 		return;
 	}
 	//printfDx(L"m_distanceToEnemy:%f\n", m_distanceToEnemy);
+	if (m_controlMode == ControlMode::PLAYER)
+	{
+		m_moveInput = HandleInput();
+		UpdatePlayerControlState();
+	}
+	else
+	{
+		UpdateAIState();
+	}
+
+	m_isInAttackSequence = m_companionState != CompanionState::NORMAL && m_companionState != CompanionState::FOLLOW_PLAYER
+						 && m_companionState != CompanionState::TRACK_ENEMY;
+
+	if (m_distanceToPlayer > kWarpDistance) // プレイヤーと離れすぎたらプレイヤーの近くにワープする
+	{
+		m_pos = VGet(m_playerPos.x, m_playerPos.y, m_playerPos.z - kPostWarpPosZ);
+		m_companionState = CompanionState::FOLLOW_PLAYER;
+	}
+
+	m_vec.y += kGravity;
+	if (m_pos.y + m_vec.y < 0.0f)
+	{
+		m_pos.y = 0.0f;   // 地面に固定
+		m_vec.y = 0.0f;   // 縦速度をゼロ
+	}
 	m_companionToEnemy = VSub(m_enemyPos, m_pos);
 	m_distanceToEnemy = VSize(m_companionToEnemy);
 	m_companionToPlayer = VSub(m_playerPos, m_pos);
@@ -131,20 +157,7 @@ void Companion::Update()
 			m_companionState = CompanionState::FOLLOW_PLAYER;
 		}
 	}
-	UpdateCompanionState();
-	m_isInAttackSequence = m_companionState != CompanionState::NORMAL && m_companionState != CompanionState::FOLLOW_PLAYER
-						&& m_companionState != CompanionState::TRACK_ENEMY;
-	if (m_distanceToPlayer > kWarpDistance) // プレイヤーと離れすぎたらプレイヤーの近くにワープする
-	{
-		m_pos = VGet(m_playerPos.x,m_playerPos.y,m_playerPos.z - kPostWarpPosZ);
-		m_companionState = CompanionState::FOLLOW_PLAYER;
-	}
-	m_vec.y += kGravity;
-	if (m_pos.y + m_vec.y < 0.0f)
-	{
-		m_pos.y = 0.0f;   // 地面に固定
-		m_vec.y = 0.0f;   // 縦速度をゼロ
-	}
+	
 	VECTOR nextPos = VAdd(m_pos, m_vec); // 仮の次の位置
 	// Z方向(前後)制限
 	if (nextPos.z >= kBackLimit - kWallOffset)
@@ -243,7 +256,7 @@ void Companion::OnSpecialSkil()
 	m_specialSkil.timer = kSpecialSkilDuration;
 }
 
-void Companion::UpdateCompanionState()
+void Companion::UpdateAIState()
 {
 	if (m_attackCoolTimer > 0.0f)
 	{
@@ -378,4 +391,170 @@ void Companion::UpdateCompanionState()
 		}
 		break;
 	}
+}
+
+void Companion::UpdatePlayerControlState()
+{
+	if (m_attackCoolTimer > 0.0f)
+	{
+		m_attackCoolTimer--;
+	}
+	// AI用のステートはプレイヤー操作時はNORMALとして扱う
+	if (m_companionState == CompanionState::FOLLOW_PLAYER || m_companionState == CompanionState::TRACK_ENEMY)
+	{
+		m_companionState == CompanionState::NORMAL;
+	}
+
+	switch (m_companionState)
+	{
+	case Companion::CompanionState::NORMAL:
+		UpdateMovement(m_moveInput); // 移動処理
+		if (m_attackCoolTimer > 0.0f)
+		{
+			if (Pad::isTrigger(PAD_INPUT_4))
+			{
+				OnAttack();
+				m_companionState = CompanionState::NORMAL_ATTACK;
+				m_attackCoolTimer = kAttackCoolTime;
+			}
+			else if (Pad::isTrigger(PAD_INPUT_2))
+			{
+				OnStrongAttack();
+				m_companionState == CompanionState::STRONG_ATTACK;
+				m_attackCoolTimer = kAttackCoolTime;
+			}
+			else if (Pad::isTrigger(PAD_INPUT_5))
+			{
+				OnSpecialSkil();
+				m_companionState == CompanionState::SPECIALSKIL;
+				m_attackCoolTimer = kAttackCoolTime;
+			}
+		}
+		break;
+	case Companion::CompanionState::NORMAL_ATTACK:
+		if (m_attack.active)
+		{
+			m_attack.timer--;
+			ChangeAnim(m_modelHandle, kAttackAnimNo, false, kAttackAnimIncrement);
+			if (m_attack.timer < 0.0f)
+			{
+				m_attack.active = false;
+				m_companionState = CompanionState::NORMAL;
+			}
+		}
+		else
+		{
+			m_companionState = CompanionState::NORMAL;// 予期せず active が false になったら NORMAL に戻る
+		}
+		break;
+	case Companion::CompanionState::STRONG_ATTACK:
+		m_strongAttack.pos = VAdd(m_strongAttack.pos, VScale(m_strongAttack.dir, kStrongAttackBulletSpeed)); // 毎フレーム位置の更新
+		if (m_strongAttack.active)
+		{
+			m_strongAttack.timer--;
+			ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, kStrongAttackAnimIncrement);
+			if (m_strongAttack.timer < 0.0f)
+			{
+				m_strongAttack.active = false;
+				m_companionState = CompanionState::NORMAL;
+			}
+		}
+		else
+		{
+			m_companionState = CompanionState::NORMAL;// 予期せず active が false になったら NORMAL に戻る
+		}
+		break;
+	case Companion::CompanionState::SPECIALSKIL:
+		if (m_specialSkil.active)
+		{
+			m_specialSkil.timer--;
+			ChangeAnim(m_modelHandle, kSpecialSkilAnimNo, false, kSpecialSkilAnimIncriment);
+			if (m_specialSkil.timer < 0.0f)
+			{
+				m_specialSkil.active = false;
+				m_companionState = CompanionState::NORMAL;
+			}
+		}
+		else
+		{
+			m_companionState = CompanionState::NORMAL;// 予期せず active が false になったら NORMAL に戻る
+		}
+		break;
+	}
+}
+
+void Companion::UpdateMovement(const VECTOR& moveDir)
+{
+	if (!m_isInAttackSequence)
+	{
+		if (VSize(VGet(m_vec.x, 0.0f, m_vec.z)) > kMoveThreshold)
+		{
+			// 移動中→移動アニメーションへ変更
+			ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
+		}
+		else
+		{
+			// 停止後→待機アニメーションへ変更
+			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+		}
+	}
+	if (VSize(moveDir) > 0.0f)
+	{
+		float targetAngle = atan2f(-moveDir.x, -moveDir.z); // Player.cpp と同じ
+		float diff = targetAngle - m_angleY;
+		if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
+		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+
+		m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
+
+		if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
+		else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
+	}
+
+	// 移動処理
+	if (VSize(moveDir) > 0.0f)
+	{
+		m_vec.x = moveDir.x * kMoveSpeed;
+		m_vec.z = moveDir.z * kMoveSpeed;
+	}
+	else // 入力がない場合
+	{
+		m_vec.x *= kMoveDecRate;
+		m_vec.z *= kMoveDecRate;
+	}
+}
+
+VECTOR Companion::HandleInput()
+{
+	if (m_controlMode == ControlMode::COMPANION)
+	{
+		return VGet(0.0f, 0.0f, 0.0f);
+	}
+	// アナログスティックの入力を取得
+	int stickX = 0;
+	int stickY = 0;
+	GetJoypadAnalogInput(&stickX, &stickY, DX_INPUT_PAD1);
+	SetJoypadDeadZone(DX_INPUT_PAD1, kAnalogDeadZone);
+
+	// 入力値を-1.0fから1.0fの範囲に正規化
+	float inputX = stickX / 1000.0f;
+	float inputZ = -stickY / 1000.0f; // Y軸をZ軸に(奥方向)
+	// 入力がない場合はゼロベクトルを返す
+	if (inputX == 0.0f && inputZ == 0.0f)
+	{
+		return VGet(0.0f, 0.0f, 0.0f);
+	}
+
+	// 入力ベクトルを正規化
+	VECTOR inputVec = VNorm(VGet(inputX, 0.0f, inputZ));
+	// カメラの向きに合わせて入力ベクトルを回転
+	float cameraYaw = -m_pCamera->GetHorizonrtalAngle();
+	float cosY = cosf(cameraYaw);
+	float sinY = sinf(cameraYaw);
+
+	VECTOR moveDir;
+	moveDir.x = inputVec.x * cosY - inputVec.z * sinY;
+	moveDir.z = inputVec.x * sinY + inputVec.z * cosY;
+	moveDir.y = 0.0f;
+	return moveDir;
 }

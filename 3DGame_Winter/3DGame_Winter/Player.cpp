@@ -96,10 +96,8 @@ Player::Player():
     m_comboFinish(kComboFinishAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
     m_specialSkil(kSpecialSkilRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
     m_dirToEnemy({0.0f,0.0f,0.0f}),
-    m_moveInput({ 0.0f,0.0f,0.0f }),
     m_distanceToEnemy(0.0f),
     m_distanceToFollowTarget(0.0f),
-    m_isInAttackSequence(false),
     m_avoidanceTimer(0.0f),
     m_isAvoidanceFlag(false),
     m_comboStep(0),
@@ -442,16 +440,17 @@ void Player::UpdateMovement(const VECTOR& moveDir)
         // “G‚Æ‚Ì‹——£‚ªkLockOnRangeˆÈ‰º‚È‚ç“G‚Ì‚Ù‚¤‚ðŒü‚­
         if (m_distanceToEnemy <= kAutoTurnDistance)
         {
-            // ƒƒbƒNƒIƒ“Žž “G‚Ì•ûŒü‚ðŒü‚­
             m_dirToEnemy = VSub(m_enemyPos, m_pos);
             if (VSize(VGet(m_dirToEnemy.x, 0.0f, m_dirToEnemy.z)) > 0.001f)
             {
-                float targetAngle = atan2f(-m_dirToEnemy.x, -m_dirToEnemy.z);
-                float diff = targetAngle - m_angleY;
+                float targetAngle = atan2f(-m_dirToEnemy.x, -m_dirToEnemy.z); // “G•ûŒü‚Ö‚ÌŠp“x(YŽ²‰ñ“]‚ð‹‚ß‚é)
+                float diff = targetAngle - m_angleY; // Œ»Ý‚ÌŠp“x‚Æ“G•ûŒü‚Ö‚ÌŠp“x‚Ì·•ª‚ð‹‚ß‚é
+                // ·•ª‚ðƒÎ`-ƒÎ‚Ì”ÍˆÍ‚É³‹K‰»‚·‚é
                 if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
                 else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
-                m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
 
+                m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed); // Šp“x‚ðŠŠ‚ç‚©‚É•ÏX
+                // ÅI“I‚ÈŠp“x‚ðƒÎ`-ƒÎ‚Ì”ÍˆÍ‚ÉŽû‚ß‚é
                 if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
                 else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
             }

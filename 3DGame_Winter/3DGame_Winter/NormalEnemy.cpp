@@ -8,6 +8,8 @@ namespace
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kMoveSpeed = 5.0f;
 	constexpr float kMoveDecRate = 0.8f;
+	constexpr int kIdleAnimNo = 41;
+	constexpr int kWalkAnimNo = 55;
 }
 
 NormalEnemy::NormalEnemy()

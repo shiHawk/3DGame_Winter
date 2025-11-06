@@ -2,13 +2,15 @@
 #include <memory>
 #include "DxLib.h"
 #include "CharacterBase.h"
+#include "Camera.h"
+#include "Pad.h"
 
 class Companion :public CharacterBase
 {
 public:
 	Companion();
 	~Companion();
-	void Init();
+	void Init(std::shared_ptr<Camera> pCamera);
 	void End();
 	virtual void Update()override;
 	void Draw();
@@ -17,8 +19,11 @@ public:
 	virtual void OnAttack() override;
 	void OnStrongAttack();
 	void OnSpecialSkil();
-	void UpdateCompanionState();
+	void UpdateAIState();
+	void UpdatePlayerControlState(); // プレイヤー時のステート
 private:
+	void UpdateMovement(const VECTOR& moveDir);
+	VECTOR HandleInput();
 	enum class CompanionState
 	{
 		NORMAL,
@@ -30,6 +35,7 @@ private:
 	};
 	ControlMode m_controlMode;
 	CompanionState m_companionState;
+	std::shared_ptr<Camera> m_pCamera;
 	VECTOR m_forwardDir;
 	VECTOR m_enemyPos;
 	VECTOR m_playerPos;
@@ -45,6 +51,5 @@ private:
 	float m_angleY;
 	float m_specialGauge;
 	float m_attackCoolTimer;
-	bool m_isInAttackSequence;
 };
 

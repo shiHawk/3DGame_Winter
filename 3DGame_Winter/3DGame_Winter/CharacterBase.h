@@ -18,9 +18,11 @@ protected:
 	};
 	VECTOR m_pos;
 	VECTOR m_vec;
+	VECTOR m_moveInput;
 	int m_hp;
 	int m_attackPower;
 	bool m_isDead;
+	bool m_isInAttackSequence; // UŒ‚’†‚©•ûŒü•â³’†‚©
 	int m_modelHandle;
 	struct AttackSphere
 	{

@@ -31,7 +31,7 @@ void GameScene::Init()
 	m_pPlayer->Init(m_pCamera);
 	//m_pEnemy->Init(m_pPlayer);
 	m_pNormalEnemy->Init(m_pPlayer);
-	m_pCompanion->Init();
+	m_pCompanion->Init(m_pCamera);
 }
 
 void GameScene::End()

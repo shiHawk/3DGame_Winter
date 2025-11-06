@@ -51,11 +51,9 @@ private:
 	AttackSphere m_attack2;
 	AttackSphere m_comboFinish;
 	AttackSphere m_specialSkil;
-	VECTOR m_dirToEnemy;
-	VECTOR m_moveInput; 
+	VECTOR m_dirToEnemy; 
 	float m_distanceToEnemy; // エネミーまでの距離の長さ
 	float m_distanceToFollowTarget;
-	bool m_isInAttackSequence; // プレイヤーが攻撃中か方向補正中か
 	float m_avoidanceTimer; // 回避時間
 	bool m_isAvoidanceFlag; // 回避のフラグ
 	int m_comboStep; // コンボの段階
