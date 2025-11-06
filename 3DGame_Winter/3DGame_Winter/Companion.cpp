@@ -9,7 +9,7 @@ namespace
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x00f000;
 	constexpr int kSphereSpcColor = 0xffffff;
-	constexpr float kMoveSpeed = 2.0f;
+	constexpr float kMoveSpeed = 3.0f;
 	constexpr float kJumpPower = 10.0f;
 	constexpr float kGravity = -5.5f;
 	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
@@ -125,22 +125,22 @@ void Companion::Update()
 	else
 	{
 		UpdateAIState();
+		if (m_distanceToPlayer > kWarpDistance) // プレイヤーと離れすぎたらプレイヤーの近くにワープする
+		{
+			m_pos = VGet(m_playerPos.x, m_playerPos.y, m_playerPos.z - kPostWarpPosZ);
+			m_strongAttack.active = false;
+			m_companionState = CompanionState::FOLLOW_PLAYER;
+		}
 	}
 
 	m_isInAttackSequence = m_companionState != CompanionState::NORMAL && m_companionState != CompanionState::FOLLOW_PLAYER
 						 && m_companionState != CompanionState::TRACK_ENEMY;
 
-	if (m_distanceToPlayer > kWarpDistance) // プレイヤーと離れすぎたらプレイヤーの近くにワープする
-	{
-		m_pos = VGet(m_playerPos.x, m_playerPos.y, m_playerPos.z - kPostWarpPosZ);
-		m_companionState = CompanionState::FOLLOW_PLAYER;
-	}
-
 	m_vec.y += kGravity;
 	if (m_pos.y + m_vec.y < 0.0f)
 	{
-		m_pos.y = 0.0f;   // 地面に固定
-		m_vec.y = 0.0f;   // 縦速度をゼロ
+		m_pos.y = 0.0f; // 地面に固定
+		m_vec.y = 0.0f; // 縦速度をゼロ
 	}
 	m_companionToEnemy = VSub(m_enemyPos, m_pos);
 	m_distanceToEnemy = VSize(m_companionToEnemy);
@@ -230,7 +230,7 @@ void Companion::Draw()
 void Companion::OnAttack()
 {
 	m_attackPower = kAttackPower;
-	m_attack.dir = VNorm(VGet(sinf(m_angleY ), 0.0f, cosf(m_angleY )));
+	m_attack.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
 	m_attack.active = true;
 	m_attack.pos = VAdd(m_pos, VScale(m_attack.dir, kAttackRange));
 	m_attack.timer = kAttackDuration;
@@ -402,7 +402,7 @@ void Companion::UpdatePlayerControlState()
 	// AI用のステートはプレイヤー操作時はNORMALとして扱う
 	if (m_companionState == CompanionState::FOLLOW_PLAYER || m_companionState == CompanionState::TRACK_ENEMY)
 	{
-		m_companionState == CompanionState::NORMAL;
+		m_companionState = CompanionState::NORMAL;
 	}
 
 	switch (m_companionState)
@@ -420,13 +420,13 @@ void Companion::UpdatePlayerControlState()
 			else if (Pad::isTrigger(PAD_INPUT_2))
 			{
 				OnStrongAttack();
-				m_companionState == CompanionState::STRONG_ATTACK;
+				m_companionState = CompanionState::STRONG_ATTACK;
 				m_attackCoolTimer = kAttackCoolTime;
 			}
 			else if (Pad::isTrigger(PAD_INPUT_5))
 			{
 				OnSpecialSkil();
-				m_companionState == CompanionState::SPECIALSKIL;
+				m_companionState = CompanionState::SPECIALSKIL;
 				m_attackCoolTimer = kAttackCoolTime;
 			}
 		}
@@ -444,7 +444,7 @@ void Companion::UpdatePlayerControlState()
 		}
 		else
 		{
-			m_companionState = CompanionState::NORMAL;// 予期せず active が false になったら NORMAL に戻る
+			m_companionState = CompanionState::NORMAL;// 予期せずactiveがfalseになったらNORMALに戻る
 		}
 		break;
 	case Companion::CompanionState::STRONG_ATTACK:
@@ -461,7 +461,7 @@ void Companion::UpdatePlayerControlState()
 		}
 		else
 		{
-			m_companionState = CompanionState::NORMAL;// 予期せず active が false になったら NORMAL に戻る
+			m_companionState = CompanionState::NORMAL;// 予期せずactiveがfalseになったらNORMALに戻る
 		}
 		break;
 	case Companion::CompanionState::SPECIALSKIL:
@@ -477,7 +477,7 @@ void Companion::UpdatePlayerControlState()
 		}
 		else
 		{
-			m_companionState = CompanionState::NORMAL;// 予期せず active が false になったら NORMAL に戻る
+			m_companionState = CompanionState::NORMAL;// 予期せずactiveがfalseになったらNORMALに戻る
 		}
 		break;
 	}

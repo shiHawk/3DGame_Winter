@@ -1,7 +1,7 @@
 #include "Enemy.h"
 namespace
 {
-	constexpr VECTOR kSpherePos = { 600.0f,0.0f,500.0f };
+	constexpr VECTOR kDefaultPos = { 600.0f,0.0f,500.0f };
 	constexpr float kSphereRadius = 30.0f;
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x000000;

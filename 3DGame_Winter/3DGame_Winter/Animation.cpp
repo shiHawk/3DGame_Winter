@@ -59,7 +59,7 @@ void Animation::UpdateAnim()
 	{
 		// ブレンド中の処理 
 		m_blendRate += kBlendRateIncrement; // 任意の値でブレンド率を上げる 
-		// (1) ブレンド元(old)の再生時間を進める
+		// (1)ブレンド元(old)の再生時間を進める
 		if (m_oldAttachNo != -1)
 		{
 			m_oldPlayTime += m_timeIncrement;
@@ -70,7 +70,7 @@ void Animation::UpdateAnim()
 			MV1SetAttachAnimTime(m_modelHandle, m_oldAttachNo, m_oldPlayTime);
 		}
 
-		// (2) 現在(current)の再生時間を進める
+		// (2)現在(current)の再生時間を進める
 		if (m_currentAttachNo != -1)
 		{
 			m_currentPlayTime += m_timeIncrement;
@@ -89,7 +89,7 @@ void Animation::UpdateAnim()
 			}
 			MV1SetAttachAnimTime(m_modelHandle, m_currentAttachNo, m_currentPlayTime);
 		}
-		// (3) ブレンド率を更新し、完了判定を行う
+		// (3)ブレンド率を更新し、完了判定を行う
 		if (m_blendRate >= 1.0f)
 		{
 			m_blendRate = 1.0f;
@@ -162,20 +162,6 @@ void Animation::ChangeAnim(int modelHandle, int animNo, bool isLoop, float incre
 	// 各アニメーションのブレンド率を初期設定
 	MV1SetAttachAnimBlendRate(modelHandle, m_oldAttachNo, 1.0f);
 	MV1SetAttachAnimBlendRate(modelHandle, m_currentAttachNo, 0.0f);
-
-	//// 次のアニメーションをアタッチ
-	//m_nextAttachNo = MV1AttachAnim(modelHandle, animNo);
-	//// 今アタッチされているアニメーションをデタッチ
-	//MV1DetachAnim(modelHandle, m_currentAttachNo);
-	//m_currentAttachNo = m_nextAttachNo;
-	//m_isLoop = isLoop;
-	//// 再生時間をリセット
-	//m_currentPlayTime = 0.0f;
-	//m_timeIncrement = increment;
-	//// 総再生時間を再設定
-	//m_animTotalTime = MV1GetAttachAnimTotalTime(modelHandle, m_nextAttachNo);
-	//m_isEnd = false;
-	//m_attachAnimNo = animNo;
 }
 
 bool Animation::GetIsAnimEnd()

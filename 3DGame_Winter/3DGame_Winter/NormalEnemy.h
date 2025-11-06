@@ -1,6 +1,7 @@
 #pragma once
 #include "Enemy.h"
 #include "Player.h"
+#include "DxLib.h"
 class NormalEnemy :public Enemy
 {
 public:
@@ -11,6 +12,5 @@ public:
 	void Update() override;
 	void Draw() override;
 private:
-	
 };
 

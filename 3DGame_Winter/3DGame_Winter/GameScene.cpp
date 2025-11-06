@@ -6,7 +6,7 @@ namespace
 	constexpr VECTOR kTrianglePos2 = { 400.0f,0.0f,0.0f };
 	constexpr VECTOR kTrianglePos3 = { 0.0f,0.0f,0.0f };
 	constexpr int kTriangleColor = 0xfff0ff;
-	constexpr VECTOR kSpherePos = { 0.0f,0.0f,0.0f };
+	constexpr VECTOR kDefaultPos = { 0.0f,0.0f,0.0f };
 	constexpr VECTOR kSpherePos2 = { 600.0f,0.0f,500.0f };
 	constexpr float kSphereRadius = 20.0f;
 	constexpr int kDivNum = 8;
@@ -64,8 +64,8 @@ void GameScene::Draw()
 {
 	m_pPlayer->Draw();
 	//m_pEnemy->Draw();
-	m_pNormalEnemy->Draw();
 	m_pCompanion->Draw();
+	m_pNormalEnemy->Draw();
 	DrawGrid();
 }
 

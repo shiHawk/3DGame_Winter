@@ -21,6 +21,7 @@ public:
 	void OnSpecialSkil();
 	void UpdateAIState();
 	void UpdatePlayerControlState(); // プレイヤー時のステート
+	void SetControlMode(ControlMode mode) { m_controlMode = mode; }
 private:
 	void UpdateMovement(const VECTOR& moveDir);
 	VECTOR HandleInput();

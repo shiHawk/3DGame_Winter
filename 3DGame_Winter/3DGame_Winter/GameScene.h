@@ -5,6 +5,7 @@
 #include "Enemy.h"
 #include "NormalEnemy.h"
 #include "Companion.h"
+#include "DxLib.h"
 #include <memory>
 class GameScene :public SceneBase
 {

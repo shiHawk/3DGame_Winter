@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Pad.h"
 #include "Camera.h"
+#include "DxLib.h"
 #include <cmath>
 namespace
 {

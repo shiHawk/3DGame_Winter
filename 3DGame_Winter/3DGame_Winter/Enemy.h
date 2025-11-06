@@ -1,6 +1,7 @@
 #pragma once
 #include "CharacterBase.h"
 #include "Player.h"
+#include "DxLib.h"
 #include <memory>
 class Enemy :public CharacterBase
 {
