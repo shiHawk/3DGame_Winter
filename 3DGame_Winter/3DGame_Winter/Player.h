@@ -44,7 +44,6 @@ private:
 	void UpdatePlayerState();
 	std::shared_ptr<Camera> m_pCamera;
 	float m_angleY;
-	bool m_isJump;
 	VECTOR m_forwardDir;
 	VECTOR m_enemyPos;
 	VECTOR m_followTargetPos; // AI時に追従する対象（プレイヤー）の座標
@@ -59,6 +58,7 @@ private:
 	bool m_isAvoidanceFlag; // 回避のフラグ
 	int m_comboStep; // コンボの段階
 	float m_comboWindowTimer; // コンボの受付時間
+	float m_aiComboCoolTimer; // AIのコンボ用クールタイム
 	int m_specialGauge; // 必殺ゲージ
 	bool m_isSpecialSkilFlag; // 必殺技のフラグ
 	bool m_aiWillDo3HitCombo; // AIが3コンボ攻撃をするかどうかのフラグ

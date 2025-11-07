@@ -24,6 +24,7 @@ protected:
 	bool m_isDead;
 	bool m_isInAttackSequence; // UŒ‚’†‚©•ûŒü•â³’†‚©
 	int m_modelHandle;
+	bool m_isJump;
 	struct AttackSphere
 	{
 		float radius; // UŒ‚‚Ì”»’è‚Ì‘å‚«‚³

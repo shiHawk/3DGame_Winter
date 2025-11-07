@@ -8,7 +8,8 @@ CharacterBase::CharacterBase():
 	m_modelHandle(-1),
 	m_pos({0.0f,0.0f,0.0f}),
 	m_vec({ 0.0f,0.0f,0.0f }),
-	m_moveInput({ 0.0f,0.0f,0.0f })
+	m_moveInput({ 0.0f,0.0f,0.0f }),
+	m_isJump(false)
 {
 }
 

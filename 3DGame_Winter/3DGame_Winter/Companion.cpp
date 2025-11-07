@@ -12,7 +12,7 @@ namespace
 	constexpr float kMoveSpeed = 3.0f;
 	constexpr float kPlayerMoveSpeed = 10.0f; // プレイヤー操作モードでの移動速度
 	constexpr float kJumpPower = 10.0f;
-	constexpr float kGravity = -5.5f;
+	constexpr float kGravity = -0.5f;
 	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
 	// 減速
 	constexpr float kMoveDecRate = 0.80f;
@@ -103,7 +103,6 @@ void Companion::Init(std::shared_ptr<Camera> pCamera)
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
 	MV1SetRotationXYZ(m_modelHandle,kDefaultDir);
 	AttachAnim(m_modelHandle,kIdleAnimNo);
-	//m_controlMode = ControlMode::PLAYER;
 }
 
 void Companion::End()
@@ -145,6 +144,7 @@ void Companion::Update()
 	{
 		m_pos.y = 0.0f; // 地面に固定
 		m_vec.y = 0.0f; // 縦速度をゼロ
+		m_isJump = false;
 	}
 	m_companionToEnemy = VSub(m_enemyPos, m_pos);
 	m_distanceToEnemy = VSize(m_companionToEnemy);

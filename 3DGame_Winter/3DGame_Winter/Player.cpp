@@ -62,6 +62,7 @@ namespace
     constexpr int kGaugeConsumption = 100; // ゲージの消費量
 
     constexpr float kComboWindowTime = 20.0f;
+    constexpr float kAIComboCoolTime = 10.0f; // AIのコンボ間クールタイム
 
     constexpr float kModelScale = 50.0f; // モデルのスケール
     constexpr int kIdleAnimNo = 1;
@@ -89,7 +90,6 @@ Player::Player():
     m_controlMode(ControlMode::PLAYER),
     m_playerState(PlayerState::NORMAL),
     m_angleY(0.0f),
-    m_isJump(false),
     m_forwardDir({0.0f,0.0f,0.0f}),
     m_enemyPos({0.0f,0.0f,0.0f}),
     m_followTargetPos(0.0f,0.0f,0.0f),
@@ -104,6 +104,7 @@ Player::Player():
     m_isAvoidanceFlag(false),
     m_comboStep(0),
     m_comboWindowTimer(0.0f),
+    m_aiComboCoolTimer(0.0f),
     m_specialGauge(0),
     m_isSpecialSkilFlag(false),
     m_aiWillDo3HitCombo(false)
@@ -129,7 +130,6 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
     MV1SetRotationXYZ(m_modelHandle, kRightDir);
     AttachAnim(m_modelHandle, kIdleAnimNo);
     SRand(GetTickCount64());
-    //m_controlMode = ControlMode::COMPANION;
 }
 
 void Player::End()
@@ -437,7 +437,6 @@ void Player::UpdateMovement(const VECTOR& moveDir)
     }
     
     // 回転処理
-    // isLockOn の状態に応じて、向きの決め方を変える
     if (m_isInAttackSequence)
     {
         // 敵との距離がkLockOnRange以下なら敵のほうを向く
@@ -642,11 +641,17 @@ void Player::HandleStateSpecialSkil()
 
 void Player::HandleAIComboWindow()
 {
+    if (m_aiComboCoolTimer > 0.0f)
+    {
+        m_aiComboCoolTimer--;
+        return;
+    }
     // 1段階目 (弱) が終わった後
     if (m_comboStep == 1)
     {
         m_comboStep = 2; // AIは必ず2段階目 (強A) に移行する
         TryStartAttack(&Player::OnAttack2, PlayerState::ROTATING_TO_ATTACK2, PlayerState::ATTACKING2);
+        m_aiComboCoolTimer = kAIComboCoolTime;
     }
     // 2段階目 (強A) が終わった後
     else if (m_comboStep == 2)
@@ -660,6 +665,7 @@ void Player::HandleAIComboWindow()
         {
             m_playerState = PlayerState::NORMAL; // 2ヒットで終了
             m_comboStep = 0;
+            m_aiComboCoolTimer = 0.0f;
         }
     }
     else
@@ -744,15 +750,19 @@ void Player::UpdateAttackState(AttackSphere& attackData, int animNo, float animI
         {
             attackData.active = false;
             m_playerState = nextState;
+
             if (nextState == PlayerState::COMBO_WINDOW)
             {
                 m_comboWindowTimer = kComboWindowTime; // コンボ受付時間を設定
+                if (m_controlMode == ControlMode::COMPANION)
+                {
+                    m_aiComboCoolTimer = kAIComboCoolTime; // コンボの繋ぎ目にクールタイムを設定
+                }
             }
             else if (nextState == PlayerState::NORMAL)
             {
                 m_comboStep = 0; // コンボ終了
             }
-            m_comboWindowTimer = kComboWindowTime; // コンボ受付時間を設定
         }
     }
 }

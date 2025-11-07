@@ -48,10 +48,10 @@ SceneBase* GameScene::Update()
 	m_pPlayer->Update();
 	m_pNormalEnemy->Update();
 	m_pCompanion->Update();
-	if (Pad::isTrigger(PAD_INPUT_6))
+	if (Pad::isTrigger(PAD_INPUT_6)) // RBボタンでプレイヤーとコンパニオンの切り替え
 	{
-		CharacterBase::ControlMode currentMode = m_pPlayer->GetControlMode();
-		CharacterBase::ControlMode playerNewMode;
+		CharacterBase::ControlMode currentMode = m_pPlayer->GetControlMode(); // 現在のモード
+		CharacterBase::ControlMode playerNewMode; // 次のプレイヤーのモード
 		if (currentMode == CharacterBase::ControlMode::PLAYER)
 		{
 			playerNewMode = CharacterBase::ControlMode::COMPANION;
@@ -61,7 +61,7 @@ SceneBase* GameScene::Update()
 			playerNewMode = CharacterBase::ControlMode::PLAYER;
 		}
 		m_pPlayer->SetControlMode(playerNewMode);
-		CharacterBase::ControlMode companionNewMode;
+		CharacterBase::ControlMode companionNewMode; // コンパニオンのモード
 		if (playerNewMode == CharacterBase::ControlMode::PLAYER)
 		{
 			companionNewMode = CharacterBase::ControlMode::COMPANION;
@@ -90,9 +90,7 @@ SceneBase* GameScene::Update()
 	}
 	m_pPlayer->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pPlayer->SetFollowTargetPos(m_pCompanion->GetPos());
-	//m_pCamera->SetControlledCharacterPosition(m_pPlayer->GetPos());
 	m_pCamera->SetLockOnPosition(m_pNormalEnemy->GetPos());
-	//m_pCamera->SetPlayerDir(m_pPlayer->GetPlayerDir());
 	m_pCompanion->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pCompanion->SetPlayerPos(m_pPlayer->GetPos());
 	return this;
