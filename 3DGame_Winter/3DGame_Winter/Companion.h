@@ -16,12 +16,14 @@ public:
 	void Draw();
 	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; };
 	void SetPlayerPos(VECTOR playerPos) { m_playerPos = playerPos; };
+	VECTOR GetPlayerDir() { return m_forwardDir; }
 	virtual void OnAttack() override;
 	void OnStrongAttack();
 	void OnSpecialSkil();
 	void UpdateAIState();
 	void UpdatePlayerControlState(); // プレイヤー時のステート
 	void SetControlMode(ControlMode mode) { m_controlMode = mode; }
+	ControlMode GetControlMode() { return m_controlMode; }
 private:
 	void UpdateMovement(const VECTOR& moveDir);
 	VECTOR HandleInput();
@@ -32,7 +34,9 @@ private:
 		TRACK_ENEMY,
 		NORMAL_ATTACK,
 		STRONG_ATTACK,
-		SPECIALSKIL
+		SPECIALSKIL,
+		TURN_FOR_STRONG_ATTACK, // 強攻撃前の回転
+		TURN_FOR_SPECIALSKIL,   // 必殺技前の回転
 	};
 	ControlMode m_controlMode;
 	CompanionState m_companionState;
@@ -52,5 +56,6 @@ private:
 	float m_angleY;
 	float m_specialGauge;
 	float m_attackCoolTimer;
+	void RotatingToAttack();
 };
 

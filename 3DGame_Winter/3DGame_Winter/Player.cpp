@@ -5,14 +5,15 @@
 #include <cmath>
 namespace
 {
-    constexpr VECTOR kDefaultPos = { 0.0f,0.0f,0.0f };
+    constexpr VECTOR kDefaultPos = { 0.0f,0.0f,-700.0f };
     constexpr VECTOR kDefaultVec = { 0.0f,0.0f,0.0f };
-    constexpr VECTOR kRightDir = { 0.0,270.0f * DX_PI_F / 180.0f,0.0f };
+    constexpr VECTOR kRightDir = { 0.0f,270.0f * DX_PI_F / 180.0f,0.0f };
 	constexpr float kSphereRadius = 20.0f;
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x000fff;
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kMoveSpeed = 10.0f;
+	constexpr float kCompanionMoveSpeed = 3.0f;
     constexpr float kJumpPower = 10.0f;
     constexpr float kGravity = -0.5f;
     // 重力係数（攻撃中）
@@ -128,6 +129,7 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
     MV1SetRotationXYZ(m_modelHandle, kRightDir);
     AttachAnim(m_modelHandle, kIdleAnimNo);
     SRand(GetTickCount64());
+    //m_controlMode = ControlMode::COMPANION;
 }
 
 void Player::End()
@@ -140,7 +142,7 @@ void Player::Update()
     m_moveInput = HandleInput();
     UpdatePlayerState();
     //printfDx(L"m_isJump:%d\n", m_isJump);
-    //printfDx(L"m_comboWindowTimer:%f\n", m_comboWindowTimer);
+    //printfDx(L"m_distanceToFollowTarget:%f\n", m_distanceToFollowTarget);
     if (m_controlMode == ControlMode::PLAYER)
     {
         if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
@@ -158,10 +160,11 @@ void Player::Update()
             m_specialGauge -= kGaugeConsumption;
             OnSpecialSkil();
         }
-        m_distanceToFollowTarget = VSize(VSub(m_followTargetPos, m_pos));
     }
     else
     {
+        m_distanceToFollowTarget = VSize(VSub(m_followTargetPos, m_pos));
+        //printfDx(L"m_distanceToFollowTarget:%f\n", m_distanceToFollowTarget);
         if (m_distanceToFollowTarget > kWarpDistance)
         {
             m_pos = VGet(m_followTargetPos.x, m_followTargetPos.y, m_followTargetPos.z - kPostWarpPosZ);
@@ -237,29 +240,28 @@ void Player::Update()
     MV1SetPosition(m_modelHandle, m_pos);
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim();
-    /*DINPUT_JOYSTATE input;
-    int i;
-    int Color;
-    //入力状態を取得
-    GetJoypadDirectInputState(DX_INPUT_PAD1, &input);
-
-    //画面に構造体の中身を描画
-    Color = GetColor(255, 255, 255);
-    DrawFormatString(0, 0, Color, L"X:%d Y:%d Z:%d",
-        input.X, input.Y, input.Z);
-    DrawFormatString(0, 16, Color, L"Rx:%d Ry:%d Rz:%d",
-        input.Rx, input.Ry, input.Rz);
-    DrawFormatString(0, 32, Color, L"Slider 0:%d 1:%d",
-        input.Slider[0], input.Slider[1]);
-    DrawFormatString(0, 48, Color, L"POV 0:%d 1:%d 2:%d 3:%d",
-        input.POV[0], input.POV[1],
-        input.POV[2], input.POV[3]);
-    DrawString(0, 64, L"Button", Color);
-    for (i = 0; i < 32; i++)
-    {
-        DrawFormatString(64 + i % 8 * 64, 64 + i / 8 * 16, Color,
-            L"%2d:%d", i, input.Buttons[i]);
-    }*/
+    //DINPUT_JOYSTATE input;
+    //int i;
+    //int Color;
+    ////入力状態を取得
+    //GetJoypadDirectInputState(DX_INPUT_PAD1, &input);
+    ////画面に構造体の中身を描画
+    //Color = GetColor(255, 255, 255);
+    //DrawFormatString(0, 0, Color, L"X:%d Y:%d Z:%d",
+    //    input.X, input.Y, input.Z);
+    //DrawFormatString(0, 16, Color, L"Rx:%d Ry:%d Rz:%d",
+    //    input.Rx, input.Ry, input.Rz);
+    //DrawFormatString(0, 32, Color, L"Slider 0:%d 1:%d",
+    //    input.Slider[0], input.Slider[1]);
+    //DrawFormatString(0, 48, Color, L"POV 0:%d 1:%d 2:%d 3:%d",
+    //    input.POV[0], input.POV[1],
+    //    input.POV[2], input.POV[3]);
+    //DrawString(0, 64, L"Button", Color);
+    //for (i = 0; i < 32; i++)
+    //{
+    //    DrawFormatString(64 + i % 8 * 64, 64 + i / 8 * 16, Color,
+    //        L"%2d:%d", i, input.Buttons[i]);
+    //}
 }
 
 void Player::Draw()
@@ -486,8 +488,16 @@ void Player::UpdateMovement(const VECTOR& moveDir)
         if (VSize(moveDir) > 0.0f)
         {
             // 5.移動ベクトルを更新
-            m_vec.x = moveDir.x * kMoveSpeed;
-            m_vec.z = moveDir.z * kMoveSpeed;
+            if (m_controlMode == ControlMode::PLAYER)
+            {
+                m_vec.x = moveDir.x * kMoveSpeed;
+                m_vec.z = moveDir.z * kMoveSpeed;
+            }
+            else
+            {
+                m_vec.x = moveDir.x * kCompanionMoveSpeed;
+                m_vec.z = moveDir.z * kCompanionMoveSpeed;
+            }
         }
         else // 入力がない場合
         {

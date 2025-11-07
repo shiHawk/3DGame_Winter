@@ -4,12 +4,13 @@ namespace
 {
 	constexpr VECTOR kDefaultPos = { 100.0f,0.0f,-60.0f };
 	constexpr VECTOR kDefaultVec = { 0.0f,0.0f,0.0f };
-	constexpr VECTOR kDefaultDir = { 0.0,270.0f * DX_PI_F / 180.0f,0.0f };
+	constexpr VECTOR kDefaultDir = { 0.0f,270.0f * DX_PI_F / 180.0f,0.0f };
 	constexpr float kSphereRadius = 20.0f;
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x00f000;
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kMoveSpeed = 3.0f;
+	constexpr float kPlayerMoveSpeed = 10.0f; // プレイヤー操作モードでの移動速度
 	constexpr float kJumpPower = 10.0f;
 	constexpr float kGravity = -5.5f;
 	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
@@ -102,6 +103,7 @@ void Companion::Init(std::shared_ptr<Camera> pCamera)
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
 	MV1SetRotationXYZ(m_modelHandle,kDefaultDir);
 	AttachAnim(m_modelHandle,kIdleAnimNo);
+	//m_controlMode = ControlMode::PLAYER;
 }
 
 void Companion::End()
@@ -132,10 +134,12 @@ void Companion::Update()
 			m_companionState = CompanionState::FOLLOW_PLAYER;
 		}
 	}
-
 	m_isInAttackSequence = m_companionState != CompanionState::NORMAL && m_companionState != CompanionState::FOLLOW_PLAYER
 						 && m_companionState != CompanionState::TRACK_ENEMY;
-
+	if (m_isInAttackSequence)
+	{
+		m_vec = { 0.0f,0.0f,0.0f };
+	}
 	m_vec.y += kGravity;
 	if (m_pos.y + m_vec.y < 0.0f)
 	{
@@ -144,6 +148,16 @@ void Companion::Update()
 	}
 	m_companionToEnemy = VSub(m_enemyPos, m_pos);
 	m_distanceToEnemy = VSize(m_companionToEnemy);
+	// 敵への方向ベクトル（正規化）を毎フレーム計算
+	if (m_distanceToEnemy > 0.0f)
+	{
+		m_dirToEnemy = VNorm(m_companionToEnemy);
+	}
+	else
+	{
+		// 敵との距離が0（または敵がいない）場合はゼロベクトル
+		m_dirToEnemy = VGet(0.0f, 0.0f, 0.0f);
+	}
 	m_companionToPlayer = VSub(m_playerPos, m_pos);
 	m_distanceToPlayer = VSize(m_companionToPlayer);
 	if (m_companionState == CompanionState::NORMAL)
@@ -241,7 +255,17 @@ void Companion::OnStrongAttack()
 	m_attackPower = kStrongAttackPower;
 	m_strongAttack.timer = kStrongAttackDuration;
 	m_strongAttack.active = true;
-	m_strongAttack.dir = VNorm(m_dirToEnemy);
+	if (m_controlMode == ControlMode::PLAYER)
+	{
+		// プレイヤー操作時: 弾の方向をキャラクターの現在の向き (m_angleY) に基づいて水平に設定
+		// Y成分は 0.0f にして水平に飛ばす
+		m_strongAttack.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
+	}
+	else // ControlMode::COMPANION (AIモード)
+	{
+		// AI操作時: 弾の方向を敵の方向 (m_dirToEnemy) に設定 (Y成分を含む)
+		m_strongAttack.dir = VNorm(m_dirToEnemy);
+	}
 	VECTOR forwardVec = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
 	m_strongAttack.pos = VAdd(m_pos,VScale(forwardVec,kSphereRadius*2.0f));
 	m_strongAttack.pos.y = m_pos.y;
@@ -303,14 +327,7 @@ void Companion::UpdateAIState()
 	case Companion::CompanionState::TRACK_ENEMY:
 	{
 		m_dirToEnemy = VNorm(m_companionToEnemy);
-		float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
-		float diff = targetAngle - m_angleY;
-		if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
-		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
-		m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
-
-		if (m_angleY > DX_PI_F)       m_angleY -= 2.0f * DX_PI_F;
-		else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
+		RotatingToAttack();
 
 		if (m_distanceToEnemy > kEnemyLeashDistance) // kEnemyLeashDistanceより敵が離れたら追跡をやめる
 		{
@@ -409,7 +426,7 @@ void Companion::UpdatePlayerControlState()
 	{
 	case Companion::CompanionState::NORMAL:
 		UpdateMovement(m_moveInput); // 移動処理
-		if (m_attackCoolTimer > 0.0f)
+		if (m_attackCoolTimer <= 0.0f)
 		{
 			if (Pad::isTrigger(PAD_INPUT_4))
 			{
@@ -419,15 +436,38 @@ void Companion::UpdatePlayerControlState()
 			}
 			else if (Pad::isTrigger(PAD_INPUT_2))
 			{
-				OnStrongAttack();
-				m_companionState = CompanionState::STRONG_ATTACK;
-				m_attackCoolTimer = kAttackCoolTime;
+				if (m_distanceToEnemy > 0.0f) // 敵がいる場合のみ回転
+				{
+					m_companionState = CompanionState::TURN_FOR_STRONG_ATTACK; // 回転ステートに遷移
+				}
+				else
+				{
+					OnStrongAttack();
+					m_companionState = CompanionState::STRONG_ATTACK;
+					m_attackCoolTimer = kAttackCoolTime;
+				}
 			}
 			else if (Pad::isTrigger(PAD_INPUT_5))
 			{
-				OnSpecialSkil();
-				m_companionState = CompanionState::SPECIALSKIL;
-				m_attackCoolTimer = kAttackCoolTime;
+				if (m_distanceToEnemy > 0.0f) // 敵がいる場合のみ回転
+				{
+					m_companionState = CompanionState::TURN_FOR_SPECIALSKIL; // 回転ステートに遷移
+				}
+				else
+				{
+					OnSpecialSkil();
+					m_companionState = CompanionState::SPECIALSKIL;
+					m_attackCoolTimer = kAttackCoolTime;
+				}
+				// SpecialSkil 発動時に敵の方向を即座に向く
+				if (m_distanceToEnemy > 0.0f) // 敵が有効な場合
+				{
+					// m_dirToEnemy を使って敵の方向の角度（ラジアン）を計算
+					float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+
+					// キャラクターの向き(m_angleY)を即座に敵の方向に設定
+					m_angleY = targetAngle;
+				}
 			}
 		}
 		break;
@@ -480,6 +520,42 @@ void Companion::UpdatePlayerControlState()
 			m_companionState = CompanionState::NORMAL;// 予期せずactiveがfalseになったらNORMALに戻る
 		}
 		break;
+	case CompanionState::TURN_FOR_STRONG_ATTACK:
+	{
+		RotatingToAttack(); // 滑らかに回転
+
+		// 敵の方向への目標角度を再計算
+		float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+		float diff = targetAngle - m_angleY;
+		if (diff > DX_PI_F) diff -= 2.0f * DX_PI_F;
+		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+
+		// 角度の差が閾値以下になったら攻撃開始
+		if (std::abs(diff) < kAngleThreshold) // kAngleThreshold は既に 0.1f で定義されています
+		{
+			OnStrongAttack();
+			m_companionState = CompanionState::STRONG_ATTACK;
+			m_attackCoolTimer = kAttackCoolTime;
+		}
+		break;
+	}
+	case Companion::CompanionState::TURN_FOR_SPECIALSKIL:
+	{
+		RotatingToAttack(); // 滑らかに回転
+
+		float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+		float diff = targetAngle - m_angleY;
+		if (diff > DX_PI_F) diff -= 2.0f * DX_PI_F;
+		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+
+		if (std::abs(diff) < kAngleThreshold)
+		{
+			OnSpecialSkil();
+			m_companionState = CompanionState::SPECIALSKIL;
+			m_attackCoolTimer = kAttackCoolTime;
+		}
+		break;
+	}
 	}
 }
 
@@ -500,7 +576,7 @@ void Companion::UpdateMovement(const VECTOR& moveDir)
 	}
 	if (VSize(moveDir) > 0.0f)
 	{
-		float targetAngle = atan2f(-moveDir.x, -moveDir.z); // Player.cpp と同じ
+		float targetAngle = atan2f(moveDir.x, moveDir.z);
 		float diff = targetAngle - m_angleY;
 		if (diff > DX_PI_F)       diff -= 2.0f * DX_PI_F;
 		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
@@ -514,8 +590,8 @@ void Companion::UpdateMovement(const VECTOR& moveDir)
 	// 移動処理
 	if (VSize(moveDir) > 0.0f)
 	{
-		m_vec.x = moveDir.x * kMoveSpeed;
-		m_vec.z = moveDir.z * kMoveSpeed;
+		m_vec.x = moveDir.x * kPlayerMoveSpeed;
+		m_vec.z = moveDir.z * kPlayerMoveSpeed;
 	}
 	else // 入力がない場合
 	{
@@ -557,4 +633,31 @@ VECTOR Companion::HandleInput()
 	moveDir.z = inputVec.x * sinY + inputVec.z * cosY;
 	moveDir.y = 0.0f;
 	return moveDir;
+}
+
+void Companion::RotatingToAttack()
+{
+	// 敵がいない、または距離が0の場合は回転しない
+	if (m_distanceToEnemy <= 0.0f)
+	{
+		return;
+	}
+
+	// 敵の方向への目標角度を計算
+	// m_dirToEnemy は Update 関数で既に正規化されているはずです。
+	float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+
+	// 現在の角度と目標角度の差分を計算
+	float diff = targetAngle - m_angleY;
+
+	// 角度の差分を -π から π の範囲に正規化 (最短回転)
+	if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
+	else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+
+	// lerpによる滑らかな角度補間
+	m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
+
+	// m_angleYを -π から π の範囲に正規化
+	if (m_angleY > DX_PI_F)      m_angleY -= 2.0f * DX_PI_F;
+	else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
 }

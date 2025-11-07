@@ -22,6 +22,7 @@ public:
 	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; }
 	VECTOR GetPlayerDir() { return m_forwardDir; }
 	void SetControlMode(ControlMode mode) { m_controlMode = mode; }
+	ControlMode GetControlMode() { return m_controlMode; }
 	void SetFollowTargetPos(VECTOR targetPos) { m_followTargetPos = targetPos; } // AI操作時に追従する対象（＝プレイヤー）の座標をセットする
 private:
 	enum class PlayerState

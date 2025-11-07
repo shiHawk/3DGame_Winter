@@ -29,7 +29,6 @@ void GameScene::Init()
 	m_pCompanion = std::make_shared<Companion>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
-	//m_pEnemy->Init(m_pPlayer);
 	m_pNormalEnemy->Init(m_pPlayer);
 	m_pCompanion->Init(m_pCamera);
 }
@@ -47,14 +46,53 @@ SceneBase* GameScene::Update()
 {
 	m_pCamera->Update();
 	m_pPlayer->Update();
-	//m_pEnemy->Update();
 	m_pNormalEnemy->Update();
 	m_pCompanion->Update();
+	if (Pad::isTrigger(PAD_INPUT_6))
+	{
+		CharacterBase::ControlMode currentMode = m_pPlayer->GetControlMode();
+		CharacterBase::ControlMode playerNewMode;
+		if (currentMode == CharacterBase::ControlMode::PLAYER)
+		{
+			playerNewMode = CharacterBase::ControlMode::COMPANION;
+		}
+		else
+		{
+			playerNewMode = CharacterBase::ControlMode::PLAYER;
+		}
+		m_pPlayer->SetControlMode(playerNewMode);
+		CharacterBase::ControlMode companionNewMode;
+		if (playerNewMode == CharacterBase::ControlMode::PLAYER)
+		{
+			companionNewMode = CharacterBase::ControlMode::COMPANION;
+		}
+		else
+		{
+			companionNewMode = CharacterBase::ControlMode::PLAYER;
+		}
+		m_pCompanion->SetControlMode(companionNewMode);
+	}
+	// 現在のコントロールモードを取得
+	CharacterBase::ControlMode currentControlMode = m_pPlayer->GetControlMode();
+	// モードに応じてカメラに渡す位置を決定
+	if (currentControlMode == CharacterBase::ControlMode::PLAYER)
+	{
+		// プレイヤーが操作モードの場合、プレイヤーの位置をカメラに渡す
+		m_pCamera->SetControlledCharacterPosition(m_pPlayer->GetPos());
+		// プレイヤーの向きをカメラに渡す
+		m_pCamera->SetPlayerDir(m_pPlayer->GetPlayerDir());
+	}
+	else if (currentControlMode == CharacterBase::ControlMode::COMPANION)
+	{
+		// コンパニオンが操作モードの場合、コンパニオンの位置をカメラに渡す
+		m_pCamera->SetControlledCharacterPosition(m_pCompanion->GetPos());
+		m_pCamera->SetPlayerDir(m_pCompanion->GetPlayerDir());
+	}
 	m_pPlayer->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pPlayer->SetFollowTargetPos(m_pCompanion->GetPos());
-	m_pCamera->SetPlayerPosition(m_pPlayer->GetPos());
+	//m_pCamera->SetControlledCharacterPosition(m_pPlayer->GetPos());
 	m_pCamera->SetLockOnPosition(m_pNormalEnemy->GetPos());
-	m_pCamera->SetPlayerDir(m_pPlayer->GetPlayerDir());
+	//m_pCamera->SetPlayerDir(m_pPlayer->GetPlayerDir());
 	m_pCompanion->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pCompanion->SetPlayerPos(m_pPlayer->GetPos());
 	return this;
@@ -63,7 +101,6 @@ SceneBase* GameScene::Update()
 void GameScene::Draw()
 {
 	m_pPlayer->Draw();
-	//m_pEnemy->Draw();
 	m_pCompanion->Draw();
 	m_pNormalEnemy->Draw();
 	DrawGrid();

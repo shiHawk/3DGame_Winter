@@ -9,13 +9,13 @@ public:
 	virtual void Update() = 0;
 	bool IsDead() { return m_isDead; }
 	VECTOR GetPos() { return m_pos; }
-protected:
-	virtual void OnAttack() abstract;
 	enum class ControlMode
 	{
 		PLAYER,
 		COMPANION
 	};
+protected:
+	virtual void OnAttack() abstract;
 	VECTOR m_pos;
 	VECTOR m_vec;
 	VECTOR m_moveInput;

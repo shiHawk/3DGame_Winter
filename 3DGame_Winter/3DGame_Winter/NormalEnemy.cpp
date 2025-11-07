@@ -2,7 +2,7 @@
 #include <cmath>
 namespace
 {
-	constexpr VECTOR kDefaultPos = { 0.0f,0.0f,500.0f };
+	constexpr VECTOR kDefaultPos = { -500.0f,0.0f,500.0f };
 	constexpr VECTOR kDefaultDir = { 0.0,270.0f,0.0f };
 	constexpr float kSphereRadius = 90.0f;
 	constexpr int kDivNum = 8;
