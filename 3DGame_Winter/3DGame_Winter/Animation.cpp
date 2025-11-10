@@ -132,7 +132,8 @@ void Animation::UpdateAnim()
 
 void Animation::ChangeAnim(int modelHandle, int animNo, bool isLoop, float increment)
 {
-	if (m_currentAnimNo == animNo || m_isBlending) return;
+	// アタッチされているアニメーションと同じアニメーションがすでに再生されている場合はアニメーションの変更を行わない
+	if ((m_currentAnimNo == animNo && m_timeIncrement != 0.0f) || m_isBlending) return; 
 	m_currentAnimNo = animNo;
 	// 現在の再生情報を「ブレンド元(old)」として保持
 	m_oldAttachNo = m_currentAttachNo;

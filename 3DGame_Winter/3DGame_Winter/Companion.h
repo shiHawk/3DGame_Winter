@@ -56,6 +56,9 @@ private:
 	float m_angleY;
 	float m_specialGauge;
 	float m_attackCoolTimer;
+	float m_avoidanceTimer;
+	bool m_isAvoidanceFlag;
 	void RotatingToAttack();
+	void OnAvoidance();
 };
 

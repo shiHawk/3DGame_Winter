@@ -17,7 +17,7 @@ namespace
     constexpr float kJumpPower = 10.0f;
     constexpr float kGravity = -0.5f;
     // d—ÍŒW”iUŒ‚’†j
-    const float kAttackGravityMultiplier = 0.2f;
+    const float kAttackGravityMultiplier = 0.4f;
 	// Œ¸‘¬
 	constexpr float kMoveDecRate = 0.60f;
     // ü•ª‚Ì’·‚³
@@ -36,8 +36,8 @@ namespace
 
     // ŠeUŒ‚‚ÌUŒ‚—Í
     constexpr int kAttackPower = 15;
-    constexpr int kStrongAttackPower = 30;
-    constexpr int kComboFinishAttackPower = 45;
+    constexpr int kStrongAttackPower = 45;
+    constexpr int kComboFinishAttackPower = 60;
     constexpr int kSpecialSkilPower = 150;
 
     constexpr float kAttackRange = 60.0f;
@@ -141,7 +141,6 @@ void Player::Update()
 {
     m_moveInput = HandleInput();
     UpdatePlayerState();
-    //printfDx(L"m_isJump:%d\n", m_isJump);
     //printfDx(L"m_distanceToFollowTarget:%f\n", m_distanceToFollowTarget);
     if (m_controlMode == ControlMode::PLAYER)
     {
@@ -177,7 +176,8 @@ void Player::Update()
     }
     else
     {
-        m_vec.y += kGravity * kAttackGravityMultiplier;
+        m_vec = { 0.0f,0.0f,0.0f };
+        m_vec.y += kGravity * kAttackGravityMultiplier; // UŒ‚‚Í‚©‚©‚éd—Í‚ğ¬‚³‚­‚·‚é
     }
     
     if (m_pos.y + m_vec.y < 0.0f)
@@ -275,6 +275,7 @@ void Player::Draw()
 
 	//DrawSphere3D(m_pos,kSphereRadius,kDivNum,kSphereDifColor,kSphereSpcColor,true);
     MV1DrawModel(m_modelHandle);
+#ifdef _DEBUG
     DrawLine3D(lineStart, lineEnd, kSphereDifColor);
     if (m_attack.active)
     {
@@ -292,6 +293,7 @@ void Player::Draw()
     {
         DrawSphere3D(m_specialSkil.pos, m_specialSkil.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
     }
+#endif
 }
 
 void Player::OnAttack()
