@@ -48,7 +48,7 @@ namespace
 
 	constexpr float kAttackRadius = 30.0f;
 	constexpr float kSpecialSkilRadius = 300.0f;
-	constexpr float kAttackRange = 60.0f;
+	constexpr float kAttackRange = 90.0f;
 	constexpr float kAttackCoolTime = 40.0f;
 
 	// 線分の長さ
@@ -64,7 +64,7 @@ namespace
 	constexpr float kPostWarpPosZ = 100.0f;
 
 	constexpr float kStrongAttackBulletSpeed = 8.0f; // 弾の速度
-	constexpr float kOffSetStrongAttackPosY = 25.0f; // 弾の速度
+	constexpr float kOffSetStrongAttackPosY = 25.0f; // 攻撃の位置補正
 	constexpr double kAnalogDeadZone = 0.25; // アナログスティックのデッドゾーン
 
 	constexpr float kAvoidanceFrame = 15.0f;
@@ -134,6 +134,24 @@ void Companion::Update()
 			m_vec.y = kJumpPower;
 			m_isJump = true;
 		}
+		if (Pad::isTrigger(PAD_INPUT_3) && !m_isAvoidanceFlag) // 回避
+		{
+			m_avoidanceTimer = kAvoidanceFrame;
+			m_isAvoidanceFlag = true;
+		}
+		if (m_isAvoidanceFlag)
+		{
+			OnAvoidance();
+			// 減速処理
+			m_vec.x *= kMoveDecRate;
+			m_vec.z *= kMoveDecRate;
+			if (m_avoidanceTimer <= 0.0f)
+			{
+				m_vec.x = 0.0f;
+				m_vec.z = 0.0f;
+				m_isAvoidanceFlag = false;
+			}
+		}
 		UpdatePlayerControlState();
 	}
 	else
@@ -182,6 +200,9 @@ void Companion::Update()
 		// 敵との距離が0（または敵がいない）場合はゼロベクトル
 		m_dirToEnemy = VGet(0.0f, 0.0f, 0.0f);
 	}
+	m_forwardDir.x = sinf(m_angleY);
+	m_forwardDir.y = 0.0f;
+	m_forwardDir.z = cosf(m_angleY);
 	m_companionToPlayer = VSub(m_playerPos, m_pos);
 	m_distanceToPlayer = VSize(m_companionToPlayer);
 	if (m_companionState == CompanionState::NORMAL)
@@ -442,6 +463,10 @@ void Companion::UpdatePlayerControlState()
 	{
 		m_attackCoolTimer--;
 	}
+	if (m_isAvoidanceFlag) // 回避フラグが立っている間は、他のステート処理（特にUpdateMovement）を行わない
+	{
+		return;
+	}
 	// AI用のステートはプレイヤー操作時はNORMALとして扱う
 	if (m_companionState == CompanionState::FOLLOW_PLAYER || m_companionState == CompanionState::TRACK_ENEMY)
 	{
@@ -691,6 +716,17 @@ void Companion::RotatingToAttack()
 void Companion::OnAvoidance()
 {
 	m_avoidanceTimer--;
+	VECTOR avoidDir;
+	// スティック入力がある場合、その方向(m_moveInput)を回避方向にする
+	if (VSize(m_moveInput) > 0.0f)
+	{
+		avoidDir = VNorm(m_moveInput);
+	}
+	else
+	{
+		// スティック入力がない場合、キャラクターの向いている方向(m_forwardDir)を回避方向にする
+		avoidDir = m_forwardDir;
+	}
 	m_vec.x = m_forwardDir.x * kAvoidanceMoveSpeed;
 	m_vec.z = m_forwardDir.z * kAvoidanceMoveSpeed;
 	ChangeAnim(m_modelHandle, kAvoidanceAnimNo, false, kAvoidanceAnimIncrement);

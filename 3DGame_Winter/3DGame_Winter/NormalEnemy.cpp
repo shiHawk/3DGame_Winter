@@ -12,13 +12,17 @@ namespace
 	constexpr float kMoveDecRate = 0.8f;
 	constexpr float kModelScale = 60.0f; // モデルのスケール
 	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
+	constexpr float kAttackRadius = 30.0f;
 	constexpr int kIdleAnimNo = 41;
 	constexpr int kWalkAnimNo = 55;
+	constexpr int kAttackAnimNo = 5;
 	constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
+	constexpr float kAttackAnimIncrement = 0.4f; // 待機アニメーションの再生速度
 }
 
-NormalEnemy::NormalEnemy()
+NormalEnemy::NormalEnemy():
+	m_enemyAttack(kAttackRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f })
 {
 }
 
@@ -26,9 +30,9 @@ NormalEnemy::~NormalEnemy()
 {
 }
 
-void NormalEnemy::Init(std::shared_ptr<Player> pPlayer)
+void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
 {
-	Enemy::Init(pPlayer);
+	Enemy::Init(pPlayer, pCompanion);
 	m_pos = kDefaultPos;
 	m_modelHandle = MV1LoadModel(L"Data/model/Skeleton_Warrior.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
@@ -77,4 +81,9 @@ void NormalEnemy::Draw()
 {
 	//DrawSphere3D(m_pos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
 	MV1DrawModel(m_modelHandle);
+}
+
+void NormalEnemy::OnAttack()
+{
+	ChangeAnim(m_modelHandle,kAttackAnimNo,false,kAttackAnimIncrement);
 }

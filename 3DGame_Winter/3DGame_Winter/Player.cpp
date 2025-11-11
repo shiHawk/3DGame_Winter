@@ -46,8 +46,8 @@ namespace
     constexpr float kAttackDuration = 20.0f;
     constexpr float kStrongAttackDuration = 40.0f;
     constexpr float kComboFinishAttackDuration = 40.0f;
-    constexpr float kSpecialSkilDuration = 70.0f;
-
+    constexpr float kSpecialSkilDuration = 70.0f; // 強攻撃がコンボフィニッシュにキャンセル可能になるまでの残り時間
+    constexpr float kStrongAttackCancelThreshold = 10.0f;
     constexpr float kAvoidanceFrame = 15.0f;
     constexpr float kAvoidanceMoveSpeed = 0.3f;
 
@@ -104,7 +104,7 @@ Player::Player():
     m_isAvoidanceFlag(false),
     m_comboStep(0),
     m_comboWindowTimer(0.0f),
-    m_aiComboCoolTimer(0.0f),
+    m_comboCoolTimer(0.0f),
     m_specialGauge(0),
     m_isSpecialSkilFlag(false),
     m_aiWillDo3HitCombo(false)
@@ -141,7 +141,7 @@ void Player::Update()
 {
     m_moveInput = HandleInput();
     UpdatePlayerState();
-    //printfDx(L"m_distanceToFollowTarget:%f\n", m_distanceToFollowTarget);
+    //printfDx(L"m_attack2.timer:%f\n", m_attack2.timer);
     if (m_controlMode == ControlMode::PLAYER)
     {
         if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
@@ -604,10 +604,13 @@ void Player::HandleStateAttacking2()
     // プレイヤー操作時のコンボ連携（キャンセル）
     if (m_controlMode == ControlMode::PLAYER && m_comboStep == 2 && Pad::isTrigger(PAD_INPUT_2))
     {
-        m_attack2.active = false; // 現在の攻撃をキャンセル
-        m_comboStep = 3;          // 3段階目へ
-        TryStartAttack(&Player::OnCombFinishAttack, PlayerState::ROTATING_TO_COMBOFINISH, PlayerState::ATTACKING_COMBOFINISH);
-        return; // ステートが変更されたので、このフレームの処理は終了
+        if (m_attack2.timer <= kStrongAttackCancelThreshold)
+        {
+            m_attack2.active = false; // 現在の攻撃をキャンセル
+            m_comboStep = 3;          // 3段階目へ
+            TryStartAttack(&Player::OnCombFinishAttack, PlayerState::ROTATING_TO_COMBOFINISH, PlayerState::ATTACKING_COMBOFINISH);
+            return; // ステートが変更されたので、このフレームの処理は終了
+        }
     }
 
     // 攻撃タイマーを進める (コンボ連携しなかった場合)
@@ -629,6 +632,7 @@ void Player::HandleStateComboWindow()
 
 void Player::HandleStateSpecialSkil()
 {
+    UpdateMovement(m_moveInput);
     if (m_specialSkil.active)
     {
         m_specialSkil.timer--;
@@ -643,9 +647,9 @@ void Player::HandleStateSpecialSkil()
 
 void Player::HandleAIComboWindow()
 {
-    if (m_aiComboCoolTimer > 0.0f)
+    if (m_comboCoolTimer > 0.0f)
     {
-        m_aiComboCoolTimer--;
+        m_comboCoolTimer--;
         return;
     }
     // 1段階目 (弱) が終わった後
@@ -653,7 +657,7 @@ void Player::HandleAIComboWindow()
     {
         m_comboStep = 2; // AIは必ず2段階目 (強A) に移行する
         TryStartAttack(&Player::OnAttack2, PlayerState::ROTATING_TO_ATTACK2, PlayerState::ATTACKING2);
-        m_aiComboCoolTimer = kAIComboCoolTime;
+        m_comboCoolTimer = kAIComboCoolTime;
     }
     // 2段階目 (強A) が終わった後
     else if (m_comboStep == 2)
@@ -667,7 +671,7 @@ void Player::HandleAIComboWindow()
         {
             m_playerState = PlayerState::NORMAL; // 2ヒットで終了
             m_comboStep = 0;
-            m_aiComboCoolTimer = 0.0f;
+            m_comboCoolTimer = 0.0f;
         }
     }
     else
@@ -758,7 +762,7 @@ void Player::UpdateAttackState(AttackSphere& attackData, int animNo, float animI
                 m_comboWindowTimer = kComboWindowTime; // コンボ受付時間を設定
                 if (m_controlMode == ControlMode::COMPANION)
                 {
-                    m_aiComboCoolTimer = kAIComboCoolTime; // コンボの繋ぎ目にクールタイムを設定
+                    m_comboCoolTimer = kAIComboCoolTime; // コンボの繋ぎ目にクールタイムを設定
                 }
             }
             else if (nextState == PlayerState::NORMAL)

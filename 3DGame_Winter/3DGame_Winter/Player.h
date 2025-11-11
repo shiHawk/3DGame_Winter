@@ -58,7 +58,7 @@ private:
 	bool m_isAvoidanceFlag; // 回避のフラグ
 	int m_comboStep; // コンボの段階
 	float m_comboWindowTimer; // コンボの受付時間
-	float m_aiComboCoolTimer; // AIのコンボ用クールタイム
+	float m_comboCoolTimer; // AIのコンボ用クールタイム
 	int m_specialGauge; // 必殺ゲージ
 	bool m_isSpecialSkilFlag; // 必殺技のフラグ
 	bool m_aiWillDo3HitCombo; // AIが3コンボ攻撃をするかどうかのフラグ

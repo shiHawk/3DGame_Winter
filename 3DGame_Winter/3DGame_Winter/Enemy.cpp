@@ -12,11 +12,13 @@ namespace
 
 Enemy::Enemy():
 m_toPlayerDir({0.0f,0.0f,0.0f}),
-m_toPlayerDistance(0.0f)
+m_toPlayerDistance(0.0f),
+m_toCompanionDir({ 0.0f,0.0f,0.0f }),
+m_toCompanionDistance(0.0f)
 {
 }
 
-void Enemy::Init(std::shared_ptr<Player> pPlayer)
+void Enemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
 {
 	m_pPlayer = pPlayer;
 }

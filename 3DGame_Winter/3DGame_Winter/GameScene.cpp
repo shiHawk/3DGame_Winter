@@ -29,7 +29,7 @@ void GameScene::Init()
 	m_pCompanion = std::make_shared<Companion>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
-	m_pNormalEnemy->Init(m_pPlayer);
+	m_pNormalEnemy->Init(m_pPlayer,m_pCompanion);
 	m_pCompanion->Init(m_pCamera);
 }
 
