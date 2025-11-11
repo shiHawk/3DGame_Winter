@@ -78,6 +78,7 @@ namespace
     constexpr float kAttackAnimIncrement = 0.7f; // 攻撃アニメーションの再生速度
     constexpr float kStrongAttackAnimIncrement = 0.9f; // 強攻撃アニメーションの再生速度
     constexpr float kComboFinishAttackAnimIncrement = 0.7f; 
+    constexpr float kCancelFrames = 10.0f;
 
     constexpr float kEnemyLeashDistance = 500.0f; // これ以上敵から離れたら、追跡をやめてプレイヤーの元に戻る距離
     constexpr float kNearAttackDistance = kAttackRange * 1.5f; // 近距離攻撃のために、敵にこの距離まで近づく (kAttackRange より少し広め)
@@ -585,7 +586,7 @@ void Player::HandleStateNormal(bool aiWantsToAttack)
 void Player::HandleStateAttacking()
 {
     UpdateMovement(m_moveInput);
-    // プレイヤー操作時のコンボ連携（キャンセル）
+    // プレイヤー操作時のコンボ連携
     if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_2))
     {
         m_attack.active = false; // 現在の攻撃をキャンセル
@@ -601,7 +602,7 @@ void Player::HandleStateAttacking()
 void Player::HandleStateAttacking2()
 {
     UpdateMovement(m_moveInput);
-    // プレイヤー操作時のコンボ連携（キャンセル）
+    // プレイヤー操作時のコンボ連携
     if (m_controlMode == ControlMode::PLAYER && m_comboStep == 2 && Pad::isTrigger(PAD_INPUT_2))
     {
         if (m_attack2.timer <= kStrongAttackCancelThreshold)
@@ -723,7 +724,7 @@ void Player::RotatingToAttackAndAttack(void(Player::* attackFunc)(), PlayerState
     if (std::abs(diff) < kAngleThreshold)
     {
         m_angleY = targetAngle; // 最後に角度をぴったり合わせる
-        (this->*attackFunc)(); // ← メンバ関数ポインタ呼び出し
+        (this->*attackFunc)(); // メンバ関数ポインタ呼び出し
         m_playerState = nextState; // 攻撃状態へ移行
     }
 }
@@ -752,11 +753,12 @@ void Player::UpdateAttackState(AttackSphere& attackData, int animNo, float animI
     {
         attackData.timer--;
         ChangeAnim(m_modelHandle, animNo, false, animInc);
-        if (attackData.timer < 0.0f)
+        float animTotalTime = MV1GetAnimTotalTime(m_modelHandle, animNo);
+        printfDx(L"playTime:%f\n", GetPlayTime());
+        if (animTotalTime-kCancelFrames <= GetPlayTime())
         {
             attackData.active = false;
             m_playerState = nextState;
-
             if (nextState == PlayerState::COMBO_WINDOW)
             {
                 m_comboWindowTimer = kComboWindowTime; // コンボ受付時間を設定
