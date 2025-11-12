@@ -24,6 +24,12 @@ public:
 	void SetControlMode(ControlMode mode) { m_controlMode = mode; }
 	ControlMode GetControlMode() { return m_controlMode; }
 	void SetFollowTargetPos(VECTOR targetPos) { m_followTargetPos = targetPos; } // AI操作時に追従する対象（＝プレイヤー）の座標をセットする
+	float GetAttackRadius() { return m_attack.radius; }
+	VECTOR GetAttackPos() { return m_attack.pos; }
+	bool IsAttackActive() { return m_attack.active; }
+	int GetAttackPower() { return m_attackPower; }
+	void AddPos(VECTOR offset);
+	float GetColRadius();
 private:
 	enum class PlayerState
 	{
@@ -48,9 +54,6 @@ private:
 	VECTOR m_enemyPos;
 	VECTOR m_followTargetPos; // AI時に追従する対象（プレイヤー）の座標
 	AttackSphere m_attack;
-	AttackSphere m_attack2;
-	AttackSphere m_comboFinish;
-	AttackSphere m_specialSkil;
 	VECTOR m_dirToEnemy; 
 	float m_distanceToEnemy; // エネミーまでの距離の長さ
 	float m_distanceToFollowTarget;

@@ -23,6 +23,7 @@ namespace
     // 線分の長さ
     constexpr float kForwardLineLength = 100.0f;
     constexpr float kBackLineLength = 540.0f;
+    constexpr float kColRadius = 40.0f;
     // アナログスティックのデッドゾーン
     constexpr double kAnalogDeadZone = 0.25;
     constexpr float kMoveThreshold = 0.1f; // 移動とみなす入力の閾値
@@ -36,8 +37,8 @@ namespace
 
     // 各攻撃の攻撃力
     constexpr int kAttackPower = 15;
-    constexpr int kStrongAttackPower = 45;
-    constexpr int kComboFinishAttackPower = 60;
+    constexpr int kStrongAttackPower = 35;
+    constexpr int kComboFinishAttackPower = 50;
     constexpr int kSpecialSkilPower = 150;
 
     constexpr float kAttackRange = 60.0f;
@@ -95,9 +96,6 @@ Player::Player():
     m_enemyPos({0.0f,0.0f,0.0f}),
     m_followTargetPos(0.0f,0.0f,0.0f),
     m_attack(kAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
-    m_attack2(kStrongAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
-    m_comboFinish(kComboFinishAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
-    m_specialSkil(kSpecialSkilRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
     m_dirToEnemy({0.0f,0.0f,0.0f}),
     m_distanceToEnemy(0.0f),
     m_distanceToFollowTarget(0.0f),
@@ -122,9 +120,6 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
     m_attackPower = kAttackPower;
     m_playerState = PlayerState::NORMAL;
     m_attack.active = false;
-    m_attack2.active = false;
-    m_comboFinish.active = false;
-    m_specialSkil.active = false;
     m_distanceToEnemy = 0.0f;
     m_modelHandle = MV1LoadModel(L"Data/model/Barbarian.mv1");
     MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
@@ -282,24 +277,13 @@ void Player::Draw()
     {
         DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
     }
-    if (m_attack2.active)
-    {
-        DrawSphere3D(m_attack2.pos, m_attack2.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
-    }
-    if (m_comboFinish.active)
-    {
-        DrawSphere3D(m_comboFinish.pos, m_comboFinish.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
-    }
-    if (m_specialSkil.active)
-    {
-        DrawSphere3D(m_specialSkil.pos, m_specialSkil.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
-    }
 #endif
 }
 
 void Player::OnAttack()
 {
     m_attackPower = kAttackPower;
+    m_attack.radius = kAttackRadius;
     m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos,VScale(m_attack.dir,kAttackRange));
@@ -313,10 +297,11 @@ void Player::OnAttack()
 void Player::OnAttack2()
 {
     m_attackPower = kStrongAttackPower;
-    m_attack2.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
-    m_attack2.active = true;
-    m_attack2.pos = VAdd(m_pos, VScale(m_attack2.dir, kAttackRange));
-    m_attack2.timer = kStrongAttackDuration;
+    m_attack.radius = kStrongAttackRadius;
+    m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
+    m_attack.active = true;
+    m_attack.pos = VAdd(m_pos, VScale(m_attack.dir, kAttackRange));
+    m_attack.timer = kStrongAttackDuration;
     if (m_pos.y > 0.0f)
     {
         m_vec.y = 0.0f; // 垂直速度をゼロにし、上昇・下降を停止
@@ -326,18 +311,20 @@ void Player::OnAttack2()
 void Player::OnCombFinishAttack()
 {
     m_attackPower = kComboFinishAttackPower;
-    m_comboFinish.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
-    m_comboFinish.active = true;
-    m_comboFinish.pos = VAdd(m_pos, VScale(m_comboFinish.dir, kAttackRange));
-    m_comboFinish.timer = kComboFinishAttackDuration;
+    m_attack.radius = kComboFinishAttackRadius;
+    m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
+    m_attack.active = true;
+    m_attack.pos = VAdd(m_pos, VScale(m_attack.dir, kAttackRange));
+    m_attack.timer = kComboFinishAttackDuration;
 }
 
 void Player::OnSpecialSkil()
 {
     m_attackPower = kSpecialSkilPower;
-    m_specialSkil.active = true;
-    m_specialSkil.pos = m_pos;
-    m_specialSkil.timer = kSpecialSkilDuration;
+    m_attack.radius = kSpecialSkilRadius;
+    m_attack.active = true;
+    m_attack.pos = m_pos;
+    m_attack.timer = kSpecialSkilDuration;
     m_playerState = PlayerState::SPECIALSKIL;
 }
 
@@ -347,6 +334,16 @@ void Player::OnAvoidance()
     m_vec.x = m_forwardDir.x * kAvoidanceMoveSpeed;
     m_vec.z = m_forwardDir.z * kAvoidanceMoveSpeed;
     ChangeAnim(m_modelHandle,kAvoidanceAnimNo,false,kAnimIncrement);
+}
+
+void Player::AddPos(VECTOR offset)
+{
+    m_pos = VAdd(m_pos, offset);
+}
+
+float Player::GetColRadius()
+{
+    return kColRadius;
 }
 
 VECTOR Player::HandleInput()
@@ -545,7 +542,7 @@ void Player::UpdatePlayerState()
         break;
     case Player::PlayerState::ATTACKING_COMBOFINISH:
         UpdateMovement(m_moveInput);
-        UpdateAttackState(m_comboFinish, kComboFinishAttackAnimNo, kComboFinishAttackAnimIncrement, PlayerState::NORMAL);
+        UpdateAttackState(m_attack, kComboFinishAttackAnimNo, kComboFinishAttackAnimIncrement, PlayerState::NORMAL);
         break;
     case Player::PlayerState::COMBO_WINDOW:
         HandleStateComboWindow();
@@ -576,7 +573,7 @@ void Player::HandleStateNormal(bool aiWantsToAttack)
     }
 
     // プレイヤーの単発強攻撃入力 (弱攻撃とは独立して判定)
-    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_2) && !m_attack2.active)
+    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_2) && !m_attack.active)
     {
         m_comboStep = 0; // 単発
         TryStartAttack(&Player::OnAttack2, PlayerState::ROTATING_TO_ATTACK2, PlayerState::ATTACKING2);
@@ -605,9 +602,9 @@ void Player::HandleStateAttacking2()
     // プレイヤー操作時のコンボ連携
     if (m_controlMode == ControlMode::PLAYER && m_comboStep == 2 && Pad::isTrigger(PAD_INPUT_2))
     {
-        if (m_attack2.timer <= kStrongAttackCancelThreshold)
+        if (m_attack.timer <= kStrongAttackCancelThreshold)
         {
-            m_attack2.active = false; // 現在の攻撃をキャンセル
+            m_attack.active = false; // 現在の攻撃をキャンセル
             m_comboStep = 3;          // 3段階目へ
             TryStartAttack(&Player::OnCombFinishAttack, PlayerState::ROTATING_TO_COMBOFINISH, PlayerState::ATTACKING_COMBOFINISH);
             return; // ステートが変更されたので、このフレームの処理は終了
@@ -616,7 +613,7 @@ void Player::HandleStateAttacking2()
 
     // 攻撃タイマーを進める (コンボ連携しなかった場合)
     PlayerState nextState = (m_comboStep == 2) ? PlayerState::COMBO_WINDOW : PlayerState::NORMAL;
-    UpdateAttackState(m_attack2, kStrongAttackAnimNo, kStrongAttackAnimIncrement, nextState);
+    UpdateAttackState(m_attack, kStrongAttackAnimNo, kStrongAttackAnimIncrement, nextState);
 }
 
 void Player::HandleStateComboWindow()
@@ -634,13 +631,13 @@ void Player::HandleStateComboWindow()
 void Player::HandleStateSpecialSkil()
 {
     UpdateMovement(m_moveInput);
-    if (m_specialSkil.active)
+    if (m_attack.active)
     {
-        m_specialSkil.timer--;
+        m_attack.timer--;
         ChangeAnim(m_modelHandle, kSpecialSkilAnimNo, false, kComboFinishAttackAnimIncrement);
-        if (m_specialSkil.timer < 0.0f)
+        if (m_attack.timer < 0.0f)
         {
-            m_specialSkil.active = false;
+            m_attack.active = false;
             m_playerState = PlayerState::NORMAL;
         }
     }
@@ -754,7 +751,7 @@ void Player::UpdateAttackState(AttackSphere& attackData, int animNo, float animI
         attackData.timer--;
         ChangeAnim(m_modelHandle, animNo, false, animInc);
         float animTotalTime = MV1GetAnimTotalTime(m_modelHandle, animNo);
-        printfDx(L"playTime:%f\n", GetPlayTime());
+        //printfDx(L"playTime:%f\n", GetPlayTime());
         if (animTotalTime-kCancelFrames <= GetPlayTime())
         {
             attackData.active = false;

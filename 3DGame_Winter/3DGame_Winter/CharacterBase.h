@@ -9,6 +9,7 @@ public:
 	virtual void Update() = 0;
 	bool IsDead() { return m_isDead; }
 	VECTOR GetPos() { return m_pos; }
+	void AddPos(VECTOR offset) { VAdd(m_pos, offset); }
 	enum class ControlMode
 	{
 		PLAYER,
@@ -33,5 +34,7 @@ protected:
 		float timer; // çUåÇéûä‘
 		VECTOR dir;
 	};
+	bool m_isHitFlag;
+	float m_invincibilityTimer;
 };
 

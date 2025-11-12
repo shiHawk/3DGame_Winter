@@ -69,6 +69,7 @@ namespace
 
 	constexpr float kAvoidanceFrame = 15.0f;
 	constexpr float kAvoidanceMoveSpeed = 0.3f;
+	constexpr float kColRadius = 40.0f;
 }
 
 Companion::Companion():
@@ -82,8 +83,6 @@ Companion::Companion():
 	m_companionToEnemy({ 0.0f,0.0f,0.0f }),
 	m_companionToPlayer({ 0.0f,0.0f,0.0f }),
 	m_attack(kAttackRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
-	m_strongAttack(kAttackRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
-	m_specialSkil(kSpecialSkilRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
 	m_distanceToEnemy(0.0f),
 	m_distanceToPlayer(0.0f),
 	m_angleY(0.0f),
@@ -105,8 +104,6 @@ void Companion::Init(std::shared_ptr<Camera> pCamera)
 	m_vec = kDefaultVec;
 	m_distanceToEnemy = 0.0f;
 	m_attack.active = false;
-	m_strongAttack.active = false;
-	m_specialSkil.active = false;
 	m_modelHandle = MV1LoadModel(L"Data/model/Mage.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
 	MV1SetRotationXYZ(m_modelHandle,kDefaultDir);
@@ -160,7 +157,7 @@ void Companion::Update()
 		if (m_distanceToPlayer > kWarpDistance) // プレイヤーと離れすぎたらプレイヤーの近くにワープする
 		{
 			m_pos = VGet(m_playerPos.x, m_playerPos.y, m_playerPos.z - kPostWarpPosZ);
-			m_strongAttack.active = false;
+			m_attack.active = false;
 			m_companionState = CompanionState::FOLLOW_PLAYER;
 		}
 	}
@@ -270,27 +267,23 @@ void Companion::Draw()
 	VECTOR lineStart = VGet(m_pos.x, m_pos.y + kSphereRadius *0.5f, m_pos.z);
 	VECTOR lineEnd = VAdd(lineStart, m_forwardDir);
 #ifdef _DEBUG
-	if (m_attack.active)
+	if (m_companionState == CompanionState::NORMAL_ATTACK)
 	{
 		DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 	}
 	DrawLine3D(lineStart, lineEnd, kSphereDifColor);
 #endif 
-	if (m_strongAttack.active)
+	if (m_companionState == CompanionState::STRONG_ATTACK || m_companionState == CompanionState::SPECIALSKIL)
 	{
-		DrawSphere3D(m_strongAttack.pos, m_strongAttack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
+		DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
 	}
-	if (m_specialSkil.active)
-	{
-		DrawSphere3D(m_specialSkil.pos, m_specialSkil.radius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
-	}
-	
 	MV1DrawModel(m_modelHandle);
 }
 
 void Companion::OnAttack()
 {
 	m_attackPower = kAttackPower;
+	m_attack.radius = kAttackRadius;
 	m_attack.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
 	m_attack.active = true;
 	m_attack.pos = VAdd(m_pos, VScale(m_attack.dir, kAttackRange));
@@ -300,31 +293,33 @@ void Companion::OnAttack()
 void Companion::OnStrongAttack()
 {
 	m_attackPower = kStrongAttackPower;
-	m_strongAttack.timer = kStrongAttackDuration;
-	m_strongAttack.active = true;
+	m_attack.radius = kAttackRadius;
+	m_attack.timer = kStrongAttackDuration;
+	m_attack.active = true;
 	if (m_controlMode == ControlMode::PLAYER)
 	{
 		// プレイヤー操作時: 弾の方向をキャラクターの現在の向き (m_angleY) に基づいて水平に設定
 		// Y成分は 0.0f にして水平に飛ばす
-		m_strongAttack.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
+		m_attack.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
 	}
 	else // ControlMode::COMPANION (AIモード)
 	{
 		// AI操作時: 弾の方向を敵の方向 (m_dirToEnemy) に設定 (Y成分を含む)
-		m_strongAttack.dir = VNorm(m_dirToEnemy);
+		m_attack.dir = VNorm(m_dirToEnemy);
 	}
 	VECTOR forwardVec = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
-	m_strongAttack.pos = VAdd(m_pos,VScale(forwardVec,kSphereRadius*2.0f));
-	m_strongAttack.pos.y = kOffSetStrongAttackPosY;
+	m_attack.pos = VAdd(m_pos,VScale(forwardVec,kSphereRadius*2.0f));
+	m_attack.pos.y = kOffSetStrongAttackPosY;
 }
 
 void Companion::OnSpecialSkil()
 {
 	m_attackPower = kStrongAttackPower;
-	m_specialSkil.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
-	m_specialSkil.active = true;
-	m_specialSkil.pos = m_enemyPos;
-	m_specialSkil.timer = kSpecialSkilDuration;
+	m_attack.radius = kSpecialSkilRadius;
+	m_attack.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
+	m_attack.active = true;
+	m_attack.pos = m_enemyPos;
+	m_attack.timer = kSpecialSkilDuration;
 }
 
 void Companion::UpdateAIState()
@@ -429,27 +424,27 @@ void Companion::UpdateAIState()
 		}
 		break;
 	case Companion::CompanionState::STRONG_ATTACK:
-		if (m_strongAttack.active)
+		if (m_attack.active)
 		{
-			m_strongAttack.pos = VAdd(m_strongAttack.pos, VScale(m_strongAttack.dir, kStrongAttackBulletSpeed)); // 毎フレーム位置の更新
-			m_strongAttack.timer--;
+			m_attack.pos = VAdd(m_attack.pos, VScale(m_attack.dir, kStrongAttackBulletSpeed)); // 毎フレーム位置の更新
+			m_attack.timer--;
 			ChangeAnim(m_modelHandle,kStrongAttackAnimNo,false, kStrongAttackAnimIncrement);
-			if (m_strongAttack.timer <= 0.0f)
+			if (m_attack.timer <= 0.0f)
 			{
-				m_strongAttack.active = false;
+				m_attack.active = false;
 				m_companionState = CompanionState::NORMAL;
 				m_attackCoolTimer = kAttackCoolTime;
 			}
 		}
 		break;
 	case Companion::CompanionState::SPECIALSKIL:
-		if (m_specialSkil.active)
+		if (m_attack.active)
 		{
-			m_specialSkil.timer--;
+			m_attack.timer--;
 			ChangeAnim(m_modelHandle, kSpecialSkilAnimNo, false, kSpecialSkilAnimIncriment); 
-			if (m_specialSkil.timer < 0.0f)
+			if (m_attack.timer < 0.0f)
 			{
-				m_specialSkil.active = false;
+				m_attack.active = false;
 				m_companionState = CompanionState::NORMAL;
 			}
 		}
@@ -539,14 +534,14 @@ void Companion::UpdatePlayerControlState()
 		}
 		break;
 	case Companion::CompanionState::STRONG_ATTACK:
-		m_strongAttack.pos = VAdd(m_strongAttack.pos, VScale(m_strongAttack.dir, kStrongAttackBulletSpeed)); // 毎フレーム位置の更新
-		if (m_strongAttack.active)
+		m_attack.pos = VAdd(m_attack.pos, VScale(m_attack.dir, kStrongAttackBulletSpeed)); // 毎フレーム位置の更新
+		if (m_attack.active)
 		{
-			m_strongAttack.timer--;
+			m_attack.timer--;
 			ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, kStrongAttackAnimIncrement);
-			if (m_strongAttack.timer < 0.0f || VSize(VSub(m_strongAttack.pos,m_enemyPos)) <= m_strongAttack.radius*2.0f)
+			if (m_attack.timer < 0.0f || VSize(VSub(m_attack.pos,m_enemyPos)) <= m_attack.radius*2.0f)
 			{
-				m_strongAttack.active = false;
+				m_attack.active = false;
 				m_companionState = CompanionState::NORMAL;
 			}
 		}
@@ -556,13 +551,13 @@ void Companion::UpdatePlayerControlState()
 		}
 		break;
 	case Companion::CompanionState::SPECIALSKIL:
-		if (m_specialSkil.active)
+		if (m_attack.active)
 		{
-			m_specialSkil.timer--;
+			m_attack.timer--;
 			ChangeAnim(m_modelHandle, kSpecialSkilAnimNo, false, kSpecialSkilAnimIncriment);
-			if (m_specialSkil.timer < 0.0f)
+			if (m_attack.timer < 0.0f)
 			{
-				m_specialSkil.active = false;
+				m_attack.active = false;
 				m_companionState = CompanionState::NORMAL;
 			}
 		}
@@ -608,6 +603,11 @@ void Companion::UpdatePlayerControlState()
 		break;
 	}
 	}
+}
+
+float Companion::GetColRadius()
+{
+	return kColRadius;
 }
 
 void Companion::UpdateMovement(const VECTOR& moveDir)

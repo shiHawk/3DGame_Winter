@@ -12,6 +12,8 @@ public:
 	void Update() override;
 	void Draw() override;
 	virtual void OnAttack() override;
+	void OnDamage();
+	float GetColRadius();
 private:
 	AttackSphere m_enemyAttack;
 };

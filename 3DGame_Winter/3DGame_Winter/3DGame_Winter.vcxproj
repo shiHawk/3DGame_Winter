@@ -138,6 +138,7 @@
     <ClCompile Include="CharacterBase.cpp" />
     <ClCompile Include="Companion.cpp" />
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="GameplayCollision.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NormalEnemy.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="ControlMode.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="GameplayCollision.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="NormalEnemy.h" />
     <ClInclude Include="Pad.h" />

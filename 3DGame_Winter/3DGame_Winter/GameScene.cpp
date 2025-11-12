@@ -27,10 +27,12 @@ void GameScene::Init()
 	//m_pEnemy = std::make_shared<Enemy>();
 	m_pNormalEnemy = std::make_shared<NormalEnemy>();
 	m_pCompanion = std::make_shared<Companion>();
+	m_pGameplayCollision = std::make_shared<GameplayCollision>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
 	m_pNormalEnemy->Init(m_pPlayer,m_pCompanion);
 	m_pCompanion->Init(m_pCamera);
+	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemy);
 }
 
 void GameScene::End()
@@ -93,6 +95,7 @@ SceneBase* GameScene::Update()
 	m_pCamera->SetLockOnPosition(m_pNormalEnemy->GetPos());
 	m_pCompanion->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pCompanion->SetPlayerPos(m_pPlayer->GetPos());
+	m_pGameplayCollision->Update();
 	return this;
 }
 

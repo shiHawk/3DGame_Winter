@@ -5,6 +5,7 @@
 #include "Enemy.h"
 #include "NormalEnemy.h"
 #include "Companion.h"
+#include "GameplayCollision.h"
 #include "DxLib.h"
 #include "Pad.h"
 #include "CharacterBase.h"
@@ -25,5 +26,6 @@ private:
 	std::shared_ptr<Enemy> m_pEnemy;
 	std::shared_ptr<NormalEnemy> m_pNormalEnemy;
 	std::shared_ptr<Companion> m_pCompanion;
+	std::shared_ptr<GameplayCollision> m_pGameplayCollision;
 };
 

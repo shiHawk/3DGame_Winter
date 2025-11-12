@@ -24,6 +24,11 @@ public:
 	void UpdatePlayerControlState(); // プレイヤー時のステート
 	void SetControlMode(ControlMode mode) { m_controlMode = mode; }
 	ControlMode GetControlMode() { return m_controlMode; }
+	float GetAttackRadius() { return m_attack.radius; }
+	VECTOR GetAttackPos() { return m_attack.pos; }
+	bool IsAttackActive() { return m_attack.active; }
+	int GetAttackPower() { return m_attackPower; }
+	float GetColRadius();
 private:
 	void UpdateMovement(const VECTOR& moveDir);
 	VECTOR HandleInput();
@@ -49,8 +54,6 @@ private:
 	VECTOR m_companionToEnemy;
 	VECTOR m_companionToPlayer;
 	AttackSphere m_attack;
-	AttackSphere m_strongAttack;
-	AttackSphere m_specialSkil;
 	float m_distanceToEnemy;
 	float m_distanceToPlayer;
 	float m_angleY;
