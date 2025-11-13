@@ -24,7 +24,8 @@ void GameplayCollision::Update()
 {
 	CheckPlayerAttack();
 	ChaeckCompanionAttack();
-	PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pCompanion->GetPos(),m_pCompanion->GetColRadius());
+	PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pNormalEnemy->GetPos(), m_pNormalEnemy->GetColRadius(),m_pPlayer.get());
+	PushBackCharacter(m_pCompanion->GetPos(), m_pCompanion->GetColRadius(), m_pNormalEnemy->GetPos(), m_pNormalEnemy->GetColRadius(),m_pCompanion.get());
 }
 
 void GameplayCollision::Draw()
@@ -71,7 +72,7 @@ void GameplayCollision::ChaeckCompanionAttack()
 	}
 }
 
-void GameplayCollision::PushBackCharacter(VECTOR pos1, float pos1Radius, VECTOR pos2, float pos2Radius)
+void GameplayCollision::PushBackCharacter(VECTOR pos1, float pos1Radius, VECTOR pos2, float pos2Radius, CharacterBase* pTargetCharacter)
 {
 	m_overLapData.m_penetrationVector = VSub(pos1, pos2);
 	m_overLapData.m_penetrationVectorSize = VSize(m_overLapData.m_penetrationVector);
@@ -80,6 +81,10 @@ void GameplayCollision::PushBackCharacter(VECTOR pos1, float pos1Radius, VECTOR 
 	{
 		m_overLapData.m_pushDir = VNorm(m_overLapData.m_penetrationVector);
 		m_overLapData.m_pushBack = VScale(m_overLapData.m_pushDir, m_overLapData.m_overLapSize);
-		m_pPlayer->AddPos(m_overLapData.m_pushBack);
+		if (pTargetCharacter)
+		{
+			pTargetCharacter->AddPos(m_overLapData.m_pushBack);
+		}
+		
 	}
 }

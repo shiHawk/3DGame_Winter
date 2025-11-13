@@ -27,12 +27,16 @@ void GameScene::Init()
 	//m_pEnemy = std::make_shared<Enemy>();
 	m_pNormalEnemy = std::make_shared<NormalEnemy>();
 	m_pCompanion = std::make_shared<Companion>();
+	m_pStage = std::make_shared<Stage>();
 	m_pGameplayCollision = std::make_shared<GameplayCollision>();
+	m_pWorldCollision = std::make_shared<WorldCollision>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
+	m_pStage->Init();
 	m_pNormalEnemy->Init(m_pPlayer,m_pCompanion);
 	m_pCompanion->Init(m_pCamera);
 	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemy);
+	m_pWorldCollision->Init(m_pPlayer, m_pStage);
 }
 
 void GameScene::End()
@@ -42,14 +46,17 @@ void GameScene::End()
 	//m_pEnemy->End();
 	m_pNormalEnemy->End();
 	m_pCompanion->End();
+	m_pStage->End();
 }
 
 SceneBase* GameScene::Update()
 {
 	m_pCamera->Update();
+	m_pWorldCollision->Update();
 	m_pPlayer->Update();
 	m_pNormalEnemy->Update();
-	m_pCompanion->Update();
+	//m_pCompanion->Update();
+	m_pStage->Update();
 	if (Pad::isTrigger(PAD_INPUT_6)) // RBボタンでプレイヤーとコンパニオンの切り替え
 	{
 		CharacterBase::ControlMode currentMode = m_pPlayer->GetControlMode(); // 現在のモード
@@ -101,10 +108,11 @@ SceneBase* GameScene::Update()
 
 void GameScene::Draw()
 {
+	m_pStage->Draw();
 	m_pPlayer->Draw();
 	m_pCompanion->Draw();
 	m_pNormalEnemy->Draw();
-	DrawGrid();
+	//DrawGrid();
 }
 
 void GameScene::DrawGrid()

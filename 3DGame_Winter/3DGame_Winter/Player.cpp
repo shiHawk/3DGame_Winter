@@ -140,7 +140,7 @@ void Player::Update()
     //printfDx(L"m_attack2.timer:%f\n", m_attack2.timer);
     if (m_controlMode == ControlMode::PLAYER)
     {
-        if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
+        if (Pad::isTrigger(PAD_INPUT_1) && !m_isJump)
         {
             m_vec.y = kJumpPower;
             m_isJump = true;
@@ -175,17 +175,17 @@ void Player::Update()
         m_vec = { 0.0f,0.0f,0.0f };
         m_vec.y += kGravity * kAttackGravityMultiplier; // UŒ‚Žž‚Í‚©‚©‚éd—Í‚ð¬‚³‚­‚·‚é
     }
-    
-    if (m_pos.y + m_vec.y < 0.0f)
-    {
-        m_pos.y = 0.0f;   // ’n–Ê‚ÉŒÅ’è
-        m_vec.y = 0.0f;   // c‘¬“x‚ðƒ[ƒ
-        m_isJump = false; // ’…’n
-    }
-    else
-    {
-        m_pos.y += m_vec.y;
-    }
+    m_pos.y += m_vec.y;
+    //if (m_pos.y + m_vec.y < 0.0f)
+    //{
+    //    m_pos.y = 0.0f;   // ’n–Ê‚ÉŒÅ’è
+    //    m_vec.y = 0.0f;   // c‘¬“x‚ðƒ[ƒ
+    //    m_isJump = false; // ’…’n
+    //}
+    //else
+    //{
+    //   m_pos.y += m_vec.y;
+    //}
     
     if (m_isAvoidanceFlag)
     {
@@ -236,6 +236,7 @@ void Player::Update()
     MV1SetPosition(m_modelHandle, m_pos);
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim();
+    //printfDx(L"m_pos.x:%f\nm_pos.z:%f\n\n",m_pos.x,m_pos.z);
     //DINPUT_JOYSTATE input;
     //int i;
     //int Color;

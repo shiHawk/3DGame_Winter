@@ -28,6 +28,12 @@ public:
 	VECTOR GetAttackPos() { return m_attack.pos; }
 	bool IsAttackActive() { return m_attack.active; }
 	int GetAttackPower() { return m_attackPower; }
+	// WorldCollision‚©‚çŒÄ‚Î‚ê‚éŠÖ”ŒQ
+	void SetPos(VECTOR newPos) { m_pos = newPos; }
+	void SetVecY(float newVecY) { m_vec.y = newVecY; }
+	void SetIsJump(bool isJumping) { m_isJump = isJumping; }
+	VECTOR GetVec() { return m_vec; }
+
 	void AddPos(VECTOR offset);
 	float GetColRadius();
 private:

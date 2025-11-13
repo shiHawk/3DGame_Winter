@@ -1,4 +1,5 @@
 #pragma once
+#include "CharacterBase.h"
 #include "Player.h"
 #include "Companion.h"
 #include "NormalEnemy.h"
@@ -16,7 +17,7 @@ public:
 	void Draw();
 	void CheckPlayerAttack();
 	void ChaeckCompanionAttack();
-	void PushBackCharacter(VECTOR pos1,float pos1Radius, VECTOR pos2, float pos2Radius);
+	void PushBackCharacter(VECTOR pos1,float pos1Radius, VECTOR pos2, float pos2Radius,CharacterBase* pTargetCharacter);
 private:
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;
