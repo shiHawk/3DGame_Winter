@@ -1,5 +1,6 @@
 #include "WorldCollision.h"
 #include "Player.h"
+#include "Companion.h"
 #include "Stage.h"
 #include <cmath>
 namespace
@@ -9,6 +10,12 @@ namespace
 	constexpr float kGroundMargin = 0.01f; // 地面とのわずかな隙間(めり込み防止)
 	constexpr float kGroundCorrectionOffsetY = -8.0f; // 地面抜け時に補正するY座標
 	constexpr float kLerpSpeed = 0.3f;
+
+	constexpr float kFrontLimit = -1000.0f; // ステージ奥
+	constexpr float kBackLimit = 1000.0f;   // ステージ手前
+	constexpr float kLeftLimit = -1000.0f;  // ステージ左
+	constexpr float kRightLimit = 1000.0f;  // ステージ右
+	constexpr float kWallOffset = 0.001f;
 }
 WorldCollision::WorldCollision():
 	m_lastGroundY(0.0f)
@@ -19,9 +26,10 @@ WorldCollision::~WorldCollision()
 {
 }
 
-void WorldCollision::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Stage> pStage)
+void WorldCollision::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Stage> pStage, std::shared_ptr<Companion> pCompanion)
 {
 	m_pPlayer = pPlayer;
+	m_pCompanion = pCompanion;
 	m_pStage = pStage;
 }
 
@@ -36,17 +44,17 @@ void WorldCollision::Update()
 	{
 		return;
 	}
-	CheckGroundCollision();
+	CheckGroundCollision(m_pPlayer.get());
 }
 
 void WorldCollision::Draw()
 {
 }
 
-void WorldCollision::CheckGroundCollision()
+void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 {
 	// 必要な情報の取得
-	VECTOR playerPos = m_pPlayer->GetPos(); // プレイヤーの現在の座標
+	VECTOR playerPos = pTargetCharacter->GetPos(); // プレイヤーの現在の座標
 	const auto& tileHandles = m_pStage->GetTileModelHandles(); // ステージの全タイル
 	// レイを定義
 	VECTOR rayStart = playerPos;
@@ -74,7 +82,7 @@ void WorldCollision::CheckGroundCollision()
 	}
 	//printfDx(L"highestGroundY:%f\n", highestGroundY);
 	// プレイヤーの現在のY軸速度を取得
-	float playerVecY = m_pPlayer->GetVec().y;
+	float playerVecY = pTargetCharacter->GetVec().y;
 	if (isGrounded && highestGroundY > -99999.0f)
 	{
 		m_lastGroundY = highestGroundY;
@@ -83,7 +91,7 @@ void WorldCollision::CheckGroundCollision()
 	//printfDx(L"playerPosY:%f\n", m_pPlayer->GetPos().y);
 	// 判定結果からプレイヤーに反映
 	// 地面が見つかり、かつ プレイヤーのY座標が地面より下(またはめり込んでいる)場合
-	if (isGrounded && playerPos.y + m_pPlayer->GetVec().y <= highestGroundY)
+	if (isGrounded && playerPos.y + pTargetCharacter->GetVec().y <= highestGroundY)
 	{
 		// 上昇中でない場合のみ着地判定
 		if (playerVecY <= 0.0f)
@@ -94,8 +102,8 @@ void WorldCollision::CheckGroundCollision()
 			m_pPlayer->SetIsJump(false);
 		}
 	}
-	playerPos = VAdd(playerPos, m_pPlayer->GetVec());
-	m_pPlayer->SetPos(playerPos);
+	playerPos = VAdd(playerPos, pTargetCharacter->GetVec());
+	pTargetCharacter->SetPos(playerPos);
 	//else
 	//{
 	//	// 地面判定失敗時の保険

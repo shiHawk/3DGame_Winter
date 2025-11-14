@@ -10,6 +10,10 @@ public:
 	bool IsDead() { return m_isDead; }
 	VECTOR GetPos() { return m_pos; }
 	void AddPos(VECTOR offset) { m_pos = VAdd(m_pos, offset); }
+	void SetPos(VECTOR newPos) { m_pos = newPos; }
+	void SetVecY(float newVecY) { m_vec.y = newVecY; }
+	void SetIsJump(bool isJumping) { m_isJump = isJumping; }
+	VECTOR GetVec() { return m_vec; }
 	enum class ControlMode
 	{
 		PLAYER,

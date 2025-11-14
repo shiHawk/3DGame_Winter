@@ -38,7 +38,7 @@ void Stage::Init()
 		{
 			// x座標を開始位置に戻す
 			m_tilePos.x = kStartTilePos.x;
-			// z座標をkTileSize分引いて、手前の行へ移動
+			// z座標をkTileSize分引いて、手前へ移動
 			m_tilePos.z -= kTileSize;
 			if (i == 24)
 			{

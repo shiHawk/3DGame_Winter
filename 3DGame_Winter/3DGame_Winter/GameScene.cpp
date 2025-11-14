@@ -36,7 +36,7 @@ void GameScene::Init()
 	m_pNormalEnemy->Init(m_pPlayer,m_pCompanion);
 	m_pCompanion->Init(m_pCamera);
 	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemy);
-	m_pWorldCollision->Init(m_pPlayer, m_pStage);
+	m_pWorldCollision->Init(m_pPlayer, m_pStage, m_pCompanion);
 }
 
 void GameScene::End()

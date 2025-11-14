@@ -118,7 +118,7 @@ void NormalEnemy::OnDamage()
 {
 	if (m_invincibilityTimer > 0.0f) return;
 	m_isHitFlag = true;
-	printfDx(L"Hit\n");
+	//printfDx(L"Hit\n");
 	m_hp -= m_pPlayer->GetAttackPower();
 	m_invincibilityTimer = kInvincibilityTime;
 	//printfDx(L"m_hp:%d\n",m_hp);
