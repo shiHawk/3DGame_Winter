@@ -14,8 +14,8 @@ namespace
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kMoveSpeed = 10.0f;
 	constexpr float kCompanionMoveSpeed = 3.0f;
-    constexpr float kJumpPower = 10.0f;
-    constexpr float kGravity = -0.5f;
+    constexpr float kJumpPower = 15.0f;
+    constexpr float kGravity = -0.7f;
     // d—ÍŒW”iUŒ‚’†j
     const float kAttackGravityMultiplier = 0.4f;
 	// Œ¸‘¬
@@ -175,7 +175,7 @@ void Player::Update()
         m_vec = { 0.0f,0.0f,0.0f };
         m_vec.y += kGravity * kAttackGravityMultiplier; // UŒ‚‚Í‚©‚©‚éd—Í‚ğ¬‚³‚­‚·‚é
     }
-    m_pos.y += m_vec.y;
+    //m_pos.y += m_vec.y;
     //if (m_pos.y + m_vec.y < 0.0f)
     //{
     //    m_pos.y = 0.0f;   // ’n–Ê‚ÉŒÅ’è
@@ -232,10 +232,12 @@ void Player::Update()
         nextPos.x = kRightLimit - kWallOffset;
         m_vec.x = 0.0f;
     }
-    m_pos = nextPos;
-    MV1SetPosition(m_modelHandle, m_pos);
+    m_vec = VSub(nextPos, m_pos);
+    //m_pos = nextPos;
+   
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim();
+    printfDx(L"m_pos.y;%.02f\n", m_pos.y);
     //printfDx(L"m_pos.x:%f\nm_pos.z:%f\n\n",m_pos.x,m_pos.z);
     //DINPUT_JOYSTATE input;
     //int i;
@@ -263,6 +265,7 @@ void Player::Update()
 
 void Player::Draw()
 {
+    MV1SetPosition(m_modelHandle, m_pos);
     // Œü‚«‚É‡‚í‚¹‚Äü•ª‚ğ•`‰æ
     m_forwardDir.x = sinf(m_angleY+DX_PI_F) * kForwardLineLength;
     m_forwardDir.y = 0.0f;
@@ -278,6 +281,7 @@ void Player::Draw()
     {
         DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
     }
+    //DrawSphere3D(m_pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 #endif
 }
 

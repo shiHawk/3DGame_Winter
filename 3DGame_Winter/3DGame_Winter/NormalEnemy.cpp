@@ -78,18 +78,18 @@ void NormalEnemy::Update()
 		float targetAngleY = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
 		if (m_toPlayerDistance > kSphereRadius)
 		{
-			//m_pos.x += m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
-			//m_pos.z += m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
-			//if (VSize(VGet(m_toPlayerDir.x, 0.0f, m_toPlayerDir.z)) > kMoveThreshold)
-			//{
-			//	// 移動中→移動アニメーションへ変更
-			//	ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
-			//}
-			//else
-			//{
-			//	// 停止後→待機アニメーションへ変更
-			//	ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-			//}
+			m_pos.x += m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
+			m_pos.z += m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
+			if (VSize(VGet(m_toPlayerDir.x, 0.0f, m_toPlayerDir.z)) > kMoveThreshold)
+			{
+				// 移動中→移動アニメーションへ変更
+				ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
+			}
+			else
+			{
+				// 停止後→待機アニメーションへ変更
+				ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+			}
 		}
 		else
 		{

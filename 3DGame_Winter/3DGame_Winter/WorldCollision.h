@@ -17,5 +17,6 @@ private:
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Stage> m_pStage;
 	void CheckGroundCollision();
+	float m_lastGroundY;
 };
 

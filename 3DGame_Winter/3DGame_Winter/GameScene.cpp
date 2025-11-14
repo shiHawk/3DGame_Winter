@@ -51,11 +51,9 @@ void GameScene::End()
 
 SceneBase* GameScene::Update()
 {
-	m_pCamera->Update();
-	m_pWorldCollision->Update();
 	m_pPlayer->Update();
 	m_pNormalEnemy->Update();
-	//m_pCompanion->Update();
+	m_pCompanion->Update();
 	m_pStage->Update();
 	if (Pad::isTrigger(PAD_INPUT_6)) // RBボタンでプレイヤーとコンパニオンの切り替え
 	{
@@ -103,6 +101,8 @@ SceneBase* GameScene::Update()
 	m_pCompanion->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pCompanion->SetPlayerPos(m_pPlayer->GetPos());
 	m_pGameplayCollision->Update();
+	m_pWorldCollision->Update();
+	m_pCamera->Update();
 	return this;
 }
 
