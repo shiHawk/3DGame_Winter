@@ -20,5 +20,6 @@ private:
 	VECTOR m_tileStartPos;
 	int m_tileModelBase; // タイルのコピー元
 	std::vector<int> m_tileModelHandles;
+	int m_stairsHandle;
 };
 

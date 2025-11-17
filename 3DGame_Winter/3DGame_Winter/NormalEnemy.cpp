@@ -13,14 +13,18 @@ namespace
 	constexpr float kMoveDecRate = 0.8f;
 	constexpr float kModelScale = 60.0f; // モデルのスケール
 	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
+
 	constexpr float kAttackRadius = 30.0f;
+	constexpr float kAttackRange = 90.0f;
+	constexpr float kAttackDuration = 30.0f;
+
 	constexpr int kIdleAnimNo = 41;
 	constexpr int kWalkAnimNo = 55;
 	constexpr int kAttackAnimNo = 5;
 	constexpr int kDamageAnimNo = 40;
 	constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
-	constexpr float kAttackAnimIncrement = 0.4f; // 待機アニメーションの再生速度
+	constexpr float kAttackAnimIncrement = 0.5f; // 待機アニメーションの再生速度
 	constexpr float kDamageAnimIncrement = 0.6f; // 被弾アニメーションの再生速度
 
 	constexpr float kInvincibilityTime = 30.0f;
@@ -28,7 +32,9 @@ namespace
 }
 
 NormalEnemy::NormalEnemy():
-	m_enemyAttack(kAttackRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f })
+	m_enemyAttack(kAttackRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
+	m_alpha(1.0f),
+	m_targetAngle(0.0f)
 {
 }
 
@@ -66,6 +72,7 @@ void NormalEnemy::Update()
 		{
 			m_invincibilityTimer = 0.0f;
 			m_isHitFlag = false;
+			MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, m_alpha));
 			// 無敵時間が終わったら、強制的に待機アニメーションに戻す
 			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 		}
@@ -75,7 +82,7 @@ void NormalEnemy::Update()
 		MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
 		m_toPlayerDistance = VSize(VSub(m_pPlayer->GetPos(), m_pos));
 		m_toPlayerDir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
-		float targetAngleY = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
+		m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
 		if (m_toPlayerDistance > kSphereRadius)
 		{
 			m_pos.x += m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
@@ -85,20 +92,30 @@ void NormalEnemy::Update()
 				// 移動中→移動アニメーションへ変更
 				ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
 			}
-			else
+		}
+		else 
+		{
+			// 停止後→待機アニメーションへ変更
+			//ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+			if (m_enemyAttack.radius <= 0.0f && m_enemyAttack.active)
 			{
+				m_enemyAttack.active = false;
 				// 停止後→待機アニメーションへ変更
 				ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 			}
-		}
-		else
-		{
-			// 停止後→待機アニメーションへ変更
-			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+			else
+			{
+				OnAttack();
+			}
 		}
 		//printfDx(L"animTotalTime:%f\n", MV1GetAnimTotalTime(m_modelHandle, kDamageAnimNo));
-		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, targetAngleY + DX_PI_F, 0.0f));
+		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 	}
+
+	/*if (m_hp < 0)
+	{
+		m_alpha -= 0.01f;
+	}*/
 	MV1SetPosition(m_modelHandle,m_pos);
 	UpdateAnim();
 }
@@ -106,11 +123,17 @@ void NormalEnemy::Update()
 void NormalEnemy::Draw()
 {
 	//DrawSphere3D(m_pos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
+	//MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, m_alpha));
 	MV1DrawModel(m_modelHandle);
 }
 
 void NormalEnemy::OnAttack()
 {
+	m_enemyAttack.active = true;
+	m_enemyAttack.radius = kAttackRadius;
+	m_enemyAttack.dir = VNorm(VGet(sinf(m_targetAngle), 0.0f, cosf(m_targetAngle)));
+	m_enemyAttack.pos = VAdd(m_pos, VScale(m_enemyAttack.dir, kAttackRange));
+	m_enemyAttack.timer = kAttackDuration;
 	ChangeAnim(m_modelHandle,kAttackAnimNo,false,kAttackAnimIncrement);
 }
 

@@ -16,5 +16,7 @@ public:
 	float GetColRadius();
 private:
 	AttackSphere m_enemyAttack;
+	float m_alpha;
+	float m_targetAngle;
 };
 

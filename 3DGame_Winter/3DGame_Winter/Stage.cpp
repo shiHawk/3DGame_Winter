@@ -4,8 +4,9 @@ namespace
 	constexpr VECTOR kStartTilePos = {-800.0f,-10.0f,800.0f};
 	constexpr float kTileSize = 400.0f; // タイルサイズ
 	constexpr int kMaxTileNum = 26;
-	constexpr VECTOR kTestTilePos = { 600.0f,80.0f,-600.0f };
+	constexpr VECTOR kTestTilePos = { 600.0f,130.0f,-600.0f };
 }
+
 Stage::Stage():
 	m_tileTotal(0),
 	m_stageStart(0),
@@ -13,7 +14,8 @@ Stage::Stage():
 	m_tileModelBase(-1),
 	m_tileSize(0.0f),
 	m_tilePos({0.0f,0.0f,0.0f}),
-	m_tileStartPos({ 0.0f,0.0f,0.0f })
+	m_tileStartPos({ 0.0f,0.0f,0.0f }),
+	m_stairsHandle(-1)
 {
 }
 
@@ -23,6 +25,7 @@ void Stage::Init()
 	m_tileSize = kTileSize;
 	m_tileTotal = kMaxTileNum;
 	m_tileModelBase = MV1LoadModel(L"Data/model/floor_dirt_large.mv1");
+	m_stairsHandle = MV1LoadModel(L"Data/model/stairs.mv1");
 	m_tileModelHandles.resize(m_tileTotal,-1);
 	// コピー元から複製
 	for (int i = 0; i < m_tileTotal;i++)
@@ -61,6 +64,7 @@ void Stage::End()
 	}
 	m_tileModelHandles.clear();
 	MV1DeleteModel(m_tileModelBase);
+	MV1DeleteModel(m_stairsHandle);
 }
 
 void Stage::Update()

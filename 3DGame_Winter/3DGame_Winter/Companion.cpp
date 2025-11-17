@@ -10,9 +10,9 @@ namespace
 	constexpr int kSphereDifColor = 0x00f000;
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kMoveSpeed = 3.0f;
-	constexpr float kPlayerMoveSpeed = 10.0f; // プレイヤー操作モードでの移動速度
-	constexpr float kJumpPower = 10.0f;
-	constexpr float kGravity = -0.5f;
+	constexpr float kPlayerMoveSpeed = 6.0f; // プレイヤー操作モードでの移動速度
+	constexpr float kJumpPower = 8.0f;
+	constexpr float kGravity = -0.3f;
 	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
 	// 減速
 	constexpr float kMoveDecRate = 0.80f;
@@ -68,7 +68,7 @@ namespace
 	constexpr double kAnalogDeadZone = 0.25; // アナログスティックのデッドゾーン
 
 	constexpr float kAvoidanceFrame = 15.0f;
-	constexpr float kAvoidanceMoveSpeed = 0.3f;
+	constexpr float kAvoidanceMoveSpeed = 0.2f;
 	constexpr float kColRadius = 40.0f;
 }
 
@@ -126,7 +126,7 @@ void Companion::Update()
 	if (m_controlMode == ControlMode::PLAYER)
 	{
 		m_moveInput = HandleInput();
-		if (Pad::isTrigger(PAD_INPUT_1) && m_pos.y <= 0.0f)
+		if (Pad::isTrigger(PAD_INPUT_1) && !m_isJump)
 		{
 			m_vec.y = kJumpPower;
 			m_isJump = true;
@@ -150,6 +150,7 @@ void Companion::Update()
 			}
 		}
 		UpdatePlayerControlState();
+		printfDx(L"m_isJump:%d\n", m_isJump);
 	}
 	else
 	{
@@ -175,16 +176,16 @@ void Companion::Update()
 	{
 		m_vec.y += kGravity*10.0f;
 	}
-	if (m_pos.y + m_vec.y < 0.0f)
-	{
-		m_pos.y = 0.0f; // 地面に固定
-		m_vec.y = 0.0f; // 縦速度をゼロ
-		m_isJump = false;
-	}
-	else
-	{
-		m_pos.y += m_vec.y;
-	}
+	//if (m_pos.y + m_vec.y < 0.0f)
+	//{
+	//	m_pos.y = 0.0f; // 地面に固定
+	//	m_vec.y = 0.0f; // 縦速度をゼロ
+	//	m_isJump = false;
+	//}
+	//else
+	//{
+	//	m_pos.y += m_vec.y;
+	//}
 	m_companionToEnemy = VSub(m_enemyPos, m_pos);
 	m_distanceToEnemy = VSize(m_companionToEnemy);
 	// 敵への方向ベクトル（正規化）を毎フレーム計算

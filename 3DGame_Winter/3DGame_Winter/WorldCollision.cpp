@@ -45,6 +45,7 @@ void WorldCollision::Update()
 		return;
 	}
 	CheckGroundCollision(m_pPlayer.get());
+	CheckGroundCollision(m_pCompanion.get());
 }
 
 void WorldCollision::Draw()
@@ -98,8 +99,8 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 		{
 			float targetY = highestGroundY;
 			playerPos.y = targetY;
-			m_pPlayer->SetVecY(0.0f);
-			m_pPlayer->SetIsJump(false);
+			pTargetCharacter->SetVecY(0.0f);
+			pTargetCharacter->SetIsJump(false);
 		}
 	}
 	playerPos = VAdd(playerPos, pTargetCharacter->GetVec());
@@ -121,12 +122,12 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 	//	}
 	//}
 
-	if (isGrounded)
+	/*if (isGrounded)
 	{
 		DrawLine3D(rayStart,rayEnd,0xff0000);
 	}
 	else
 	{
 		DrawLine3D(rayStart, rayEnd, 0x00ff00);
-	}
+	}*/
 }

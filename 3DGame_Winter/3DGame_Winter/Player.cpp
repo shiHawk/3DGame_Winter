@@ -237,7 +237,7 @@ void Player::Update()
    
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim();
-    printfDx(L"m_pos.y;%.02f\n", m_pos.y);
+    //printfDx(L"m_pos.y;%.02f\n", m_pos.y);
     //printfDx(L"m_pos.x:%f\nm_pos.z:%f\n\n",m_pos.x,m_pos.z);
     //DINPUT_JOYSTATE input;
     //int i;
@@ -336,9 +336,28 @@ void Player::OnSpecialSkil()
 void Player::OnAvoidance()
 {
     m_avoidanceTimer--;
-    m_vec.x = m_forwardDir.x * kAvoidanceMoveSpeed;
-    m_vec.z = m_forwardDir.z * kAvoidanceMoveSpeed;
-    ChangeAnim(m_modelHandle,kAvoidanceAnimNo,false,kAnimIncrement);
+    VECTOR avoidDir;
+    // kMoveThreshold は移動とみなす入力の閾値
+    // スティックが倒されているか（入力があるか）をチェック
+    if (VSize(m_moveInput) > kMoveThreshold)
+    {
+        // 入力がある場合：m_moveInput (HandleInputで正規化・カメラ補正済み) の方向に回避
+        avoidDir = m_moveInput;
+    }
+    else
+    {
+        // 入力がない場合（ニュートラル）：現在のプレイヤーの向き (m_angleY) に回避
+        // m_angleY から正規化された方向ベクトルを計算
+        avoidDir.x = sinf(m_angleY + DX_PI_F);
+        avoidDir.y = 0.0f;
+        avoidDir.z = cosf(m_angleY + DX_PI_F);
+    }
+    // 回避速度を決定
+    float avoidSpeed = kForwardLineLength * kAvoidanceMoveSpeed;
+    // 計算した回避方向 (avoidDir) と速度 (avoidSpeed) を使って m_vec を設定
+    m_vec.x = avoidDir.x * avoidSpeed;
+    m_vec.z = avoidDir.z * avoidSpeed;
+    ChangeAnim(m_modelHandle, kAvoidanceAnimNo, false, kAnimIncrement);
 }
 
 void Player::AddPos(VECTOR offset)
