@@ -14,7 +14,8 @@ Enemy::Enemy():
 m_toPlayerDir({0.0f,0.0f,0.0f}),
 m_toPlayerDistance(0.0f),
 m_toCompanionDir({ 0.0f,0.0f,0.0f }),
-m_toCompanionDistance(0.0f)
+m_toCompanionDistance(0.0f),
+m_AttackCoolTime(0.0f)
 {
 }
 

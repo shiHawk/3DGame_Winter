@@ -20,6 +20,7 @@ private:
 	std::shared_ptr<Stage> m_pStage;
 	std::shared_ptr<Companion> m_pCompanion;
 	void CheckGroundCollision(CharacterBase* pTargetCharacter);
+	void CheckWallCollision(CharacterBase* pTargetCharacter);
 	float m_lastGroundY;
 };
 

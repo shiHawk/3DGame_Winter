@@ -6,16 +6,19 @@
 namespace
 {
 	constexpr float kGroundCheckRayOffsetY = 50.0f; // レイの開始Y座標オフセット
-	constexpr float kGroundCheckRayLength = 200.0f; // レイの長さ
+	constexpr float kGroundCheckRayLength = 200.0f; // 地面に伸ばすレイの長さ
+	constexpr float kWallCheckRayLength = 50.0f; // 正面に伸ばすレイの長さ
 	constexpr float kGroundMargin = 0.01f; // 地面とのわずかな隙間(めり込み防止)
 	constexpr float kGroundCorrectionOffsetY = -8.0f; // 地面抜け時に補正するY座標
 	constexpr float kLerpSpeed = 0.3f;
+	constexpr float kCharacterRadius = 20.0f;
 
 	constexpr float kFrontLimit = -1000.0f; // ステージ奥
 	constexpr float kBackLimit = 1000.0f;   // ステージ手前
 	constexpr float kLeftLimit = -1000.0f;  // ステージ左
 	constexpr float kRightLimit = 1000.0f;  // ステージ右
 	constexpr float kWallOffset = 0.001f;
+	constexpr float kCollisionThresholdSq = (kCharacterRadius + kWallOffset) * (kCharacterRadius + kWallOffset);
 }
 WorldCollision::WorldCollision():
 	m_lastGroundY(0.0f)
@@ -46,6 +49,7 @@ void WorldCollision::Update()
 	}
 	CheckGroundCollision(m_pPlayer.get());
 	CheckGroundCollision(m_pCompanion.get());
+	//CheckWallCollision(m_pPlayer.get());
 }
 
 void WorldCollision::Draw()
@@ -130,4 +134,77 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 	{
 		DrawLine3D(rayStart, rayEnd, 0x00ff00);
 	}*/
+}
+
+void WorldCollision::CheckWallCollision(CharacterBase* pTargetCharacter)
+{
+	VECTOR characterPos = pTargetCharacter->GetPos();
+	const auto& wallHandles = m_pStage->GetWallModelHandles(); // ステージの全ての壁
+	// レイを定義
+	VECTOR rayStart = characterPos;
+	VECTOR direction = pTargetCharacter->GetDir(); // キャラクターの向き
+	rayStart.y += kGroundCheckRayOffsetY;
+	VECTOR rayVec = VScale(direction, kWallCheckRayLength);
+	VECTOR rayEnd = VAdd(rayStart,rayVec);
+	// 当たり判定の準備
+	bool isWallHit = false;
+	VECTOR closestHitPos = VGet(0, 0, 0);
+	float minHitDistSq = (kWallCheckRayLength * kWallCheckRayLength) + 1.0f; // レイの長さの2乗より大きく初期化
+	// ステージの壁とレイの当たり判定を行う
+	for (int handle : wallHandles)
+	{
+		if (handle == -1) continue;
+		// 線分(rayStart, rayEnd)とモデル(handle)の当たり判定
+		MV1_COLL_RESULT_POLY result = MV1CollCheck_Line(handle, -1, rayStart, rayEnd);
+		if (result.HitFlag == 1)
+		{
+			isWallHit = true;
+			// 最も近い衝突位置を探す
+			VECTOR hitVec = VSub(result.HitPosition, rayStart);
+			float distSq = VDot(hitVec, hitVec); // 距離の2乗
+			if (distSq < minHitDistSq)
+			{
+				minHitDistSq = distSq;
+				closestHitPos = result.HitPosition;
+			}
+		}
+	}
+
+	if (isWallHit)
+	{
+		if (minHitDistSq < kCollisionThresholdSq)
+		{
+			// 押し戻し位置の計算
+		    // ヒット位置(closestHitPos)から、キャラクターの向きと逆方向に kWallOffset だけ戻す
+			VECTOR reverseDir = VScale(direction, -1.0f); // 逆向きベクトル
+			VECTOR offset = VScale(reverseDir, kCharacterRadius + kWallOffset);
+			// ヒット位置+オフセット位置を新しい座標とする
+			VECTOR newPos = VAdd(closestHitPos, offset);
+			// 現在のY座標は維持し、X,Z座標を更新する
+			characterPos.x = newPos.x;
+			characterPos.z = newPos.z;
+			pTargetCharacter->SetPos(characterPos);
+
+			// 壁に当たったら移動量をリセット
+			VECTOR currentVec = pTargetCharacter->GetVec();
+			float dot = VDot(currentVec, direction);
+			if (dot > 0.0f) // 前に進もうとしている場合のみ
+			{
+				// 進行方向成分の速度を打ち消す
+				VECTOR velocityAlongDir = VScale(direction, dot);
+				currentVec = VSub(currentVec, velocityAlongDir);
+				pTargetCharacter->SetVec(currentVec);
+			}
+		}
+	}
+
+	if (isWallHit)
+	{
+		DrawLine3D(rayStart, closestHitPos, 0xff0000); // ヒットした箇所まで赤
+	}
+	else
+	{
+		DrawLine3D(rayStart, rayEnd, 0x00ff00); // ヒットしなかったら緑
+	}
+	printfDx(L"closestHitPos.x:%f\nclosestHitPos.y:%f\nclosestHitPos.z:%f\n\n", closestHitPos.x, closestHitPos.y, closestHitPos.z);
 }

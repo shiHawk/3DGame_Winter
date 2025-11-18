@@ -23,5 +23,6 @@ protected:
 	// コンパニオンに向かうベクトル
 	VECTOR m_toCompanionDir;
 	float m_toCompanionDistance;
+	float m_AttackCoolTime;
 };
 

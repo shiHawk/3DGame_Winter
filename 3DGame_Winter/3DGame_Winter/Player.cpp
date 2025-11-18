@@ -5,7 +5,7 @@
 #include <cmath>
 namespace
 {
-    constexpr VECTOR kDefaultPos = { 0.0f,0.0f,-700.0f };
+    constexpr VECTOR kDefaultPos = { 0.0f,0.0f,-340.0f };
     constexpr VECTOR kDefaultVec = { 0.0f,0.0f,0.0f };
     constexpr VECTOR kRightDir = { 0.0f,270.0f * DX_PI_F / 180.0f,0.0f };
 	constexpr float kSphereRadius = 20.0f;
@@ -92,7 +92,6 @@ Player::Player():
     m_controlMode(ControlMode::PLAYER),
     m_playerState(PlayerState::NORMAL),
     m_angleY(0.0f),
-    m_forwardDir({0.0f,0.0f,0.0f}),
     m_enemyPos({0.0f,0.0f,0.0f}),
     m_followTargetPos(0.0f,0.0f,0.0f),
     m_attack(kAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),

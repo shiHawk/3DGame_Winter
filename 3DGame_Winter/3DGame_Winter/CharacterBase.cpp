@@ -1,4 +1,5 @@
 #include "CharacterBase.h"
+#include <cmath>
 
 CharacterBase::CharacterBase():
 	m_attackPower(0),
@@ -11,10 +12,21 @@ CharacterBase::CharacterBase():
 	m_moveInput({ 0.0f,0.0f,0.0f }),
 	m_isJump(false),
 	m_isHitFlag(false),
-	m_invincibilityTimer(0.0f)
+	m_invincibilityTimer(0.0f),
+	m_forwardDir({ 0.0f,0.0f,0.0f }),
+	m_angleY(0.0f)
 {
 }
 
 CharacterBase::~CharacterBase()
 {
 }
+
+//VECTOR CharacterBase::GetDir()
+//{
+//	VECTOR dir;
+//	dir.x = sinf(m_angleY + DX_PI_F);
+//	dir.y = 0.0f;
+//	dir.z = cosf(m_angleY + DX_PI_F);
+//	return dir;
+//}

@@ -16,7 +16,7 @@ namespace
 
 	constexpr float kAttackRadius = 30.0f;
 	constexpr float kAttackRange = 90.0f;
-	constexpr float kAttackDuration = 30.0f;
+	constexpr float kAttackDuration = 40.0f;
 
 	constexpr int kIdleAnimNo = 41;
 	constexpr int kWalkAnimNo = 55;
@@ -28,6 +28,7 @@ namespace
 	constexpr float kDamageAnimIncrement = 0.6f; // 被弾アニメーションの再生速度
 
 	constexpr float kInvincibilityTime = 30.0f;
+	constexpr float kMaxCoolTime = 30.0f;
 	constexpr int kMaxHp = 50;
 }
 
@@ -60,7 +61,6 @@ void NormalEnemy::End()
 
 void NormalEnemy::Update()
 {
-	//ChangeAnim(m_modelHandle,kIdleAnimNo,true, kIdleAnimIncrement);
 	if (m_invincibilityTimer > 0.0f)
 	{
 		// 無敵時間タイマーを減らす
@@ -79,6 +79,10 @@ void NormalEnemy::Update()
 	}
 	else
 	{
+		if (m_AttackCoolTime > 0.0f)
+		{
+			m_AttackCoolTime--; // クールタイムを減らす
+		}
 		MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
 		m_toPlayerDistance = VSize(VSub(m_pPlayer->GetPos(), m_pos));
 		m_toPlayerDir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
@@ -97,18 +101,24 @@ void NormalEnemy::Update()
 		{
 			// 停止後→待機アニメーションへ変更
 			//ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-			if (m_enemyAttack.radius <= 0.0f && m_enemyAttack.active)
+			if (m_enemyAttack.timer <= 0.0f && m_enemyAttack.active)
 			{
 				m_enemyAttack.active = false;
 				// 停止後→待機アニメーションへ変更
 				ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+				m_AttackCoolTime = kMaxCoolTime;
 			}
-			else
+			else if(m_enemyAttack.timer <= 0.0f && m_AttackCoolTime <= 0.0f)
 			{
 				OnAttack();
 			}
 		}
-		//printfDx(L"animTotalTime:%f\n", MV1GetAnimTotalTime(m_modelHandle, kDamageAnimNo));
+
+		if (m_enemyAttack.active)
+		{
+			m_enemyAttack.timer--;
+		}
+		printfDx(L"m_AttackCoolTime:%f\n", m_AttackCoolTime);
 		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 	}
 
@@ -141,7 +151,6 @@ void NormalEnemy::OnDamage()
 {
 	if (m_invincibilityTimer > 0.0f) return;
 	m_isHitFlag = true;
-	//printfDx(L"Hit\n");
 	m_hp -= m_pPlayer->GetAttackPower();
 	m_invincibilityTimer = kInvincibilityTime;
 	//printfDx(L"m_hp:%d\n",m_hp);

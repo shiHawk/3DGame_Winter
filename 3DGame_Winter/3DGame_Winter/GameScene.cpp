@@ -87,7 +87,7 @@ SceneBase* GameScene::Update()
 		// プレイヤーが操作モードの場合、プレイヤーの位置をカメラに渡す
 		m_pCamera->SetControlledCharacterPosition(m_pPlayer->GetPos());
 		// プレイヤーの向きをカメラに渡す
-		m_pCamera->SetPlayerDir(m_pPlayer->GetPlayerDir());
+		m_pCamera->SetPlayerDir(m_pPlayer->GetDir());
 	}
 	else if (currentControlMode == CharacterBase::ControlMode::COMPANION)
 	{

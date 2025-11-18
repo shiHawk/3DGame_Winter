@@ -14,6 +14,8 @@ public:
 	void SetVecY(float newVecY) { m_vec.y = newVecY; }
 	void SetIsJump(bool isJumping) { m_isJump = isJumping; }
 	VECTOR GetVec() { return m_vec; }
+	VECTOR GetDir() { return m_forwardDir; }
+	void SetVec(VECTOR vec) { m_vec = vec; }
 	enum class ControlMode
 	{
 		PLAYER,
@@ -40,5 +42,7 @@ protected:
 	};
 	bool m_isHitFlag;
 	float m_invincibilityTimer;
+	VECTOR m_forwardDir;
+	float m_angleY;
 };
 
