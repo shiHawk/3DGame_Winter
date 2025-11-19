@@ -100,7 +100,7 @@ void NormalEnemy::Update()
 		else 
 		{
 			// 停止後→待機アニメーションへ変更
-			//ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+			// ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 			if (m_enemyAttack.timer <= 0.0f && m_enemyAttack.active)
 			{
 				m_enemyAttack.active = false;

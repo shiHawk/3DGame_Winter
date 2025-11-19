@@ -75,7 +75,7 @@ void Stage::Init()
 	m_wallPos.y = kStartTilePos.y;
 	int wallIndex = 0; // m_wallModelHandles のインデックス
 	m_wallPos.z = kStartTilePos.z + kWallOffset; // 800 + 200 = 1000
-	m_collisionWallPos.z = kStartTilePos.z + kWallOffset; 
+	m_collisionWallPos.z = kStartTilePos.z + kWallOffset;
 	for (int i = 0; i < kWallNumPerSide; i++)
 	{
 		m_wallPos.x = kStartTilePos.x + (kTileSize * i); // -800, -400, 0, 400, 800

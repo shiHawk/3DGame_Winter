@@ -217,29 +217,6 @@ void Companion::Update()
 	}
 	
 	VECTOR nextPos = VAdd(m_pos, m_vec); // ‰¼‚ÌŽŸ‚ÌˆÊ’u
-	// Z•ûŒü(‘OŒã)§ŒÀ
-	//if (nextPos.z >= kBackLimit - kWallOffset)
-	//{
-	//	nextPos.z = kBackLimit - kWallOffset;
-	//	m_vec.z = 0.0f;
-	//}
-	//else if (nextPos.z <= kFrontLimit + kWallOffset)
-	//{
-	//	nextPos.z = kFrontLimit + kWallOffset;
-	//	m_vec.z = 0.0f;
-	//}
-
-	//// X•ûŒü(¶‰E)§ŒÀ
-	//if (nextPos.x <= kLeftLimit + kWallOffset)
-	//{
-	//	nextPos.x = kLeftLimit + kWallOffset;
-	//	m_vec.x = 0.0f;
-	//}
-	//else if (nextPos.x >= kRightLimit - kWallOffset)
-	//{
-	//	nextPos.x = kRightLimit - kWallOffset;
-	//	m_vec.x = 0.0f;
-	//}
 
 	if (!m_isInAttackSequence)
 	{

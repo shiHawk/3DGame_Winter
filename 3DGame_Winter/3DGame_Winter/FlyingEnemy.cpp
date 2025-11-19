@@ -1,4 +1,5 @@
 #include "FlyingEnemy.h"
+#include <cmath>
 namespace
 {
 	constexpr float kAttackRadius = 30.0f;
