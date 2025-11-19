@@ -32,9 +32,9 @@ public:
 	void SetVecY(float newVecY) { m_vec.y = newVecY; }
 	void SetIsJump(bool isJumping) { m_isJump = isJumping; }
 	VECTOR GetVec() { return m_vec; }
-
 	void AddPos(VECTOR offset);
 	float GetColRadius();
+	virtual VECTOR GetDir() override;
 private:
 	enum class PlayerState
 	{

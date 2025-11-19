@@ -7,11 +7,11 @@ namespace
 {
 	constexpr float kGroundCheckRayOffsetY = 50.0f; // レイの開始Y座標オフセット
 	constexpr float kGroundCheckRayLength = 200.0f; // 地面に伸ばすレイの長さ
-	constexpr float kWallCheckRayLength = 50.0f; // 正面に伸ばすレイの長さ
+	constexpr float kWallCheckRayLength = 80.0f; // 正面に伸ばすレイの長さ
 	constexpr float kGroundMargin = 0.01f; // 地面とのわずかな隙間(めり込み防止)
 	constexpr float kGroundCorrectionOffsetY = -8.0f; // 地面抜け時に補正するY座標
 	constexpr float kLerpSpeed = 0.3f;
-	constexpr float kCharacterRadius = 20.0f;
+	constexpr float kCharacterRadius = 40.0f;
 
 	constexpr float kFrontLimit = -1000.0f; // ステージ奥
 	constexpr float kBackLimit = 1000.0f;   // ステージ手前
@@ -19,6 +19,7 @@ namespace
 	constexpr float kRightLimit = 1000.0f;  // ステージ右
 	constexpr float kWallOffset = 0.001f;
 	constexpr float kCollisionThresholdSq = (kCharacterRadius + kWallOffset) * (kCharacterRadius + kWallOffset);
+	constexpr int kMaxIterations = 4;
 }
 WorldCollision::WorldCollision():
 	m_lastGroundY(0.0f)
@@ -49,7 +50,8 @@ void WorldCollision::Update()
 	}
 	CheckGroundCollision(m_pPlayer.get());
 	CheckGroundCollision(m_pCompanion.get());
-	//CheckWallCollision(m_pPlayer.get());
+	CheckWallCollision(m_pPlayer.get());
+	CheckWallCollision(m_pCompanion.get());
 }
 
 void WorldCollision::Draw()
@@ -139,72 +141,74 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 void WorldCollision::CheckWallCollision(CharacterBase* pTargetCharacter)
 {
 	VECTOR characterPos = pTargetCharacter->GetPos();
+	VECTOR currentVec = pTargetCharacter->GetVec(); // 速度もループ内で更新するためここで取得
 	const auto& wallHandles = m_pStage->GetWallModelHandles(); // ステージの全ての壁
-	// レイを定義
-	VECTOR rayStart = characterPos;
-	VECTOR direction = pTargetCharacter->GetDir(); // キャラクターの向き
-	rayStart.y += kGroundCheckRayOffsetY;
-	VECTOR rayVec = VScale(direction, kWallCheckRayLength);
-	VECTOR rayEnd = VAdd(rayStart,rayVec);
-	// 当たり判定の準備
-	bool isWallHit = false;
-	VECTOR closestHitPos = VGet(0, 0, 0);
-	float minHitDistSq = (kWallCheckRayLength * kWallCheckRayLength) + 1.0f; // レイの長さの2乗より大きく初期化
-	// ステージの壁とレイの当たり判定を行う
-	for (int handle : wallHandles)
+	for (int iter = 0; iter < kMaxIterations; iter++)
 	{
-		if (handle == -1) continue;
-		// 線分(rayStart, rayEnd)とモデル(handle)の当たり判定
-		MV1_COLL_RESULT_POLY result = MV1CollCheck_Line(handle, -1, rayStart, rayEnd);
-		if (result.HitFlag == 1)
+		// 当たり判定の準備
+		bool isWallHit = false;
+		// 最も近い衝突結果を保持するための変数
+		MV1_COLL_RESULT_POLY closestResult = { 0 };
+		// キャラクター中心から衝突点までの距離の2乗 (めり込みが深いほど値が小さくなる)
+		float minDistanceSq = 999999.0f;
+
+		// ステージの壁と球の当たり判定を行う
+		for (int handle : wallHandles)
 		{
-			isWallHit = true;
-			// 最も近い衝突位置を探す
-			VECTOR hitVec = VSub(result.HitPosition, rayStart);
-			float distSq = VDot(hitVec, hitVec); // 距離の2乗
-			if (distSq < minHitDistSq)
+			if (handle == -1) continue;
+
+			// 球とモデル(handle)の当たり判定 
+			MV1_COLL_RESULT_POLY_DIM  result = MV1CollCheck_Sphere(handle, -1, characterPos, kCharacterRadius);
+
+			if (result.HitNum > 0)
 			{
-				minHitDistSq = distSq;
-				closestHitPos = result.HitPosition;
+				for (int i = 0; i < result.HitNum; i++)
+				{
+					// result.Dim[i] で i番目に当たったポリゴンの情報にアクセス
+					if (result.Dim[i].HitFlag == 1)
+					{
+						VECTOR hitVec = VSub(result.Dim[i].HitPosition, characterPos);
+						float distSq = VDot(hitVec, hitVec);
+
+						if (distSq < minDistanceSq)
+						{
+							isWallHit = true;
+							minDistanceSq = distSq;
+							// 最も近いポリゴンの情報をコピーして保存しておく
+							closestResult = result.Dim[i];
+						}
+					}
+				}
+				MV1CollResultPolyDimTerminate(result); // 当たり判定結果ポリゴン配列の後始末
 			}
 		}
-	}
 
-	if (isWallHit)
-	{
-		if (minHitDistSq < kCollisionThresholdSq)
+		if (isWallHit)
 		{
 			// 押し戻し位置の計算
-		    // ヒット位置(closestHitPos)から、キャラクターの向きと逆方向に kWallOffset だけ戻す
-			VECTOR reverseDir = VScale(direction, -1.0f); // 逆向きベクトル
-			VECTOR offset = VScale(reverseDir, kCharacterRadius + kWallOffset);
-			// ヒット位置+オフセット位置を新しい座標とする
-			VECTOR newPos = VAdd(closestHitPos, offset);
+			// 衝突点 (closestResult.HitPosition) と壁の法線 (closestResult.Normal) を使用
+			// キャラクターの中心を壁から (kCharacterRadius + kWallOffset) 分離れた位置に設定
+			VECTOR pushbackVec = VScale(closestResult.Normal, kCharacterRadius + kWallOffset);
+			VECTOR newPos = VAdd(closestResult.HitPosition, pushbackVec);
+
 			// 現在のY座標は維持し、X,Z座標を更新する
 			characterPos.x = newPos.x;
 			characterPos.z = newPos.z;
 			pTargetCharacter->SetPos(characterPos);
 
-			// 壁に当たったら移動量をリセット
+			// 移動量の調整 (壁にめり込む方向の速度を打ち消す)
 			VECTOR currentVec = pTargetCharacter->GetVec();
-			float dot = VDot(currentVec, direction);
-			if (dot > 0.0f) // 前に進もうとしている場合のみ
+
+			// 速度ベクトルと壁の法線との内積 (速度が法線と逆方向(めり込み方向)なら dot < 0)
+			float dot = VDot(currentVec, closestResult.Normal);
+
+			if (dot < 0.0f)
 			{
-				// 進行方向成分の速度を打ち消す
-				VECTOR velocityAlongDir = VScale(direction, dot);
-				currentVec = VSub(currentVec, velocityAlongDir);
+				// 壁にめり込む方向の速度成分を打ち消す
+				VECTOR velocityAlongNormal = VScale(closestResult.Normal, dot);
+				currentVec = VSub(currentVec, velocityAlongNormal);
 				pTargetCharacter->SetVec(currentVec);
 			}
 		}
 	}
-
-	if (isWallHit)
-	{
-		DrawLine3D(rayStart, closestHitPos, 0xff0000); // ヒットした箇所まで赤
-	}
-	else
-	{
-		DrawLine3D(rayStart, rayEnd, 0x00ff00); // ヒットしなかったら緑
-	}
-	printfDx(L"closestHitPos.x:%f\nclosestHitPos.y:%f\nclosestHitPos.z:%f\n\n", closestHitPos.x, closestHitPos.y, closestHitPos.z);
 }

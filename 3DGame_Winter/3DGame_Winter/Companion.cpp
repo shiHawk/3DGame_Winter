@@ -10,9 +10,10 @@ namespace
 	constexpr int kSphereDifColor = 0x00f000;
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kMoveSpeed = 3.0f;
-	constexpr float kPlayerMoveSpeed = 6.0f; // プレイヤー操作モードでの移動速度
-	constexpr float kJumpPower = 8.0f;
-	constexpr float kGravity = -0.3f;
+	constexpr float kPlayerMoveSpeed = 10.0f; // プレイヤー操作モードでの移動速度
+	constexpr float kJumpPower = 15.0f;
+	constexpr float kGravity = -0.7f;
+	constexpr float kAirResistance = 0.99f;
 	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
 	// 減速
 	constexpr float kMoveDecRate = 0.80f;
@@ -217,28 +218,28 @@ void Companion::Update()
 	
 	VECTOR nextPos = VAdd(m_pos, m_vec); // 仮の次の位置
 	// Z方向(前後)制限
-	if (nextPos.z >= kBackLimit - kWallOffset)
-	{
-		nextPos.z = kBackLimit - kWallOffset;
-		m_vec.z = 0.0f;
-	}
-	else if (nextPos.z <= kFrontLimit + kWallOffset)
-	{
-		nextPos.z = kFrontLimit + kWallOffset;
-		m_vec.z = 0.0f;
-	}
+	//if (nextPos.z >= kBackLimit - kWallOffset)
+	//{
+	//	nextPos.z = kBackLimit - kWallOffset;
+	//	m_vec.z = 0.0f;
+	//}
+	//else if (nextPos.z <= kFrontLimit + kWallOffset)
+	//{
+	//	nextPos.z = kFrontLimit + kWallOffset;
+	//	m_vec.z = 0.0f;
+	//}
 
-	// X方向(左右)制限
-	if (nextPos.x <= kLeftLimit + kWallOffset)
-	{
-		nextPos.x = kLeftLimit + kWallOffset;
-		m_vec.x = 0.0f;
-	}
-	else if (nextPos.x >= kRightLimit - kWallOffset)
-	{
-		nextPos.x = kRightLimit - kWallOffset;
-		m_vec.x = 0.0f;
-	}
+	//// X方向(左右)制限
+	//if (nextPos.x <= kLeftLimit + kWallOffset)
+	//{
+	//	nextPos.x = kLeftLimit + kWallOffset;
+	//	m_vec.x = 0.0f;
+	//}
+	//else if (nextPos.x >= kRightLimit - kWallOffset)
+	//{
+	//	nextPos.x = kRightLimit - kWallOffset;
+	//	m_vec.x = 0.0f;
+	//}
 
 	if (!m_isInAttackSequence)
 	{
@@ -253,7 +254,7 @@ void Companion::Update()
 			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 		}
 	}
-	m_pos = nextPos;
+	//m_pos = nextPos;
 	MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY+DX_PI_F, 0.0f));
 	MV1SetPosition(m_modelHandle,m_pos);
 	UpdateAnim();
@@ -611,6 +612,15 @@ float Companion::GetColRadius()
 	return kColRadius;
 }
 
+VECTOR Companion::GetDir()
+{
+	VECTOR dir;
+	dir.x = sinf(m_angleY + DX_PI_F);
+	dir.y = 0.0f;
+	dir.z = cosf(m_angleY + DX_PI_F);
+	return dir;
+}
+
 void Companion::UpdateMovement(const VECTOR& moveDir)
 {
 	if (!m_isInAttackSequence)
@@ -647,8 +657,17 @@ void Companion::UpdateMovement(const VECTOR& moveDir)
 	}
 	else // 入力がない場合
 	{
-		m_vec.x *= kMoveDecRate;
-		m_vec.z *= kMoveDecRate;
+		if (m_isJump)
+		{
+			// 空中にいるときは、減速をほとんどさせない
+			m_vec.x *= kAirResistance;
+			m_vec.z *= kAirResistance;
+		}
+		else
+		{
+			m_vec.x *= kMoveDecRate;
+			m_vec.z *= kMoveDecRate;
+		}
 	}
 }
 

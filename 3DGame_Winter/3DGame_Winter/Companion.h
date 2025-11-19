@@ -29,6 +29,7 @@ public:
 	bool IsAttackActive() { return m_attack.active; }
 	int GetAttackPower() { return m_attackPower; }
 	float GetColRadius();
+	virtual VECTOR GetDir() override;
 private:
 	void UpdateMovement(const VECTOR& moveDir);
 	VECTOR HandleInput();

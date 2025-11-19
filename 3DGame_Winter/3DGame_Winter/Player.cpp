@@ -209,28 +209,28 @@ void Player::Update()
     }
     VECTOR nextPos = VAdd(m_pos, m_vec); // 仮の次の位置
     // Z方向(前後)制限
-    if (nextPos.z >= kBackLimit - kWallOffset)
-    {
-        nextPos.z = kBackLimit - kWallOffset;
-        m_vec.z = 0.0f;
-    }
-    else if (nextPos.z <= kFrontLimit + kWallOffset)
-    {
-        nextPos.z = kFrontLimit + kWallOffset;
-        m_vec.z = 0.0f;
-    }
+    //if (nextPos.z >= kBackLimit - kWallOffset)
+    //{
+    //    nextPos.z = kBackLimit - kWallOffset;
+    //    m_vec.z = 0.0f;
+    //}
+    //else if (nextPos.z <= kFrontLimit + kWallOffset)
+    //{
+    //    nextPos.z = kFrontLimit + kWallOffset;
+    //    m_vec.z = 0.0f;
+    //}
 
-    // X方向(左右)制限
-    if(nextPos.x <= kLeftLimit + kWallOffset)
-    {
-        nextPos.x = kLeftLimit + kWallOffset;
-        m_vec.x = 0.0f;
-    }
-    else if(nextPos.x >= kRightLimit - kWallOffset) 
-    {
-        nextPos.x = kRightLimit - kWallOffset;
-        m_vec.x = 0.0f;
-    }
+    //// X方向(左右)制限
+    //if(nextPos.x <= kLeftLimit + kWallOffset)
+    //{
+    //    nextPos.x = kLeftLimit + kWallOffset;
+    //    m_vec.x = 0.0f;
+    //}
+    //else if(nextPos.x >= kRightLimit - kWallOffset) 
+    //{
+    //    nextPos.x = kRightLimit - kWallOffset;
+    //    m_vec.x = 0.0f;
+    //}
     m_vec = VSub(nextPos, m_pos);
     //m_pos = nextPos;
    
@@ -280,7 +280,7 @@ void Player::Draw()
     {
         DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
     }
-    //DrawSphere3D(m_pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+    DrawSphere3D({m_pos.x,m_pos.y+50.0f,m_pos.z}, kColRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 #endif
 }
 
@@ -367,6 +367,15 @@ void Player::AddPos(VECTOR offset)
 float Player::GetColRadius()
 {
     return kColRadius;
+}
+
+VECTOR Player::GetDir()
+{
+    VECTOR dir;
+	dir.x = sinf(m_angleY + DX_PI_F);
+	dir.y = 0.0f;
+	dir.z = cosf(m_angleY + DX_PI_F);
+	return dir;
 }
 
 VECTOR Player::HandleInput()

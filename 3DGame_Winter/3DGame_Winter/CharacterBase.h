@@ -14,7 +14,7 @@ public:
 	void SetVecY(float newVecY) { m_vec.y = newVecY; }
 	void SetIsJump(bool isJumping) { m_isJump = isJumping; }
 	VECTOR GetVec() { return m_vec; }
-	VECTOR GetDir() { return m_forwardDir; }
+	virtual VECTOR GetDir() = 0;
 	void SetVec(VECTOR vec) { m_vec = vec; }
 	enum class ControlMode
 	{

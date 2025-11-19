@@ -30,6 +30,7 @@ void GameScene::Init()
 	m_pStage = std::make_shared<Stage>();
 	m_pGameplayCollision = std::make_shared<GameplayCollision>();
 	m_pWorldCollision = std::make_shared<WorldCollision>();
+	m_pFlyingEnemy = std::make_shared<FlyingEnemy>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
 	m_pStage->Init();
@@ -37,6 +38,7 @@ void GameScene::Init()
 	m_pCompanion->Init(m_pCamera);
 	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemy);
 	m_pWorldCollision->Init(m_pPlayer, m_pStage, m_pCompanion);
+	m_pFlyingEnemy->Init(m_pPlayer, m_pCompanion);
 }
 
 void GameScene::End()
@@ -46,6 +48,7 @@ void GameScene::End()
 	//m_pEnemy->End();
 	m_pNormalEnemy->End();
 	m_pCompanion->End();
+	m_pFlyingEnemy->End();
 	m_pStage->End();
 }
 
@@ -102,6 +105,7 @@ SceneBase* GameScene::Update()
 	m_pCompanion->SetPlayerPos(m_pPlayer->GetPos());
 	m_pGameplayCollision->Update();
 	m_pWorldCollision->Update();
+	m_pFlyingEnemy->Update();
 	m_pCamera->Update();
 	return this;
 }
@@ -112,6 +116,7 @@ void GameScene::Draw()
 	m_pPlayer->Draw();
 	m_pCompanion->Draw();
 	m_pNormalEnemy->Draw();
+	//m_pFlyingEnemy->Draw();
 	//DrawGrid();
 }
 

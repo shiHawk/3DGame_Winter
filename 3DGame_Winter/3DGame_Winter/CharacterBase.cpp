@@ -21,12 +21,3 @@ CharacterBase::CharacterBase():
 CharacterBase::~CharacterBase()
 {
 }
-
-//VECTOR CharacterBase::GetDir()
-//{
-//	VECTOR dir;
-//	dir.x = sinf(m_angleY + DX_PI_F);
-//	dir.y = 0.0f;
-//	dir.z = cosf(m_angleY + DX_PI_F);
-//	return dir;
-//}

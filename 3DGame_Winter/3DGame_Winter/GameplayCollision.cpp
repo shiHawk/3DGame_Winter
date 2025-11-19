@@ -36,7 +36,7 @@ void GameplayCollision::CheckPlayerAttack()
 {
 	if (!m_pPlayer->IsAttackActive())
 	{
-		return; // コンパニオンが攻撃中でなければ処理を終わる
+		return; // プレイヤーが攻撃中でなければ処理を終わる
 	}
 	// コンパニオンの現在の攻撃情報を取得
 	float playerAttackRadius = m_pPlayer->GetAttackRadius();

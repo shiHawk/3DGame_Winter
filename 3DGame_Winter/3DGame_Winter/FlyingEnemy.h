@@ -3,11 +3,11 @@
 #include "Player.h"
 #include "Companion.h"
 #include "DxLib.h"
-class NormalEnemy :public Enemy
+class FlyingEnemy :public Enemy
 {
 public:
-	NormalEnemy();
-	~NormalEnemy();
+	FlyingEnemy();
+	~FlyingEnemy();
 	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion);
 	void End();
 	void Update() override;

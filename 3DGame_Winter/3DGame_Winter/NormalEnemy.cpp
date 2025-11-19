@@ -118,7 +118,7 @@ void NormalEnemy::Update()
 		{
 			m_enemyAttack.timer--;
 		}
-		printfDx(L"m_AttackCoolTime:%f\n", m_AttackCoolTime);
+		//printfDx(L"m_AttackCoolTime:%f\n", m_AttackCoolTime);
 		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 	}
 
@@ -159,4 +159,9 @@ void NormalEnemy::OnDamage()
 float NormalEnemy::GetColRadius()
 {
 	return kColRadius;
+}
+
+VECTOR NormalEnemy::GetDir()
+{
+	return VECTOR();
 }
