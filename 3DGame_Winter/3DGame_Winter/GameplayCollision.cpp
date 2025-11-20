@@ -24,8 +24,8 @@ void GameplayCollision::Update()
 {
 	CheckPlayerAttack();
 	ChaeckCompanionAttack();
-	PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pNormalEnemy->GetPos(), m_pNormalEnemy->GetColRadius(),m_pPlayer.get());
-	PushBackCharacter(m_pCompanion->GetPos(), m_pCompanion->GetColRadius(), m_pNormalEnemy->GetPos(), m_pNormalEnemy->GetColRadius(),m_pCompanion.get());
+	PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pPlayer.get());
+	PushBackCharacter(m_pCompanion->GetPos(), m_pCompanion->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pCompanion.get());
 }
 
 void GameplayCollision::Draw()

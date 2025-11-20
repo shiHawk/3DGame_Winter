@@ -11,12 +11,15 @@ namespace
 	constexpr float kColRadius = 30.0f;
 	constexpr float kMoveSpeed = 4.0f;
 	constexpr float kMoveDecRate = 0.8f;
+	constexpr float kAttackSpeed = 2.5f; // ˆÚ“®‘¬“x
 }
 
 FlyingEnemy::FlyingEnemy() :
 	m_enemyAttack(kAttackRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
 	m_alpha(1.0f),
-	m_targetAngle(0.0f)
+	m_targetAngle(0.0f),
+	m_toPlayerDir({ 0.0f,0.0f,0.0f }),
+	m_attackDir({ 0.0f,0.0f,0.0f })
 {
 }
 
@@ -53,6 +56,12 @@ void FlyingEnemy::Draw()
 
 void FlyingEnemy::OnAttack()
 {
+	m_toPlayerDir = VNorm(VSub(m_pCompanion->GetPos(),m_pos));
+	m_attackDir = m_toPlayerDir;
+
+	m_enemyAttack.pos.x += m_enemyAttack.dir.x * kAttackSpeed * kMoveDecRate;
+	m_enemyAttack.pos.y += m_enemyAttack.dir.y * kAttackSpeed * kMoveDecRate;
+	m_enemyAttack.pos.z += m_enemyAttack.dir.z * kAttackSpeed * kMoveDecRate;
 }
 
 void FlyingEnemy::OnDamage()

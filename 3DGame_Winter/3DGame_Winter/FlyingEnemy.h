@@ -20,5 +20,7 @@ private:
 	AttackSphere m_enemyAttack;
 	float m_alpha;
 	float m_targetAngle;
+	VECTOR m_toPlayerDir;
+	VECTOR m_attackDir; 
 };
 

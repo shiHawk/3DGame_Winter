@@ -54,7 +54,6 @@ void EffectManager::Update()
 void EffectManager::Draw()
 {
 	Effekseer_Sync3DSetting(); // Effekseerの表示設定をDXライブラリの設定に同期させる
-
 	DrawEffekseer3D(); // エフェクトの描画
 }
 
