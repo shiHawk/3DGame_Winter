@@ -46,8 +46,8 @@ namespace
     // 各攻撃の持続時間
     constexpr float kAttackDuration = 20.0f;
     constexpr float kStrongAttackDuration = 40.0f;
-    constexpr float kComboFinishAttackDuration = 40.0f;
-    constexpr float kSpecialSkilDuration = 70.0f; // 強攻撃がコンボフィニッシュにキャンセル可能になるまでの残り時間
+    constexpr float kComboFinishAttackDuration = 40.0f; // 強攻撃がコンボフィニッシュにキャンセル可能になるまでの残り時間
+    constexpr float kSpecialSkilDuration = 80.0f; 
     constexpr float kStrongAttackCancelThreshold = 10.0f;
     constexpr float kAvoidanceFrame = 15.0f;
     constexpr float kAvoidanceMoveSpeed = 0.3f;
@@ -308,6 +308,7 @@ void Player::OnSpecialSkil()
     m_attack.pos = m_pos;
     m_attack.timer = kSpecialSkilDuration;
     m_playerState = PlayerState::SPECIALSKIL;
+    m_isSpecialSkilFlag = true;
 }
 
 void Player::OnAvoidance()
@@ -649,6 +650,7 @@ void Player::HandleStateSpecialSkil()
         {
             m_attack.active = false;
             m_playerState = PlayerState::NORMAL;
+            m_isSpecialSkilFlag = false;
         }
     }
 }

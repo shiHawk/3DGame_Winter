@@ -198,7 +198,6 @@ void WorldCollision::CheckWallCollision(CharacterBase* pTargetCharacter)
 
 			// 移動量の調整 (壁にめり込む方向の速度を打ち消す)
 			VECTOR currentVec = pTargetCharacter->GetVec();
-
 			// 速度ベクトルと壁の法線との内積 (速度が法線と逆方向(めり込み方向)なら dot < 0)
 			float dot = VDot(currentVec, closestResult.Normal);
 

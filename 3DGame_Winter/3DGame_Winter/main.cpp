@@ -1,7 +1,11 @@
 #include "DxLib.h"
 #include "game.h"
 #include "SceneManager.h"
-
+#include <EffekseerForDXLib.h>
+namespace
+{
+	constexpr int kParticleMax = 8000;
+}
 //Dxlibのエントリーポイント
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_  HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
@@ -18,6 +22,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_  HINSTANCE hPrevInstance, 
 	{
 		return -1;			// エラーが起きたら直ちに終了
 	}
+	Effekseer_Init(kParticleMax);
+	Effekseer_SetGraphicsDeviceLostCallbackFunctions();
+	Effekseer_Sync3DSetting();
 	// ダブルバッファモード
 	SetDrawScreen(DX_SCREEN_BACK);
 	// 最初のシーンの初期化
@@ -43,6 +50,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_  HINSTANCE hPrevInstance, 
 		}
 	}
 	scene.End();
+	Effkseer_End();
 	DxLib_End();//Dxlib終了処理
 	return 0;//終了 
 }

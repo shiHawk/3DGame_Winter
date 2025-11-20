@@ -35,6 +35,7 @@ public:
 	void AddPos(VECTOR offset);
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
+	bool IsSpecialSkilFlag() { return m_isSpecialSkilFlag; }
 private:
 	enum class PlayerState
 	{
