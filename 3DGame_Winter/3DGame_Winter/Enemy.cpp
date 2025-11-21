@@ -22,6 +22,7 @@ m_AttackCoolTime(0.0f)
 void Enemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
 {
 	m_pPlayer = pPlayer;
+	m_pCompanion = pCompanion;
 }
 
 void Enemy::End()

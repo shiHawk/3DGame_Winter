@@ -121,7 +121,7 @@ void GameScene::Draw()
 	m_pCompanion->Draw();
 	m_pNormalEnemy->Draw();
 	m_pEffectManager->Draw();
-	//m_pFlyingEnemy->Draw();
+	m_pFlyingEnemy->Draw();
 	//DrawGrid();
 }
 
