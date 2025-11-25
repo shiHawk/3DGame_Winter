@@ -33,7 +33,7 @@ void EffectManager::End()
 
 void EffectManager::Update()
 {
-	if (m_pPlayer->IsSpecialSkilFlag() && !m_isPlayingSpecialEffect)
+	/*if (m_pPlayer->IsSpecialSkilFlag() && !m_isPlayingSpecialEffect)
 	{
 		m_playerEffectHandle = PlayEffekseer3DEffect(m_effectHandle);
 		SetScalePlayingEffekseer3DEffect(m_playerEffectHandle, kSpecialSkilEffectSize, kSpecialSkilEffectSize, kSpecialSkilEffectSize);
@@ -47,7 +47,7 @@ void EffectManager::Update()
 			m_playerEffectHandle = -1;
 			m_isPlayingSpecialEffect = false;
 		}
-	}
+	}*/
 	UpdateEffekseer3D(); // エフェクトの更新
 }
 

@@ -20,6 +20,8 @@ private:
 	AttackSphere m_enemyAttack;
 	float m_alpha;
 	float m_targetAngle;
+	float m_attackToPlayerDistance;
+	float m_hoverTimer; // 浮遊アニメーション用タイマー
 	VECTOR m_toPlayerDir;
 	VECTOR m_attackDir; 
 };

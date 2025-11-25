@@ -19,7 +19,7 @@ public:
 	void OnCombFinishAttack();
 	void OnSpecialSkil();
 	void OnAvoidance();
-	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; }
+	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; } 
 	void SetControlMode(ControlMode mode) { m_controlMode = mode; }
 	ControlMode GetControlMode() { return m_controlMode; }
 	void SetFollowTargetPos(VECTOR targetPos) { m_followTargetPos = targetPos; } // AI操作時に追従する対象（＝プレイヤー）の座標をセットする
@@ -36,7 +36,7 @@ public:
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
 	bool IsSpecialSkilFlag() { return m_isSpecialSkilFlag; }
-private:
+	void OnDamage(int enemyPower);
 	enum class PlayerState
 	{
 		NORMAL,
@@ -49,6 +49,12 @@ private:
 		COMBO_WINDOW,
 		SPECIALSKIL
 	};
+	bool IsComboFinish() 
+	{
+		if (m_playerState == PlayerState::ATTACKING_COMBOFINISH) return true;
+		else return false;
+	};
+private:
 	ControlMode m_controlMode;
 	PlayerState m_playerState;
 	VECTOR HandleInput();

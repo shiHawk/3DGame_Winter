@@ -357,6 +357,11 @@ VECTOR Player::GetDir()
 	return dir;
 }
 
+void Player::OnDamage(int enemyPower)
+{
+    m_hp -= enemyPower;
+}
+
 VECTOR Player::HandleInput()
 {
     if (m_controlMode == ControlMode::COMPANION)

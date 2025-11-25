@@ -9,7 +9,7 @@ namespace
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0xfffff0;
 	constexpr int kSphereSpcColor = 0xffffff;
-	constexpr float kAttackDuration = 80.0f;
+	constexpr float kAttackDuration = 200.0f;
 	constexpr float kColRadius = 30.0f;
 	constexpr float kMoveSpeed = 5.0f;
 	constexpr float kMoveDecRate = 0.8f;
@@ -20,6 +20,8 @@ FlyingEnemy::FlyingEnemy() :
 	m_enemyAttack(kAttackRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
 	m_alpha(1.0f),
 	m_targetAngle(0.0f),
+	m_attackToPlayerDistance(0.0f),
+	m_hoverTimer(0.0f),
 	m_toPlayerDir({ 0.0f,0.0f,0.0f }),
 	m_attackDir({ 0.0f,0.0f,0.0f })
 {
@@ -43,7 +45,9 @@ void FlyingEnemy::Update()
 {
 	VECTOR diff = VSub(m_pCompanion->GetPos(), m_pos);
 	diff.y = 0.0f; // ‚‚³‚ðl—¶‚µ‚È‚¢
+
 	m_toPlayerDistance = VSize(diff);
+	m_attackToPlayerDistance = VSize(VSub(m_pCompanion->GetPos(), m_enemyAttack.pos));
 	m_toPlayerDir = VNorm(diff);
 	m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
 	if (m_toPlayerDistance > kAttackRange)
@@ -61,14 +65,22 @@ void FlyingEnemy::Update()
 	if (m_enemyAttack.active)
 	{
 		m_enemyAttack.timer--;
-		m_enemyAttack.pos.x += m_enemyAttack.dir.x * kAttackSpeed * kMoveDecRate;
-		m_enemyAttack.pos.y += m_enemyAttack.dir.y * kAttackSpeed * kMoveDecRate;
-		m_enemyAttack.pos.z += m_enemyAttack.dir.z * kAttackSpeed * kMoveDecRate;
+		m_enemyAttack.pos.x += m_enemyAttack.dir.x * kAttackSpeed;
+		m_enemyAttack.pos.y += m_enemyAttack.dir.y * kAttackSpeed;
+		m_enemyAttack.pos.z += m_enemyAttack.dir.z * kAttackSpeed;
+	}
+	
+	if (m_attackToPlayerDistance < m_pCompanion->GetColRadius())
+	{
+		m_enemyAttack.active = false;
+		return;
 	}
 	if (m_enemyAttack.timer < 0.0f)
 	{
 		m_enemyAttack.active = false;
+		return;
 	}
+	printfDx(L"m_attackToPlayerDistance:%f\n", m_attackToPlayerDistance);
 }
 
 void FlyingEnemy::Draw()

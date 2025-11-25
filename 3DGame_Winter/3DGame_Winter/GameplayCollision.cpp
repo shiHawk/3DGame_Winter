@@ -23,7 +23,7 @@ void GameplayCollision::End()
 void GameplayCollision::Update()
 {
 	CheckPlayerAttack();
-	ChaeckCompanionAttack();
+	CheckCompanionAttack();
 	PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pPlayer.get());
 	PushBackCharacter(m_pCompanion->GetPos(), m_pCompanion->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pCompanion.get());
 }
@@ -49,10 +49,17 @@ void GameplayCollision::CheckPlayerAttack()
 	if (hitInfo.m_distance < playerAttackRadius + enemyColRadius)
 	{
 		m_pNormalEnemy->OnDamage();
+		if (m_pPlayer->IsComboFinish())
+		{
+			// 敵を吹き飛ばすベクトルと強さを計算し、敵に適用する
+			VECTOR pushDirection = VNorm(hitInfo.m_deltaVector); // 攻撃の中心から敵への方向
+			float knockbackPower = 5.0f;
+			m_pNormalEnemy->ApplyKnockback(pushDirection, knockbackPower);
+		}
 	}
 }
 
-void GameplayCollision::ChaeckCompanionAttack()
+void GameplayCollision::CheckCompanionAttack()
 {
 	if (!m_pCompanion->IsAttackActive())
 	{
@@ -69,6 +76,19 @@ void GameplayCollision::ChaeckCompanionAttack()
 	if (hitInfo.m_distance < companionAttackRadius + enemyColRadius)
 	{
 		m_pNormalEnemy->OnDamage();
+	}
+}
+
+void GameplayCollision::CheckStrongEnemyRangeAttack(VECTOR attackCenter, float attackRadius, int enemyPower)
+{
+	// 攻撃の中心とプレイヤーの位置の差分ベクトルを取得
+	VECTOR deltaVector = VSub(m_pPlayer->GetPos(), attackCenter);
+	// 距離を計算
+	float distance = VSize(deltaVector);
+	float totalRadius = attackRadius + m_pPlayer->GetColRadius();
+	if (distance < totalRadius)
+	{
+		m_pPlayer->OnDamage(enemyPower);
 	}
 }
 

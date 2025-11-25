@@ -22,6 +22,7 @@ namespace
 	constexpr int kWalkAnimNo = 55;
 	constexpr int kAttackAnimNo = 5;
 	constexpr int kDamageAnimNo = 40;
+	constexpr int kKnockbackAnimNo = 25;
 	constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
 	constexpr float kAttackAnimIncrement = 0.5f; // 待機アニメーションの再生速度
@@ -30,12 +31,19 @@ namespace
 	constexpr float kInvincibilityTime = 30.0f;
 	constexpr float kMaxCoolTime = 30.0f;
 	constexpr int kMaxHp = 50;
+
+	const float kKnockbackDuration = 0.5f;
+	const float kKnockBackSpeed = 5.0f;
+	// 秒数変換
+	constexpr float kFramesPerSecond = 60.0f;
 }
 
 NormalEnemy::NormalEnemy():
 	m_enemyAttack(kAttackRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
 	m_alpha(1.0f),
-	m_targetAngle(0.0f)
+	m_targetAngle(0.0f),
+	m_knockbackTimer(0.0f),
+	m_knockbackDir({ 0.0f,0.0f,0.0f })
 {
 }
 
@@ -77,6 +85,10 @@ void NormalEnemy::Update()
 			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 		}
 	}
+	else if (m_knockbackTimer > 0.0f)
+	{
+		
+	}
 	else
 	{
 		if (m_AttackCoolTime > 0.0f)
@@ -97,7 +109,7 @@ void NormalEnemy::Update()
 				ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
 			}
 		}
-		else 
+		else
 		{
 			// 停止後→待機アニメーションへ変更
 			// ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
@@ -108,7 +120,7 @@ void NormalEnemy::Update()
 				ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 				m_AttackCoolTime = kMaxCoolTime;
 			}
-			else if(m_enemyAttack.timer <= 0.0f && m_AttackCoolTime <= 0.0f)
+			else if (m_enemyAttack.timer <= 0.0f && m_AttackCoolTime <= 0.0f)
 			{
 				OnAttack();
 			}
@@ -121,7 +133,12 @@ void NormalEnemy::Update()
 		//printfDx(L"m_AttackCoolTime:%f\n", m_AttackCoolTime);
 		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 	}
-
+	/*if (m_knockbackTimer > 0.0f)
+	{
+		m_pos = VAdd(m_pos, VScale(m_knockbackDir, kKnockBackSpeed));
+		m_knockbackTimer -= 1.0f / kFramesPerSecond;
+		MV1SetPosition(m_modelHandle, m_pos);
+	}*/
 	/*if (m_hp < 0)
 	{
 		m_alpha -= 0.01f;
@@ -164,4 +181,10 @@ float NormalEnemy::GetColRadius()
 VECTOR NormalEnemy::GetDir()
 {
 	return VECTOR();
+}
+
+void NormalEnemy::ApplyKnockback(VECTOR direction, float power)
+{
+	m_knockbackDir = direction;
+	m_knockbackTimer = kKnockbackDuration;
 }

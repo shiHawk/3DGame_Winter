@@ -1,27 +1,32 @@
 #pragma once
 #include "Enemy.h"
-#include "Player.h"
-#include "Companion.h"
-#include "DxLib.h"
-class NormalEnemy :public Enemy
+class StrongEnemy :public Enemy
 {
 public:
-	NormalEnemy();
-	~NormalEnemy();
+	StrongEnemy();
+	~StrongEnemy();
 	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion);
 	void End();
 	void Update() override;
 	void Draw() override;
 	virtual void OnAttack() override;
+	void OnRangeAttack();
 	void OnDamage();
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
-	void ApplyKnockback(VECTOR direction, float power);
+	int GetStrongEnemyAttackPower();
 private:
+	enum StrongEnemyState
+	{
+		NORMALATTACK,
+		RANGEATTACK_CHARGE,
+		RANGEATTACK,
+		DEFAULT,
+		COOLDOWN
+	};
+	StrongEnemyState m_state;
 	AttackSphere m_enemyAttack;
 	float m_alpha;
 	float m_targetAngle;
-	float m_knockbackTimer;
-	VECTOR m_knockbackDir;
 };
 
