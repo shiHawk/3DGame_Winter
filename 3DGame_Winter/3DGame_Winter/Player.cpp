@@ -174,17 +174,6 @@ void Player::Update()
         m_vec = { 0.0f,0.0f,0.0f };
         m_vec.y += kGravity * kAttackGravityMultiplier; // 攻撃時はかかる重力を小さくする
     }
-    //m_pos.y += m_vec.y;
-    //if (m_pos.y + m_vec.y < 0.0f)
-    //{
-    //    m_pos.y = 0.0f;   // 地面に固定
-    //    m_vec.y = 0.0f;   // 縦速度をゼロ
-    //    m_isJump = false; // 着地
-    //}
-    //else
-    //{
-    //   m_pos.y += m_vec.y;
-    //}
     
     if (m_isAvoidanceFlag)
     {

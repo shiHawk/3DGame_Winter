@@ -9,6 +9,7 @@
 #include "GameplayCollision.h"
 #include "WorldCollision.h"
 #include "FlyingEnemy.h"
+#include "StrongEnemy.h"
 #include "EffectManager.h"
 #include "DxLib.h"
 #include "Pad.h"
@@ -34,6 +35,7 @@ private:
 	std::shared_ptr<GameplayCollision> m_pGameplayCollision;
 	std::shared_ptr<WorldCollision> m_pWorldCollision;
 	std::shared_ptr<FlyingEnemy> m_pFlyingEnemy;
+	std::shared_ptr<StrongEnemy> m_pStrongEnemy;
 	std::shared_ptr<EffectManager> m_pEffectManager;
 };
 

@@ -18,15 +18,17 @@ public:
 private:
 	enum StrongEnemyState
 	{
+		DEFAULT,
 		NORMALATTACK,
 		RANGEATTACK_CHARGE,
 		RANGEATTACK,
-		DEFAULT,
 		COOLDOWN
 	};
 	StrongEnemyState m_state;
 	AttackSphere m_enemyAttack;
 	float m_alpha;
 	float m_targetAngle;
+	float m_attackTimer;
+	float m_actionCheckTimer; // 行動抽選のクールダウンタイマー
 };
 

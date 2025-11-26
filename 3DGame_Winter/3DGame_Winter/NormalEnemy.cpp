@@ -27,6 +27,7 @@ namespace
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
 	constexpr float kAttackAnimIncrement = 0.5f; // 待機アニメーションの再生速度
 	constexpr float kDamageAnimIncrement = 0.6f; // 被弾アニメーションの再生速度
+	constexpr float kKnockbackAnimIncrement = 0.7f;
 
 	constexpr float kInvincibilityTime = 30.0f;
 	constexpr float kMaxCoolTime = 30.0f;
@@ -135,6 +136,7 @@ void NormalEnemy::Update()
 	}
 	/*if (m_knockbackTimer > 0.0f)
 	{
+		ChangeAnim(m_modelHandle, kKnockbackAnimNo,false, kKnockbackAnimIncrement);
 		m_pos = VAdd(m_pos, VScale(m_knockbackDir, kKnockBackSpeed));
 		m_knockbackTimer -= 1.0f / kFramesPerSecond;
 		MV1SetPosition(m_modelHandle, m_pos);

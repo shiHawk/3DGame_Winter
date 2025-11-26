@@ -80,7 +80,7 @@ void FlyingEnemy::Update()
 		m_enemyAttack.active = false;
 		return;
 	}
-	printfDx(L"m_attackToPlayerDistance:%f\n", m_attackToPlayerDistance);
+	//printfDx(L"m_attackToPlayerDistance:%f\n", m_attackToPlayerDistance);
 }
 
 void FlyingEnemy::Draw()
