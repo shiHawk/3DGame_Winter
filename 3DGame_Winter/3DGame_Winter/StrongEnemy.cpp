@@ -62,7 +62,7 @@ void StrongEnemy::Update()
 		if (m_toPlayerDistance > kAttackRadius + 10.0f && m_toPlayerDistance < kRangeAttackRadius * 0.8f) 
 		{
 			int rand = GetRand(kRandMax);
-			printfDx(L"rand:%d\n", rand);
+			//printfDx(L"rand:%d\n", rand);
 			if (rand < kRangeAttackProbability)
 			{
 				m_state = StrongEnemyState::RANGEATTACK_CHARGE;

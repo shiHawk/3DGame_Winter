@@ -54,7 +54,8 @@ void GameplayCollision::CheckPlayerAttack()
 			// “G‚ð‚«”ò‚Î‚·ƒxƒNƒgƒ‹‚Æ‹­‚³‚ðŒvŽZ‚µA“G‚É“K—p‚·‚é
 			VECTOR pushDirection = VNorm(hitInfo.m_deltaVector); // UŒ‚‚Ì’†S‚©‚ç“G‚Ö‚Ì•ûŒü
 			float knockbackPower = 5.0f;
-			m_pNormalEnemy->ApplyKnockback(pushDirection, knockbackPower);
+			//m_pNormalEnemy->ApplyKnockback(pushDirection, knockbackPower);
+			m_pNormalEnemy->SetIsKnockbackFlag(true);
 		}
 	}
 }

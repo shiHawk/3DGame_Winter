@@ -33,7 +33,7 @@ namespace
 	constexpr float kMaxCoolTime = 30.0f;
 	constexpr int kMaxHp = 50;
 
-	const float kKnockbackDuration = 0.5f;
+	const float kKnockbackDuration = 0.4f;
 	const float kKnockBackSpeed = 5.0f;
 	// 秒数変換
 	constexpr float kFramesPerSecond = 60.0f;
@@ -44,7 +44,8 @@ NormalEnemy::NormalEnemy():
 	m_alpha(1.0f),
 	m_targetAngle(0.0f),
 	m_knockbackTimer(0.0f),
-	m_knockbackDir({ 0.0f,0.0f,0.0f })
+	m_knockbackDir({ 0.0f,0.0f,0.0f }),
+	m_isKnockbackFlag(false)
 {
 }
 
@@ -70,7 +71,21 @@ void NormalEnemy::End()
 
 void NormalEnemy::Update()
 {
-	if (m_invincibilityTimer > 0.0f)
+	if (m_knockbackTimer > 0.0f)
+	{
+		ChangeAnim(m_modelHandle, kKnockbackAnimNo, false, kKnockbackAnimIncrement);
+		m_pos = VAdd(m_pos, VScale(m_knockbackDir, kKnockBackSpeed));
+		m_knockbackTimer -= 1.0f / kFramesPerSecond;
+		//MV1SetPosition(m_modelHandle, m_pos);
+		if (m_knockbackTimer <= 0.0f)
+		{
+			m_knockbackTimer = 0.0f;
+			m_isKnockbackFlag = false;
+			// ノックバック終了後、待機状態へ
+			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+		}
+	}
+	else if (m_invincibilityTimer > 0.0f)
 	{
 		// 無敵時間タイマーを減らす
 		//printfDx(L"m_invincibilityTimer:%f\n", m_invincibilityTimer);
@@ -134,13 +149,7 @@ void NormalEnemy::Update()
 		//printfDx(L"m_AttackCoolTime:%f\n", m_AttackCoolTime);
 		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 	}
-	/*if (m_knockbackTimer > 0.0f)
-	{
-		ChangeAnim(m_modelHandle, kKnockbackAnimNo,false, kKnockbackAnimIncrement);
-		m_pos = VAdd(m_pos, VScale(m_knockbackDir, kKnockBackSpeed));
-		m_knockbackTimer -= 1.0f / kFramesPerSecond;
-		MV1SetPosition(m_modelHandle, m_pos);
-	}*/
+	
 	/*if (m_hp < 0)
 	{
 		m_alpha -= 0.01f;
@@ -171,6 +180,10 @@ void NormalEnemy::OnDamage()
 	if (m_invincibilityTimer > 0.0f) return;
 	m_isHitFlag = true;
 	m_hp -= m_pPlayer->GetAttackPower();
+	if (m_isKnockbackFlag)
+	{
+
+	}
 	m_invincibilityTimer = kInvincibilityTime;
 	//printfDx(L"m_hp:%d\n",m_hp);
 }

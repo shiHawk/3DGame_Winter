@@ -247,7 +247,7 @@ void Player::Draw()
     {
         DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
     }
-    DrawSphere3D({m_pos.x,m_pos.y+50.0f,m_pos.z}, kColRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+    //DrawSphere3D({m_pos.x,m_pos.y+50.0f,m_pos.z}, kColRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 #endif
 }
 

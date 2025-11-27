@@ -151,7 +151,7 @@ void Companion::Update()
 			}
 		}
 		UpdatePlayerControlState();
-		printfDx(L"m_isJump:%d\n", m_isJump);
+		//printfDx(L"m_isJump:%d\n", m_isJump);
 	}
 	else
 	{

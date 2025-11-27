@@ -17,11 +17,13 @@ public:
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
 	void ApplyKnockback(VECTOR direction, float power);
+	void SetIsKnockbackFlag(bool flag) { m_isKnockbackFlag = flag; }
 private:
 	AttackSphere m_enemyAttack;
 	float m_alpha;
 	float m_targetAngle;
 	float m_knockbackTimer;
 	VECTOR m_knockbackDir;
+	bool m_isKnockbackFlag;
 };
 
