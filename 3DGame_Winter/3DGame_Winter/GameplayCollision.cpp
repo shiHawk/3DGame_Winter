@@ -1,5 +1,8 @@
 #include "GameplayCollision.h"
-
+namespace
+{
+	constexpr float kKnockbackPower = 5.0f;
+}
 GameplayCollision::GameplayCollision():
 	m_overLapData({ 0.0f,0.0f,0.0f },0.0f, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f },0.0f)
 {
@@ -53,8 +56,7 @@ void GameplayCollision::CheckPlayerAttack()
 		{
 			// “G‚ð‚«”ò‚Î‚·ƒxƒNƒgƒ‹‚Æ‹­‚³‚ðŒvŽZ‚µA“G‚É“K—p‚·‚é
 			VECTOR pushDirection = VNorm(hitInfo.m_deltaVector); // UŒ‚‚Ì’†S‚©‚ç“G‚Ö‚Ì•ûŒü
-			float knockbackPower = 5.0f;
-			//m_pNormalEnemy->ApplyKnockback(pushDirection, knockbackPower);
+			//m_pNormalEnemy->ApplyKnockback(pushDirection, kKnockbackPower);
 			m_pNormalEnemy->SetIsKnockbackFlag(true);
 		}
 	}
@@ -106,6 +108,5 @@ void GameplayCollision::PushBackCharacter(VECTOR pos1, float pos1Radius, VECTOR 
 		{
 			pTargetCharacter->AddPos(m_overLapData.m_pushBack);
 		}
-		
 	}
 }

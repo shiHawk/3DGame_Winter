@@ -14,7 +14,8 @@ CharacterBase::CharacterBase():
 	m_isHitFlag(false),
 	m_invincibilityTimer(0.0f),
 	m_forwardDir({ 0.0f,0.0f,0.0f }),
-	m_angleY(0.0f)
+	m_angleY(0.0f),
+	m_isSpecialSkilFlag(false)
 {
 }
 

@@ -2,16 +2,20 @@
 #include "DxLib.h"
 #include <EffekseerForDXLib.h>
 #include "Player.h"
+#include "Companion.h"
 namespace
 {
 	constexpr int kParticleMax = 8000;
-	constexpr float kSpecialSkilEffectSize = 80.0f;
+	constexpr float kSpecialSkilEffectSize = 100.0f;
+	constexpr float kSpecialSkilSpped = 10.0f;
 }
 
 EffectManager::EffectManager() :
-	m_effectHandle(-1),
+	m_meleeSpecialEffectHandle(-1),
 	m_playerEffectHandle(-1),
-	m_isPlayingSpecialEffect(false)
+	m_isMeleeSpecialEffect(false),
+	m_rangedSpecialEffectHandle(-1),
+	m_isRangedSpecialEffect(false)
 {
 }
 
@@ -19,35 +23,54 @@ EffectManager::~EffectManager()
 {
 }
 
-void EffectManager::Init(std::shared_ptr<Player> pPlayer)
+void EffectManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
 {
 	m_pPlayer = pPlayer;
-	m_effectHandle = LoadEffekseerEffect(L"Data/effect/SpecialSkil.efk");
+	m_pCompanion = pCompanion;
+	m_meleeSpecialEffectHandle = LoadEffekseerEffect(L"Data/effect/Aura01.efkefc");
+	m_rangedSpecialEffectHandle = LoadEffekseerEffect(L"Data/effect/MagicMeteo.efkefc");
 	m_playerEffectHandle = -1;
 }
 
 void EffectManager::End()
 {
-	DeleteEffekseerEffect(m_effectHandle);
+	DeleteEffekseerEffect(m_meleeSpecialEffectHandle);
+	DeleteEffekseerEffect(m_rangedSpecialEffectHandle);
 }
 
 void EffectManager::Update()
 {
-	/*if (m_pPlayer->IsSpecialSkilFlag() && !m_isPlayingSpecialEffect)
+	if (m_pPlayer->IsSpecialSkilFlag() && !m_isMeleeSpecialEffect)
 	{
-		m_playerEffectHandle = PlayEffekseer3DEffect(m_effectHandle);
+		m_playerEffectHandle = PlayEffekseer3DEffect(m_meleeSpecialEffectHandle);
 		SetScalePlayingEffekseer3DEffect(m_playerEffectHandle, kSpecialSkilEffectSize, kSpecialSkilEffectSize, kSpecialSkilEffectSize);
-		m_isPlayingSpecialEffect = true;
+		m_isMeleeSpecialEffect = true;
 	}
-	if (m_isPlayingSpecialEffect)
+	if (m_isMeleeSpecialEffect)
 	{
-		SetSpecialSkilEffect();
+		SetSpecialSkilEffect(m_pPlayer->GetPos().x, m_pPlayer->GetPos().y, m_pPlayer->GetPos().z);
 		if (!m_pPlayer->IsSpecialSkilFlag())
 		{
 			m_playerEffectHandle = -1;
-			m_isPlayingSpecialEffect = false;
+			m_isMeleeSpecialEffect = false;
 		}
-	}*/
+	}
+
+	if (m_pCompanion->IsSpecialSkilFlag() && !m_isRangedSpecialEffect)
+	{
+		m_playerEffectHandle = PlayEffekseer3DEffect(m_rangedSpecialEffectHandle);
+		SetScalePlayingEffekseer3DEffect(m_playerEffectHandle, kSpecialSkilEffectSize, kSpecialSkilEffectSize, kSpecialSkilEffectSize);
+		m_isRangedSpecialEffect = true;
+	}
+	if (m_isRangedSpecialEffect)
+	{
+		SetSpecialSkilEffect(m_pCompanion->GetAttackPos().x, m_pCompanion->GetAttackPos().y, m_pCompanion->GetAttackPos().z);
+		if (!m_pCompanion->IsSpecialSkilFlag())
+		{
+			m_playerEffectHandle = -1;
+			m_isRangedSpecialEffect = false;
+		}
+	}
 	UpdateEffekseer3D(); // エフェクトの更新
 }
 
@@ -57,7 +80,7 @@ void EffectManager::Draw()
 	DrawEffekseer3D(); // エフェクトの描画
 }
 
-void EffectManager::SetSpecialSkilEffect()
+void EffectManager::SetSpecialSkilEffect(float x, float y, float z)
 {
-	SetPosPlayingEffekseer3DEffect(m_playerEffectHandle,m_pPlayer->GetPos().x, m_pPlayer->GetPos().y, m_pPlayer->GetPos().z);
+	SetPosPlayingEffekseer3DEffect(m_playerEffectHandle,x, y, z);
 }

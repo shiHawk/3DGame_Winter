@@ -104,7 +104,6 @@ Player::Player():
     m_comboWindowTimer(0.0f),
     m_comboCoolTimer(0.0f),
     m_specialGauge(0),
-    m_isSpecialSkilFlag(false),
     m_aiWillDo3HitCombo(false)
 {
 }

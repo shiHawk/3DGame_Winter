@@ -35,7 +35,6 @@ public:
 	void AddPos(VECTOR offset);
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
-	bool IsSpecialSkilFlag() { return m_isSpecialSkilFlag; }
 	void OnDamage(int enemyPower);
 	enum class PlayerState
 	{
@@ -74,7 +73,6 @@ private:
 	float m_comboWindowTimer; // コンボの受付時間
 	float m_comboCoolTimer; // AIのコンボ用クールタイム
 	int m_specialGauge; // 必殺ゲージ
-	bool m_isSpecialSkilFlag; // 必殺技のフラグ
 	bool m_aiWillDo3HitCombo; // AIが3コンボ攻撃をするかどうかのフラグ
 
 	// ステートごとのハンドラ関数

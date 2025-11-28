@@ -13,7 +13,10 @@ namespace
 	constexpr float kColRadius = 30.0f;
 	constexpr float kMoveSpeed = 5.0f;
 	constexpr float kMoveDecRate = 0.8f;
-	constexpr float kAttackSpeed = 2.5f; // 移動速度
+	constexpr float kAttackSpeed = 2.5f; // 弾の移動速度
+	constexpr float kAcceleration = 0.2f; // 加速度（追尾する力）
+	constexpr float kFriction = 0.96f;    // 空気抵抗（減速する力）
+	constexpr float kMaxSpeed = 6.0f;     // 最高速度
 }
 
 FlyingEnemy::FlyingEnemy() :
@@ -52,8 +55,30 @@ void FlyingEnemy::Update()
 	m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
 	if (m_toPlayerDistance > kAttackRange)
 	{
-		m_pos.x += m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
-		m_pos.z += m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
+		// ターゲットへの方向ベクトルを正規化
+		VECTOR targetDir = VNorm(diff);
+
+		// 現在の速度ベクトルに、ターゲットへ向かう力を加算する(直接代入しない)
+		m_vec.x += targetDir.x * kAcceleration;
+		m_vec.z += targetDir.z * kAcceleration;
+
+		// 空気抵抗(減衰)をかける
+		m_vec.x *= kFriction;
+		m_vec.z *= kFriction;
+
+		// 最高速度の制限(オプション）
+		if (VSize(m_vec) > kMaxSpeed) {
+			m_vec = VScale(VNorm(m_vec), kMaxSpeed);
+		}
+
+		// 座標更新
+		m_pos = VAdd(m_pos, m_vec);
+
+		// 向きの更新(移動方向を向くようにする)
+		if (VSize(m_vec) > 0.1f) {
+			m_toPlayerDir = VNorm(m_vec);
+			m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
+		}
 	}
 	else
 	{

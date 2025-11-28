@@ -20,6 +20,8 @@ namespace
 	constexpr unsigned int kAreaColor = 0xff4500;
 	constexpr unsigned int kOutLineColor = 0xff0000;
 	constexpr int kDivNum = 32;
+	constexpr float kInvincibilityTime = 30.0f;
+	constexpr int kMaxHp = 400;
 }
 
 StrongEnemy::StrongEnemy():
@@ -40,6 +42,7 @@ void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 {
 	Enemy::Init(pPlayer, pCompanion);
 	m_pos = kDefaultPos;
+	m_hp = kMaxHp;
 }
 
 void StrongEnemy::End()
@@ -54,6 +57,19 @@ void StrongEnemy::Update()
 	if (m_actionCheckTimer > 0.0f)
 	{
 		m_actionCheckTimer -= 1.0f / kFramesPerSecond;
+	}
+	if (m_invincibilityTimer > 0.0f)
+	{
+		m_invincibilityTimer--;
+		if (kMaxHp * 0.5f >= m_hp)
+		{
+			// HPが半分以下なら怯む(ダメージリアクションをとる)
+		}
+		if (m_invincibilityTimer < 0.0f)
+		{
+			m_invincibilityTimer = 0.0f;
+			m_isHitFlag = false;
+		}
 	}
 	switch (m_state)
 	{
@@ -159,6 +175,10 @@ void StrongEnemy::OnRangeAttack()
 
 void StrongEnemy::OnDamage()
 {
+	if (m_invincibilityTimer > 0.0f) return;
+	m_isHitFlag = true;
+	m_hp -= m_pPlayer->GetAttackPower();
+	m_invincibilityTimer = kInvincibilityTime;
 }
 
 float StrongEnemy::GetColRadius()

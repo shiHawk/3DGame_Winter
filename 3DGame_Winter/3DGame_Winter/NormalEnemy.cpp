@@ -33,8 +33,9 @@ namespace
 	constexpr float kMaxCoolTime = 30.0f;
 	constexpr int kMaxHp = 50;
 
-	const float kKnockbackDuration = 0.4f;
-	const float kKnockBackSpeed = 5.0f;
+	constexpr float kKnockbackDuration = 0.4f;
+	constexpr float kKnockBackSpeed = 5.0f;
+	constexpr float kRecoveryTime = 15.0f;
 	// 秒数変換
 	constexpr float kFramesPerSecond = 60.0f;
 }
@@ -45,7 +46,8 @@ NormalEnemy::NormalEnemy():
 	m_targetAngle(0.0f),
 	m_knockbackTimer(0.0f),
 	m_knockbackDir({ 0.0f,0.0f,0.0f }),
-	m_isKnockbackFlag(false)
+	m_isKnockbackFlag(false),
+	m_recoveryTimer(0.0f)
 {
 }
 
@@ -81,9 +83,16 @@ void NormalEnemy::Update()
 		{
 			m_knockbackTimer = 0.0f;
 			m_isKnockbackFlag = false;
+			m_recoveryTimer = kRecoveryTime; // 復帰時間を設定
 			// ノックバック終了後、待機状態へ
 			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 		}
+	}
+	else if (m_recoveryTimer > 0.0f) // 復帰待機処理
+	{
+		m_recoveryTimer--; // タイマーを減らす
+		// 待機アニメーションを継続 
+		ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 	}
 	else if (m_invincibilityTimer > 0.0f)
 	{

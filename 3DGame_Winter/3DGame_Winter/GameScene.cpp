@@ -42,7 +42,7 @@ void GameScene::Init()
 	m_pWorldCollision->Init(m_pPlayer, m_pStage, m_pCompanion);
 	m_pFlyingEnemy->Init(m_pPlayer, m_pCompanion);
 	m_pStrongEnemy->Init(m_pPlayer, m_pCompanion);
-	m_pEffectManager->Init(m_pPlayer);
+	m_pEffectManager->Init(m_pPlayer,m_pCompanion);
 }
 
 void GameScene::End()

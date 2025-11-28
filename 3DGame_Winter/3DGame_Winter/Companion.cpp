@@ -252,7 +252,7 @@ void Companion::Draw()
 	}
 	DrawLine3D(lineStart, lineEnd, kSphereDifColor);
 #endif 
-	if (m_companionState == CompanionState::STRONG_ATTACK || m_companionState == CompanionState::SPECIALSKIL)
+	if (m_companionState == CompanionState::STRONG_ATTACK)
 	{
 		DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
 	}
@@ -299,6 +299,7 @@ void Companion::OnSpecialSkil()
 	m_attack.active = true;
 	m_attack.pos = m_enemyPos;
 	m_attack.timer = kSpecialSkilDuration;
+	m_isSpecialSkilFlag = true;
 }
 
 void Companion::UpdateAIState()
@@ -536,6 +537,7 @@ void Companion::UpdatePlayerControlState()
 			ChangeAnim(m_modelHandle, kSpecialSkilAnimNo, false, kSpecialSkilAnimIncriment);
 			if (m_attack.timer < 0.0f)
 			{
+				m_isSpecialSkilFlag = false;
 				m_attack.active = false;
 				m_companionState = CompanionState::NORMAL;
 			}

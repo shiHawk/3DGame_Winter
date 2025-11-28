@@ -23,6 +23,7 @@ private:
 	float m_alpha;
 	float m_targetAngle;
 	float m_knockbackTimer;
+	float m_recoveryTimer; // 復帰待機タイマー
 	VECTOR m_knockbackDir;
 	bool m_isKnockbackFlag;
 };

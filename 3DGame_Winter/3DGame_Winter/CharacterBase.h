@@ -16,6 +16,7 @@ public:
 	VECTOR GetVec() { return m_vec; }
 	virtual VECTOR GetDir() = 0;
 	void SetVec(VECTOR vec) { m_vec = vec; }
+	bool IsSpecialSkilFlag() { return m_isSpecialSkilFlag; }
 	enum class ControlMode
 	{
 		PLAYER,
@@ -44,5 +45,6 @@ protected:
 	float m_invincibilityTimer;
 	VECTOR m_forwardDir;
 	float m_angleY;
+	bool m_isSpecialSkilFlag;
 };
 
