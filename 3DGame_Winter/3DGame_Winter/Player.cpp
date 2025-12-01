@@ -241,7 +241,7 @@ void Player::Draw()
 	//DrawSphere3D(m_pos,kSphereRadius,kDivNum,kSphereDifColor,kSphereSpcColor,true);
     MV1DrawModel(m_modelHandle);
 #ifdef _DEBUG
-    DrawLine3D(lineStart, lineEnd, kSphereDifColor);
+    //DrawLine3D(lineStart, lineEnd, kSphereDifColor);
     if (m_attack.active)
     {
         DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);

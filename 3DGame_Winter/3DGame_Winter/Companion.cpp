@@ -167,7 +167,8 @@ void Companion::Update()
 						 && m_companionState != CompanionState::TRACK_ENEMY;
 	if (m_isInAttackSequence)
 	{
-		m_vec = { 0.0f,0.0f,0.0f };
+		m_vec.x = 0.0f;
+		m_vec.z = 0.0f;
 	}
 	if (m_controlMode == ControlMode::PLAYER)
 	{
@@ -250,7 +251,7 @@ void Companion::Draw()
 	{
 		DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 	}
-	DrawLine3D(lineStart, lineEnd, kSphereDifColor);
+	//DrawLine3D(lineStart, lineEnd, kSphereDifColor);
 #endif 
 	if (m_companionState == CompanionState::STRONG_ATTACK)
 	{
@@ -288,7 +289,7 @@ void Companion::OnStrongAttack()
 	}
 	VECTOR forwardVec = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
 	m_attack.pos = VAdd(m_pos,VScale(forwardVec,kSphereRadius*2.0f));
-	m_attack.pos.y = kOffSetStrongAttackPosY;
+	m_attack.pos.y = m_pos.y + kOffSetStrongAttackPosY;
 }
 
 void Companion::OnSpecialSkil()
@@ -514,11 +515,12 @@ void Companion::UpdatePlayerControlState()
 		}
 		break;
 	case Companion::CompanionState::STRONG_ATTACK:
+		ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, kStrongAttackAnimIncrement);
 		m_attack.pos = VAdd(m_attack.pos, VScale(m_attack.dir, kStrongAttackBulletSpeed)); // 毎フレーム位置の更新
 		if (m_attack.active)
 		{
 			m_attack.timer--;
-			ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, kStrongAttackAnimIncrement);
+			
 			if (m_attack.timer < 0.0f || VSize(VSub(m_attack.pos,m_enemyPos)) <= m_attack.radius*2.0f)
 			{
 				m_attack.active = false;
