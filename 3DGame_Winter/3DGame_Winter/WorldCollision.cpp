@@ -71,6 +71,7 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 	// 当たり判定の準備
 	bool isGrounded = false;
 	float highestGroundY = -99999.0f;
+	VECTOR highestGroundNormal = VGet(0.0f, 1.0f, 0.0f);
 	// ステージの全タイルとレイの当たり判定を実行
 	for (int handle : tileHandles)
 	{
@@ -84,6 +85,7 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 			if (result.HitPosition.y > highestGroundY)
 			{
 				highestGroundY = result.HitPosition.y;
+				highestGroundNormal = result.Normal;
 			}
 		}
 	}
@@ -96,6 +98,9 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 	}
 	//printfDx(L"m_lastGroundY:%f\n", m_lastGroundY);
 	//printfDx(L"playerPosY:%f\n", m_pPlayer->GetPos().y);
+	// // プレイヤーの現在のY軸速度を取得
+	VECTOR currentVec = pTargetCharacter->GetVec();
+	playerVecY = currentVec.y;
 	// 判定結果からプレイヤーに反映
 	// 地面が見つかり、かつ プレイヤーのY座標が地面より下(またはめり込んでいる)場合
 	if (isGrounded && playerPos.y + pTargetCharacter->GetVec().y <= highestGroundY)
@@ -107,6 +112,15 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 			playerPos.y = targetY;
 			pTargetCharacter->SetVecY(0.0f);
 			pTargetCharacter->SetIsJump(false);
+			// 地面の法線と現在の移動ベクトルの内積を計算
+			float dot = VDot(currentVec, highestGroundNormal);
+			// 地面にめり込む方向の速度成分（法線方向の成分）を打ち消す
+			// これにより、ベクトルが地面に平行な成分（坂に沿った方向）になる
+			VECTOR velocityAlongNormal = VScale(highestGroundNormal, dot);
+			VECTOR newVec = VSub(currentVec, velocityAlongNormal);
+			// 調整されたXZ成分を速度に反映
+			pTargetCharacter->SetVecX(newVec.x);
+			pTargetCharacter->SetVecZ(newVec.z);
 		}
 	}
 	playerPos = VAdd(playerPos, pTargetCharacter->GetVec());

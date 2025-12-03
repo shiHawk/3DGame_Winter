@@ -11,7 +11,9 @@ public:
 	VECTOR GetPos() { return m_pos; }
 	void AddPos(VECTOR offset) { m_pos = VAdd(m_pos, offset); }
 	void SetPos(VECTOR newPos) { m_pos = newPos; }
+	void SetVecX(float newVecX) { m_vec.x = newVecX; }
 	void SetVecY(float newVecY) { m_vec.y = newVecY; }
+	void SetVecZ(float newVecZ) { m_vec.z = newVecZ; }
 	void SetIsJump(bool isJumping) { m_isJump = isJumping; }
 	VECTOR GetVec() { return m_vec; }
 	virtual VECTOR GetDir() = 0;
