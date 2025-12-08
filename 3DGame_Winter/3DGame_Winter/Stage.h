@@ -1,11 +1,14 @@
 #pragma once
 #include "DxLib.h"
 #include <vector>
+#include <string>
+#include<map>
 class Stage
 {
 public:
 	Stage();
 	~Stage() {};
+	bool LoadData(const char* fileName);
 	void Init();
 	void End();
 	void Update();
@@ -30,5 +33,17 @@ private:
 	std::vector<int> m_wallModelHandles;
 	std::vector<int> m_collisionWallModelHandles;
 	int m_stairsHandle;
+	struct StageObjectData
+	{
+		int typeId;
+		std::string objectName;
+		int hasCollision;
+		VECTOR position;
+		VECTOR rotation;
+		VECTOR scale;
+	};
+	std::vector<StageObjectData> m_stageData;
+	std::map<int, int> m_baseModelHandles; // typeIdとベースモデルハンドル
+	std::vector<int> m_objectModelHandles; // 生成した全オブジェクトのモデルハンドル
 };
 

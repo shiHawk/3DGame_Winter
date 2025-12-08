@@ -1,4 +1,6 @@
 #include "Stage.h"
+#include <fstream>
+#include <sstream>
 namespace
 {
 	constexpr VECTOR kStartTilePos = {-800.0f,-10.0f,800.0f};
@@ -11,6 +13,7 @@ namespace
 	constexpr VECTOR kWallRotY90 = { 0.0f, DX_PI_F / 2.0f, 0.0f };
 	constexpr VECTOR kCollisionScale = { 2.0f,2.0, 0.5f };
 	constexpr float kCollisionOffsetY = 60.0f;
+	constexpr float kDegreesPerCircle = 180.0f; // 一周当たりの度数
 }
 
 Stage::Stage():
@@ -30,8 +33,98 @@ Stage::Stage():
 {
 }
 
+bool Stage::LoadData(const char* fileName)
+{
+	std::ifstream file(fileName);
+	if (!file.is_open())
+	{
+		return false; // ファイルが開けなかった
+	}
+	std::string line;
+	// 1行目のヘッダー行をスキップ
+	std::getline(file, line);
+
+	while (std::getline(file, line))
+	{
+		std::stringstream ss(line);
+		std::string cell;
+		StageObjectData data;
+
+		// 1. TypeID (int)
+		std::getline(ss, cell, ',');
+		data.typeId = std::stoi(cell);
+
+		// 2. ObjectName (string)
+		std::getline(ss, cell, ',');
+		data.objectName = cell;
+
+		// 3. HasCollision (int)
+		std::getline(ss, cell, ',');
+		data.hasCollision = std::stoi(cell);
+
+		// 4. PositionX (float)
+		std::getline(ss, cell, ',');
+		data.position.x = std::stof(cell);
+
+		// 5. PositionY (float)
+		std::getline(ss, cell, ',');
+		data.position.y = std::stof(cell);
+
+		// 6. PositionZ (float)
+		std::getline(ss, cell, ',');
+		data.position.z = std::stof(cell);
+
+		// 7. RotationX (float)
+		std::getline(ss, cell, ',');
+		data.rotation.x = std::stof(cell);
+
+		// 8. RotationY (float)
+		std::getline(ss, cell, ',');
+		data.rotation.y = std::stof(cell);
+
+		// 9. RotationZ (float)
+		std::getline(ss, cell, ',');
+		data.rotation.z = std::stof(cell);
+
+		// 10. ScaleX (float)
+		std::getline(ss, cell, ',');
+		data.scale.x = std::stof(cell);
+
+		// 11. ScaleY (float)
+		std::getline(ss, cell, ',');
+		data.scale.y = std::stof(cell);
+
+		// 12. ScaleZ (float) - 最後の要素なので区切り文字は不要
+		std::getline(ss, cell, ',');
+		data.scale.z = std::stof(cell);
+
+		// データをコンテナに格納
+		m_stageData.push_back(data);
+	}
+	return true;
+}
+
 void Stage::Init()
 {
+	m_baseModelHandles[0] = MV1LoadModel(L"Data/model/stairs_wall_left.mv1");
+	m_baseModelHandles[1] = MV1LoadModel(L"Data/model/stairs_walled.mv1");
+	m_baseModelHandles[2] = MV1LoadModel(L"Data/model/stairs_wide.mv1");
+	m_baseModelHandles[3] = MV1LoadModel(L"Data/model/wall_corner_small.mv1");
+	m_baseModelHandles[4] = MV1LoadModel(L"Data/model/wall_open_scaffold.mv1");
+	m_baseModelHandles[5] = MV1LoadModel(L"Data/model/wall_cracked.mv1");
+	m_baseModelHandles[6] = MV1LoadModel(L"Data/model/wall_corner.mv1");
+	m_baseModelHandles[7] = MV1LoadModel(L"Data/model/wall.mv1");
+	m_baseModelHandles[8] = MV1LoadModel(L"Data/model/floor_foundation_allsides.mv1");
+	m_baseModelHandles[9] = MV1LoadModel(L"Data/model/barrier_colum_half.mv1");
+	m_baseModelHandles[10] = MV1LoadModel(L"Data/model/barrier_corner.mv1");
+	m_baseModelHandles[11] = MV1LoadModel(L"Data/model/barrier.mv1");
+	m_baseModelHandles[12] = MV1LoadModel(L"Data/model/ramp.mv1");
+	m_baseModelHandles[13] = MV1LoadModel(L"Data/model/cube6.mv1");
+	m_baseModelHandles[14] = MV1LoadModel(L"Data/model/cube7.mv1");
+	m_baseModelHandles[15] = MV1LoadModel(L"Data/model/floor_tile_grate_open.mv1");
+	m_baseModelHandles[16] = MV1LoadModel(L"Data/model/floor_tile_large.mv1");
+
+
 	m_tilePos = kStartTilePos;
 	m_tileSize = kTileSize;
 	m_tileTotal = kMaxTileNum;
