@@ -62,7 +62,7 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 {
 	// 必要な情報の取得
 	VECTOR playerPos = pTargetCharacter->GetPos(); // プレイヤーの現在の座標
-	const auto& tileHandles = m_pStage->GetTileModelHandles(); // ステージの全タイル
+	const auto& tileHandles = m_pStage->GetObjectModelHandles(); // ステージの全タイル
 	// レイを定義
 	VECTOR rayStart = playerPos;
 	rayStart.y += kGroundCheckRayOffsetY;

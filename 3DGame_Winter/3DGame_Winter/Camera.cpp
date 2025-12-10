@@ -17,7 +17,7 @@ namespace
 	constexpr float kViewAngle = 80.0f; // 視野角(度数) 
 	// nearとfarの位置
 	constexpr float kCameraNearClip = 10.0f;
-	constexpr float kCameraFarClip = 3000.0f;
+	constexpr float kCameraFarClip = 10000.0f;
 	// ライトのカラー
 	constexpr float kRed = 1.0f;
 	constexpr float kGreen = 1.0f;

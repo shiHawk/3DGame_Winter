@@ -202,6 +202,8 @@ void Player::Update()
    
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim();
+    //printfDx(L"Pos.y:%f\n",m_pos.y);
+
     //printfDx(L"m_pos.y;%.02f\n", m_pos.y);
     //printfDx(L"m_pos.x:%f\nm_pos.z:%f\n\n",m_pos.x,m_pos.z);
     //DINPUT_JOYSTATE input;

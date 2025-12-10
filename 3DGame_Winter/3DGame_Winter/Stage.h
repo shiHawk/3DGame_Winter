@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include<map>
+#include "Quaternion.h"
 class Stage
 {
 public:
@@ -15,6 +16,7 @@ public:
 	void Draw();
 	const std::vector<int>& GetTileModelHandles() const { return m_collisionTileModelHandles; }
 	const std::vector<int>& GetWallModelHandles() const { return m_collisionWallModelHandles; }
+	const std::vector<int>& GetObjectModelHandles() const { return m_objectModelHandles; }
 private:
 	int m_tileTotal; // タイルの合計
 	int m_stageStart; // 配置するタイルの始点
@@ -41,6 +43,7 @@ private:
 		VECTOR position;
 		VECTOR rotation;
 		VECTOR scale;
+		Quaternion quaternion;
 	};
 	std::vector<StageObjectData> m_stageData;
 	std::map<int, int> m_baseModelHandles; // typeIdとベースモデルハンドル
