@@ -138,7 +138,7 @@ void Player::Update()
     //printfDx(L"m_attack2.timer:%f\n", m_attack2.timer);
     if (m_controlMode == ControlMode::PLAYER)
     {
-        if (Pad::isTrigger(PAD_INPUT_1) && !m_isJump)
+        if (Pad::isTrigger(PAD_INPUT_1) /*&& !m_isJump*/)
         {
             m_vec.y = kJumpPower;
             m_isJump = true;

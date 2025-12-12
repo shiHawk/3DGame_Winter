@@ -21,6 +21,7 @@ private:
 	std::shared_ptr<Companion> m_pCompanion;
 	void CheckGroundCollision(CharacterBase* pTargetCharacter);
 	void CheckWallCollision(CharacterBase* pTargetCharacter);
+	void MoveCharacter(CharacterBase* pTargetCharacter);
 	float m_lastGroundY;
 };
 

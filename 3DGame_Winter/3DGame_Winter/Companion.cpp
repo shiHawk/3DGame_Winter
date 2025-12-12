@@ -9,7 +9,7 @@ namespace
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x00f000;
 	constexpr int kSphereSpcColor = 0xffffff;
-	constexpr float kMoveSpeed = 3.0f;
+	constexpr float kMoveSpeed = 8.0f;
 	constexpr float kPlayerMoveSpeed = 10.0f; // プレイヤー操作モードでの移動速度
 	constexpr float kJumpPower = 15.0f;
 	constexpr float kGravity = -0.7f;

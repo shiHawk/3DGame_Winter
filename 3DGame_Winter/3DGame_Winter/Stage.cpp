@@ -137,9 +137,9 @@ void Stage::Init()
 	m_baseModelHandles[10] = MV1LoadModel(L"Data/model/barrier_colum_half.mv1");
 	m_baseModelHandles[11] = MV1LoadModel(L"Data/model/barrier_corner.mv1");
 	m_baseModelHandles[12] = MV1LoadModel(L"Data/model/barrier.mv1");
-	m_baseModelHandles[13] = MV1LoadModel(L"Data/model/ramp.mv1");
-	m_baseModelHandles[14] = MV1LoadModel(L"Data/model/cube6.mv1");
-	m_baseModelHandles[15] = MV1LoadModel(L"Data/model/cube7.mv1");
+	m_baseModelHandles[13] = MV1LoadModel(L"Data/model/Primitive_Slope.mv1");
+	m_baseModelHandles[14] = MV1LoadModel(L"Data/model/Primitive_Floor.mv1");
+	m_baseModelHandles[15] = MV1LoadModel(L"Data/model/Primitive_Cube.mv1");
 	m_baseModelHandles[16] = MV1LoadModel(L"Data/model/floor_tile_grate_open.mv1");
 	m_baseModelHandles[17] = MV1LoadModel(L"Data/model/floor_tile_large.mv1");
 	m_baseModelHandles[18] = MV1LoadModel(L"Data/model/pillar_decorated.mv1");
@@ -150,24 +150,24 @@ void Stage::Init()
 	}
 
 	std::map<int, float> modelScaleFix;
-	modelScaleFix[0] = 1.0f; // stairs_wall_left
+	modelScaleFix[0] = 100.0f; // stairs_wall_left
 	modelScaleFix[1] = 1.0f; // stairs_walled
-	modelScaleFix[2] = 1.0f; // stairs_wide
+	modelScaleFix[2] = 100.0f; // stairs_wide
 	modelScaleFix[3] = 100.0f; // wall_corner_small
 	modelScaleFix[4] = 100.0f; // wall_open_scaffold
 	modelScaleFix[5] = 100.0f; // wall_cracked
 	modelScaleFix[6] = 100.0f; // wall_corner
 	modelScaleFix[7] = 100.0f; // wall_arched
-	//modelScaleFix[8] = 100.0f; // wall
+	modelScaleFix[8] = 1.0f; // wall
 	modelScaleFix[9] = 100.0f; // floor_foundation_allsides
 	modelScaleFix[10] = 100.0f; // barrier_colum_half
 	modelScaleFix[11] = 100.0f; // barrier_corner
 	modelScaleFix[12] = 100.0f; // barrier
-	modelScaleFix[13] = 1.0f; // ramp
+	modelScaleFix[13] = 100.0f; // ramp
 	modelScaleFix[14] = 100.0f; // cube6
 	modelScaleFix[15] = 100.0f; // cube7
 	modelScaleFix[16] = 1.0f; // floor_tile_grate_open
-	//modelScaleFix[17] = 100.0f; // floor_tile_large
+	modelScaleFix[17] = 1.0f; // floor_tile_large
 	modelScaleFix[18] = 100.0f; // pillar_decorated
 
 	for (auto& data : m_stageData)
@@ -182,7 +182,11 @@ void Stage::Init()
 
 		// ベースモデルから新しいモデルを複製
 		int handle = MV1DuplicateModel(baseHandle);
-
+		// 当たり判定用のモデルは描画しない
+		if (data.typeId == 13 || data.typeId == 14 || data.typeId == 15)
+		{
+			//MV1SetVisible(handle,false);
+		}
 		VECTOR scaledPos;
 		scaledPos.x = data.position.x * kPositionScale;
 		scaledPos.y = data.position.y * kPositionScale;
@@ -202,11 +206,11 @@ void Stage::Init()
 
 		// スケールを設定
 		//MV1SetScale(handle, finalScale);
-		data.quaternion.x = -data.quaternion.x; // X軸の符号反転
-		data.quaternion.y = -data.quaternion.y; // Y軸の符号反転
 
 		// 1. クォータニオンから回転行列を取得
 		MATRIX rotationMatrix = data.quaternion.GetMatrix();
+		MATRIX modelFixMatrix = MGetRotY(DX_PI_F); // 180度回転
+		rotationMatrix = MMult(modelFixMatrix, rotationMatrix);
 
 		// 2-1. 拡大行列を生成
 		VECTOR scaleVec = VGet(finalScale.x, finalScale.y, finalScale.z);
@@ -228,19 +232,19 @@ void Stage::Init()
 		MV1SetRotationXYZ(handle, rotationRad);*/
 
 		// 当たり判定フラグをチェック
-		if (data.hasCollision == 1)
+		if (data.typeId == 13 || data.typeId == 14 || data.typeId == 15)
 		{
 			MV1SetupCollInfo(handle, -1);
+			m_CollisionObjectModelHandles.push_back(handle); // 当たり判定用のモデルハンドルを格納
 		}
-
-		// 生成したモデルハンドルを格納
-		m_objectModelHandles.push_back(handle);
+		m_objectModelHandles.push_back(handle); 
+		
 		if (data.typeId == 15)
 		{
-			printfDx(L"Obj type:%d  pos:(%.1f, %.1f, %.1f) scale:(%.2f,%.2f,%.2f)\n",
+			/*printfDx(L"Obj type:%d  pos:(%.1f, %.1f, %.1f) scale:(%.2f,%.2f,%.2f)\n",
 				data.typeId,
 				scaledPos.x, scaledPos.y, scaledPos.z,
-				finalScale.x, finalScale.y, finalScale.z);
+				finalScale.x, finalScale.y, finalScale.z);*/
 		}
 	}
 
@@ -366,6 +370,16 @@ void Stage::End()
 		}
 	}
 	m_objectModelHandles.clear();
+
+	for (int handle : m_CollisionObjectModelHandles)
+	{
+		if (handle != -1)
+		{
+			MV1TerminateCollInfo(handle);
+			MV1DeleteModel(handle);
+		}
+	}
+	m_CollisionObjectModelHandles.clear();
 
 	// ベースモデルを削除
 	for (auto const& [typeId, handle] : m_baseModelHandles)

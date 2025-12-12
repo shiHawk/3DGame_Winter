@@ -5,8 +5,8 @@
 #include <cmath>
 namespace
 {
-	constexpr float kGroundCheckRayOffsetY = 50.0f; // レイの開始Y座標オフセット
-	constexpr float kGroundCheckRayLength = 200.0f; // 地面に伸ばすレイの長さ
+	constexpr float kGroundCheckRayOffsetY = 10.0f; // レイの開始Y座標オフセット
+	constexpr float kGroundCheckRayLength = 50000.0f; // 地面に伸ばすレイの長さ
 	constexpr float kWallCheckRayLength = 80.0f; // 正面に伸ばすレイの長さ
 	constexpr float kGroundMargin = 0.01f; // 地面とのわずかな隙間(めり込み防止)
 	constexpr float kGroundCorrectionOffsetY = -8.0f; // 地面抜け時に補正するY座標
@@ -62,7 +62,7 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 {
 	// 必要な情報の取得
 	VECTOR playerPos = pTargetCharacter->GetPos(); // プレイヤーの現在の座標
-	const auto& tileHandles = m_pStage->GetObjectModelHandles(); // ステージの全タイル
+	const auto& tileHandles = m_pStage->GetCollisionObjectModelHandles(); // ステージの全タイル
 	// レイを定義
 	VECTOR rayStart = playerPos;
 	rayStart.y += kGroundCheckRayOffsetY;
@@ -156,7 +156,7 @@ void WorldCollision::CheckWallCollision(CharacterBase* pTargetCharacter)
 {
 	VECTOR characterPos = pTargetCharacter->GetPos();
 	VECTOR currentVec = pTargetCharacter->GetVec(); // 速度もループ内で更新するためここで取得
-	const auto& wallHandles = m_pStage->GetWallModelHandles(); // ステージの全ての壁
+	const auto& wallHandles = m_pStage->GetCollisionObjectModelHandles(); // ステージの全ての壁
 	for (int iter = 0; iter < kMaxIterations; iter++)
 	{
 		// 当たり判定の準備
@@ -224,4 +224,13 @@ void WorldCollision::CheckWallCollision(CharacterBase* pTargetCharacter)
 			}
 		}
 	}
+}
+
+void WorldCollision::MoveCharacter(CharacterBase* pTargetCharacter)
+{
+	VECTOR pos = pTargetCharacter->GetPos();
+	pos = VAdd(pos,pTargetCharacter->GetVec());
+	pTargetCharacter->SetPos(pos);
+	CheckWallCollision(pTargetCharacter);
+	CheckGroundCollision(pTargetCharacter);
 }

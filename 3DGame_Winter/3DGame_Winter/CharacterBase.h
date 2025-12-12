@@ -19,6 +19,7 @@ public:
 	virtual VECTOR GetDir() = 0;
 	void SetVec(VECTOR vec) { m_vec = vec; }
 	bool IsSpecialSkilFlag() { return m_isSpecialSkilFlag; }
+	bool IsJumpFlag() { return m_isJump; }
 	enum class ControlMode
 	{
 		PLAYER,
