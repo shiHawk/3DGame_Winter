@@ -5,7 +5,7 @@
 #include <cmath>
 namespace
 {
-    constexpr VECTOR kDefaultPos = { 0.0f,0.0f,-340.0f };
+    constexpr VECTOR kDefaultPos = { 0.0f,0.0f,-300.0f };
     constexpr VECTOR kDefaultVec = { 0.0f,0.0f,0.0f };
     constexpr VECTOR kRightDir = { 0.0f,270.0f * DX_PI_F / 180.0f,0.0f };
 	constexpr float kSphereRadius = 20.0f;

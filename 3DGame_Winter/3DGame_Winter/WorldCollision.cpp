@@ -192,10 +192,6 @@ void WorldCollision::CheckWallCollision(CharacterBase* pTargetCharacter)
 							// 最も近いポリゴンの情報をコピーして保存しておく
 							closestResult = result.Dim[i];
 						}
-						/*else
-						{
-							printfDx(L"miss\n\n");
-						}*/
 					}
 				}
 				MV1CollResultPolyDimTerminate(result); // 当たり判定結果ポリゴン配列の後始末

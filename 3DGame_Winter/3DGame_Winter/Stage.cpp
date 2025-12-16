@@ -185,7 +185,7 @@ void Stage::Init()
 		// “–‚½‚è”»’è—p‚Ìƒ‚ƒfƒ‹‚Í•`‰æ‚µ‚È‚¢
 		if (data.typeId == 13 || data.typeId == 14 || data.typeId == 15)
 		{
-			MV1SetVisible(handle,false);
+			//MV1SetVisible(handle,false);
 		}
 		VECTOR scaledPos;
 		scaledPos.x = data.position.x * kPositionScale;
@@ -245,14 +245,6 @@ void Stage::Init()
 			m_CollisionObjectModelHandles.push_back(handle); // “–‚½‚è”»’è—p‚Ìƒ‚ƒfƒ‹ƒnƒ“ƒhƒ‹‚ðŠi”[
 		}
 		m_objectModelHandles.push_back(handle); 
-		
-		if (data.typeId == 15)
-		{
-			/*printfDx(L"Obj type:%d  pos:(%.1f, %.1f, %.1f) scale:(%.2f,%.2f,%.2f)\n",
-				data.typeId,
-				scaledPos.x, scaledPos.y, scaledPos.z,
-				finalScale.x, finalScale.y, finalScale.z);*/
-		}
 	}
 
 	//m_tilePos = kStartTilePos;
