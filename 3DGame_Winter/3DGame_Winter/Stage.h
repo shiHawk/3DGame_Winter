@@ -18,6 +18,8 @@ public:
 	const std::vector<int>& GetWallModelHandles() const { return m_collisionWallModelHandles; }
 	const std::vector<int>& GetObjectModelHandles() const { return m_objectModelHandles; }
 	const std::vector<int>& GetCollisionObjectModelHandles() const { return m_CollisionObjectModelHandles; }
+	const std::vector<int>& GetWallCollisionModelHandles() const { return m_wallCollisionModelHandles; }
+	const std::vector<int>& GetGroundCollisionModelHandles() const { return m_groundCollisionModelHandles; }
 private:
 	int m_tileTotal; // タイルの合計
 	int m_stageStart; // 配置するタイルの始点
@@ -50,5 +52,7 @@ private:
 	std::map<int, int> m_baseModelHandles; // typeIdとベースモデルハンドル
 	std::vector<int> m_objectModelHandles; // 生成した全オブジェクトのモデルハンドル
 	std::vector<int> m_CollisionObjectModelHandles; // 当たり判定用のモデルハンドル
+	std::vector<int> m_wallCollisionModelHandles; // 当たり判定用(壁)のモデルハンドル
+	std::vector<int> m_groundCollisionModelHandles; // 当たり判定用(床)のモデルハンドル
 };
 

@@ -20,6 +20,7 @@ public:
 	void SetVec(VECTOR vec) { m_vec = vec; }
 	bool IsSpecialSkilFlag() { return m_isSpecialSkilFlag; }
 	bool IsJumpFlag() { return m_isJump; }
+	VECTOR GetPrevPos() { return m_prevPos; }
 	enum class ControlMode
 	{
 		PLAYER,
@@ -27,6 +28,7 @@ public:
 	};
 protected:
 	virtual void OnAttack() abstract;
+	void ApplyMovement();
 	VECTOR m_pos;
 	VECTOR m_vec;
 	VECTOR m_moveInput;
@@ -49,5 +51,6 @@ protected:
 	VECTOR m_forwardDir;
 	float m_angleY;
 	bool m_isSpecialSkilFlag;
+	VECTOR m_prevPos;
 };
 

@@ -15,10 +15,17 @@ CharacterBase::CharacterBase():
 	m_invincibilityTimer(0.0f),
 	m_forwardDir({ 0.0f,0.0f,0.0f }),
 	m_angleY(0.0f),
-	m_isSpecialSkilFlag(false)
+	m_isSpecialSkilFlag(false),
+	m_prevPos({ 0.0f,0.0f,0.0f })
 {
 }
 
 CharacterBase::~CharacterBase()
 {
+}
+
+void CharacterBase::ApplyMovement()
+{
+	m_prevPos = m_pos;           // © ˆÚ“®‘O
+	m_pos = VAdd(m_pos, m_vec);  // © ˆÚ“®
 }

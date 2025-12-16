@@ -62,7 +62,7 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 {
 	// 必要な情報の取得
 	VECTOR playerPos = pTargetCharacter->GetPos(); // プレイヤーの現在の座標
-	const auto& tileHandles = m_pStage->GetCollisionObjectModelHandles(); // ステージの全タイル
+	const auto& tileHandles = m_pStage->GetGroundCollisionModelHandles(); // ステージの全タイル
 	// レイを定義
 	VECTOR rayStart = playerPos;
 	rayStart.y += kGroundCheckRayOffsetY;
@@ -156,7 +156,7 @@ void WorldCollision::CheckWallCollision(CharacterBase* pTargetCharacter)
 {
 	VECTOR characterPos = pTargetCharacter->GetPos();
 	VECTOR currentVec = pTargetCharacter->GetVec(); // 速度もループ内で更新するためここで取得
-	const auto& wallHandles = m_pStage->GetCollisionObjectModelHandles(); // ステージの全ての壁
+	const auto& wallHandles = m_pStage->GetWallCollisionModelHandles(); // ステージの全ての壁
 	for (int iter = 0; iter < kMaxIterations; iter++)
 	{
 		// 当たり判定の準備
@@ -187,10 +187,15 @@ void WorldCollision::CheckWallCollision(CharacterBase* pTargetCharacter)
 						if (distSq < minDistanceSq)
 						{
 							isWallHit = true;
+							//printfDx(L"Hit\n\n");
 							minDistanceSq = distSq;
 							// 最も近いポリゴンの情報をコピーして保存しておく
 							closestResult = result.Dim[i];
 						}
+						/*else
+						{
+							printfDx(L"miss\n\n");
+						}*/
 					}
 				}
 				MV1CollResultPolyDimTerminate(result); // 当たり判定結果ポリゴン配列の後始末
