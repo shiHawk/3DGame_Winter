@@ -185,7 +185,7 @@ void Stage::Init()
 		// “–‚½‚è”»’è—p‚Ìƒ‚ƒfƒ‹‚Í•`‰æ‚µ‚È‚¢
 		if (data.typeId == 13 || data.typeId == 14 || data.typeId == 15)
 		{
-			//MV1SetVisible(handle,false);
+			MV1SetVisible(handle,false);
 		}
 		VECTOR scaledPos;
 		scaledPos.x = data.position.x * kPositionScale;

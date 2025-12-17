@@ -13,7 +13,7 @@ namespace
 	constexpr int kSphereDifColor = 0x000fff;
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kMoveSpeed = 10.0f;
-	constexpr float kCompanionMoveSpeed = 3.0f;
+	constexpr float kCompanionMoveSpeed = 8.0f;
     constexpr float kJumpPower = 15.0f;
     constexpr float kGravity = -0.7f;
     // èdóÕåWêîÅiçUåÇíÜÅj
@@ -250,6 +250,7 @@ void Player::Draw()
     }
     //DrawSphere3D({m_pos.x,m_pos.y+50.0f,m_pos.z}, kColRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 #endif
+    printfDx(L"pos.x:%f ,pos.y:%f ,pos.z:%f\n",m_pos.x,m_pos.y,m_pos.z);
 }
 
 void Player::OnAttack()

@@ -61,7 +61,7 @@ void GameScene::End()
 SceneBase* GameScene::Update()
 {
 	m_pPlayer->Update();
-	m_pNormalEnemy->Update();
+	//m_pNormalEnemy->Update();
 	m_pCompanion->Update();
 	m_pStage->Update();
 	if (Pad::isTrigger(PAD_INPUT_6)) // RBボタンでプレイヤーとコンパニオンの切り替え
