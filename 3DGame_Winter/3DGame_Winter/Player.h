@@ -46,7 +46,8 @@ public:
 		ROTATING_TO_COMBOFINISH,
 		ATTACKING_COMBOFINISH,
 		COMBO_WINDOW,
-		SPECIALSKIL
+		SPECIALSKIL,
+		DAMAGE
 	};
 	bool IsComboFinish() 
 	{
@@ -81,6 +82,7 @@ private:
 	void HandleStateAttacking2();
 	void HandleStateComboWindow();
 	void HandleStateSpecialSkil();
+	void HandleStateDamage();
 
 	// AI / プレイヤーの分岐を持つハンドラ
 	void HandleAIComboWindow();

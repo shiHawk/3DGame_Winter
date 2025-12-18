@@ -2,7 +2,7 @@
 #include <cmath>
 namespace
 {
-	constexpr VECTOR kDefaultPos = { -500.0f,0.0f,500.0f };
+	constexpr VECTOR kDefaultPos = { -500.0f,-59.0f,300.0f };
 	constexpr VECTOR kDefaultDir = { 0.0,270.0f,0.0f };
 	constexpr float kSphereRadius = 90.0f;
 	constexpr int kDivNum = 8;
@@ -30,8 +30,11 @@ namespace
 	constexpr float kKnockbackAnimIncrement = 0.7f;
 
 	constexpr float kInvincibilityTime = 30.0f;
-	constexpr float kMaxCoolTime = 30.0f;
+	constexpr float kMaxCoolTime = 60.0f;
+	constexpr float kAttackHitStartTime = 25.0f; // 判定が出始めるタイミング
+	constexpr float kAttackHitEndTime = 10.0f;   // 判定が終わるタイミング
 	constexpr int kMaxHp = 50;
+	constexpr int kAttackPower = 30;
 
 	constexpr float kKnockbackDuration = 0.4f;
 	constexpr float kKnockBackSpeed = 5.0f;
@@ -59,6 +62,7 @@ void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 {
 	Enemy::Init(pPlayer, pCompanion);
 	m_hp = kMaxHp;
+	m_attackPower = kAttackPower;
 	m_pos = kDefaultPos;
 	m_modelHandle = MV1LoadModel(L"Data/model/Skeleton_Warrior.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
@@ -169,7 +173,11 @@ void NormalEnemy::Update()
 
 void NormalEnemy::Draw()
 {
-	//DrawSphere3D(m_pos, kSphereRadius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
+	/*if (m_enemyAttack.active)
+	{
+		DrawSphere3D(m_enemyAttack.pos, kAttackRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+	}*/
+	
 	//MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, m_alpha));
 	MV1DrawModel(m_modelHandle);
 }

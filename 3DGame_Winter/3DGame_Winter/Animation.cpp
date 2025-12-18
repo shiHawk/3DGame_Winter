@@ -168,5 +168,6 @@ void Animation::ChangeAnim(int modelHandle, int animNo, bool isLoop, float incre
 bool Animation::GetIsAnimEnd()
 {
 	if (m_currentAttachNo == -1) return false;
-	return m_currentPlayTime >= m_animTotalTime;
+	if (m_currentPlayTime >= m_animTotalTime) return true;
+	//return m_currentPlayTime >= m_animTotalTime;
 }

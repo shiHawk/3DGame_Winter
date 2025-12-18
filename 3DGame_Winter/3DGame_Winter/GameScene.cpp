@@ -61,7 +61,7 @@ void GameScene::End()
 SceneBase* GameScene::Update()
 {
 	m_pPlayer->Update();
-	//m_pNormalEnemy->Update();
+	m_pNormalEnemy->Update();
 	m_pCompanion->Update();
 	m_pStage->Update();
 	if (Pad::isTrigger(PAD_INPUT_6)) // RBボタンでプレイヤーとコンパニオンの切り替え
@@ -125,8 +125,8 @@ void GameScene::Draw()
 	m_pCompanion->Draw();
 	m_pNormalEnemy->Draw();
 	m_pEffectManager->Draw();
-	m_pFlyingEnemy->Draw();
-	m_pStrongEnemy->Draw();
+	//m_pFlyingEnemy->Draw();
+	//m_pStrongEnemy->Draw();
 	//DrawGrid();
 }
 

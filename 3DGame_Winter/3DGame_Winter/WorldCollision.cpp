@@ -5,7 +5,7 @@
 #include <cmath>
 namespace
 {
-	constexpr float kGroundCheckRayOffsetY = 10.0f; // レイの開始Y座標オフセット
+	constexpr float kGroundCheckRayOffsetY = 50.0f; // レイの開始Y座標オフセット
 	constexpr float kGroundCheckRayLength = 50000.0f; // 地面に伸ばすレイの長さ
 	constexpr float kWallCheckRayLength = 80.0f; // 正面に伸ばすレイの長さ
 	constexpr float kGroundMargin = 0.01f; // 地面とのわずかな隙間(めり込み防止)
@@ -62,11 +62,12 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 {
 	// 必要な情報の取得
 	VECTOR playerPos = pTargetCharacter->GetPos(); // プレイヤーの現在の座標
+	VECTOR nextPos = VAdd(playerPos, pTargetCharacter->GetVec()); // 次のフレームの予想位置
 	const auto& tileHandles = m_pStage->GetGroundCollisionModelHandles(); // ステージの全タイル
 	// レイを定義
-	VECTOR rayStart = playerPos;
+	VECTOR rayStart = nextPos;
 	rayStart.y += kGroundCheckRayOffsetY;
-	VECTOR rayEnd = playerPos;
+	VECTOR rayEnd = nextPos;
 	rayEnd.y -= kGroundCheckRayLength;
 	// 当たり判定の準備
 	bool isGrounded = false;
@@ -101,30 +102,47 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 	// // プレイヤーの現在のY軸速度を取得
 	VECTOR currentVec = pTargetCharacter->GetVec();
 	playerVecY = currentVec.y;
-	// 判定結果からプレイヤーに反映
-	// 地面が見つかり、かつ プレイヤーのY座標が地面より下(またはめり込んでいる)場合
-	if (isGrounded && playerPos.y + pTargetCharacter->GetVec().y <= highestGroundY)
+	if (isGrounded)
 	{
-		// 上昇中でない場合のみ着地判定
-		if (playerVecY <= 0.0f)
+		// 1. もし足元が地面より下にあるなら、強制的に地面の上に押し戻す（突き抜け防止）
+		if (nextPos.y < highestGroundY)
 		{
-			float targetY = highestGroundY;
-			playerPos.y = targetY;
-			pTargetCharacter->SetVecY(0.0f);
-			pTargetCharacter->SetIsJump(false);
-			// 地面の法線と現在の移動ベクトルの内積を計算
-			float dot = VDot(currentVec, highestGroundNormal);
-			// 地面にめり込む方向の速度成分（法線方向の成分）を打ち消す
-			// これにより、ベクトルが地面に平行な成分（坂に沿った方向）になる
-			VECTOR velocityAlongNormal = VScale(highestGroundNormal, dot);
-			VECTOR newVec = VSub(currentVec, velocityAlongNormal);
-			// 調整されたXZ成分を速度に反映
-			pTargetCharacter->SetVecX(newVec.x);
-			pTargetCharacter->SetVecZ(newVec.z);
+			nextPos.y = highestGroundY;
+
+			// 2. もし落下中（VecY <= 0）なら、着地処理
+			if (pTargetCharacter->GetVec().y <= 0.0f)
+			{
+				pTargetCharacter->SetVecY(0.0f);
+				pTargetCharacter->SetIsJump(false);
+				// 坂道に沿った移動補正(必要であれば)
+			}
 		}
 	}
-	playerPos = VAdd(playerPos, pTargetCharacter->GetVec());
-	pTargetCharacter->SetPos(playerPos);
+	// 判定結果からプレイヤーに反映
+	// 地面が見つかり、かつ プレイヤーのY座標が地面より下(またはめり込んでいる)場合
+	//if (isGrounded && playerPos.y + pTargetCharacter->GetVec().y <= highestGroundY)
+	//{
+	//	// 上昇中でない場合のみ着地判定
+	//	if (playerVecY <= 0.0f)
+	//	{
+	//		float targetY = highestGroundY;
+	//		playerPos.y = targetY;
+	//		pTargetCharacter->SetVecY(0.0f);
+	//		pTargetCharacter->SetIsJump(false);
+	//		// 地面の法線と現在の移動ベクトルの内積を計算
+	//		float dot = VDot(currentVec, highestGroundNormal);
+	//		// 地面にめり込む方向の速度成分（法線方向の成分）を打ち消す
+	//		// これにより、ベクトルが地面に平行な成分（坂に沿った方向）になる
+	//		VECTOR velocityAlongNormal = VScale(highestGroundNormal, dot);
+	//		VECTOR newVec = VSub(currentVec, velocityAlongNormal);
+	//		// 調整されたXZ成分を速度に反映
+	//		pTargetCharacter->SetVecX(newVec.x);
+	//		pTargetCharacter->SetVecZ(newVec.z);
+	//	}
+	//}
+	//playerPos = VAdd(playerPos, pTargetCharacter->GetVec());
+	//pTargetCharacter->SetPos(playerPos);
+	pTargetCharacter->SetPos(nextPos);
 	//else
 	//{
 	//	// 地面判定失敗時の保険

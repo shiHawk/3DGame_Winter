@@ -17,6 +17,7 @@ public:
 	void Draw();
 	void CheckPlayerAttack();
 	void CheckCompanionAttack();
+	void CheckNormalEnemyAttack();
 	void CheckStrongEnemyRangeAttack(VECTOR attackCenter, float attackRadius,int enemyPower);
 	void PushBackCharacter(VECTOR pos1,float pos1Radius, VECTOR pos2, float pos2Radius,CharacterBase* pTargetCharacter);
 private:

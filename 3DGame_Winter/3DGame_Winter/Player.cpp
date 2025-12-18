@@ -5,7 +5,7 @@
 #include <cmath>
 namespace
 {
-    constexpr VECTOR kDefaultPos = { 0.0f,0.0f,-300.0f };
+    constexpr VECTOR kDefaultPos = { -892.0f,-50.0f,-910.0f };
     constexpr VECTOR kDefaultVec = { 0.0f,0.0f,0.0f };
     constexpr VECTOR kRightDir = { 0.0f,270.0f * DX_PI_F / 180.0f,0.0f };
 	constexpr float kSphereRadius = 20.0f;
@@ -35,6 +35,7 @@ namespace
     constexpr float kRightLimit = 1000.0f;  // ステージ右
     constexpr float kWallOffset = 0.001f;
 
+    constexpr int kMaxHp = 200;
     // 各攻撃の攻撃力
     constexpr int kAttackPower = 15;
     constexpr int kStrongAttackPower = 35;
@@ -51,6 +52,8 @@ namespace
     constexpr float kStrongAttackCancelThreshold = 10.0f;
     constexpr float kAvoidanceFrame = 15.0f;
     constexpr float kAvoidanceMoveSpeed = 0.3f;
+
+    constexpr float kInvincibilityTime = 15.0f;
 
     // 各攻撃の攻撃範囲
     constexpr float kAttackRadius = 30.0f;
@@ -73,12 +76,13 @@ namespace
     constexpr int kComboFinishAttackAnimNo = 41;
     constexpr int kSpecialSkilAnimNo = 38; // 必殺技アニメーション
     constexpr int kAvoidanceAnimNo = 15;
+    constexpr int kDamageAnimNo = 24;
     constexpr float kAnimIncrement = 0.4f; // アニメーションの再生速度
     constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
     constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
     constexpr float kAttackAnimIncrement = 0.7f; // 攻撃アニメーションの再生速度
     constexpr float kStrongAttackAnimIncrement = 0.9f; // 強攻撃アニメーションの再生速度
-    constexpr float kComboFinishAttackAnimIncrement = 0.7f; 
+    constexpr float kComboFinishAttackAnimIncrement = 0.6f; 
     constexpr float kCancelFrames = 10.0f;
 
     constexpr float kEnemyLeashDistance = 500.0f; // これ以上敵から離れたら、追跡をやめてプレイヤーの元に戻る距離
@@ -116,6 +120,7 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
     m_angleY = 0.0f;
     m_isJump = false;
     m_attackPower = kAttackPower;
+    m_hp = kMaxHp;
     m_playerState = PlayerState::NORMAL;
     m_attack.active = false;
     m_distanceToEnemy = 0.0f;
@@ -138,7 +143,7 @@ void Player::Update()
     //printfDx(L"m_attack2.timer:%f\n", m_attack2.timer);
     if (m_controlMode == ControlMode::PLAYER)
     {
-        if (Pad::isTrigger(PAD_INPUT_1) /*&& !m_isJump*/)
+        if (Pad::isTrigger(PAD_INPUT_1) && !m_isJump)
         {
             m_vec.y = kJumpPower;
             m_isJump = true;
@@ -246,7 +251,7 @@ void Player::Draw()
     //DrawLine3D(lineStart, lineEnd, kSphereDifColor);
     if (m_attack.active)
     {
-        DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+        //DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
     }
     //DrawSphere3D({m_pos.x,m_pos.y+50.0f,m_pos.z}, kColRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 #endif
@@ -351,6 +356,9 @@ VECTOR Player::GetDir()
 void Player::OnDamage(int enemyPower)
 {
     m_hp -= enemyPower;
+    m_isHitFlag = true;
+    m_invincibilityTimer = kInvincibilityTime;
+    m_playerState = PlayerState::DAMAGE;
 }
 
 VECTOR Player::HandleInput()
@@ -444,7 +452,7 @@ void Player::UpdateMovement(const VECTOR& moveDir)
     }
     
     // 回転処理
-    if (m_isInAttackSequence)
+    if (m_isInAttackSequence && m_playerState != PlayerState::DAMAGE)
     {
         // 敵との距離がkLockOnRange以下なら敵のほうを向く
         if (m_distanceToEnemy <= kAutoTurnDistance)
@@ -557,6 +565,9 @@ void Player::UpdatePlayerState()
     case Player::PlayerState::SPECIALSKIL:
         HandleStateSpecialSkil();
         break;
+    case PlayerState::DAMAGE:
+        HandleStateDamage();
+        break;
     }
 }
 
@@ -648,6 +659,18 @@ void Player::HandleStateSpecialSkil()
             m_playerState = PlayerState::NORMAL;
             m_isSpecialSkilFlag = false;
         }
+    }
+}
+
+void Player::HandleStateDamage()
+{
+    UpdateMovement(m_moveInput);
+    ChangeAnim(m_modelHandle,kDamageAnimNo,false,0.4f);
+    m_invincibilityTimer--;
+    if (m_invincibilityTimer <= 0.0f)
+    {
+        m_isHitFlag = false;
+        m_playerState = PlayerState::NORMAL;
     }
 }
 

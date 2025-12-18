@@ -17,7 +17,7 @@ namespace
 	constexpr float kViewAngle = 80.0f; // 視野角(度数) 
 	// nearとfarの位置
 	constexpr float kCameraNearClip = 10.0f;
-	constexpr float kCameraFarClip = 10000.0f;
+	constexpr float kCameraFarClip = 12500.0f;
 	// ライトのカラー
 	constexpr float kRed = 1.0f;
 	constexpr float kGreen = 1.0f;
@@ -34,9 +34,9 @@ namespace
 	constexpr float kStageMaxX = 1000.0f;
 	constexpr float kStageMinZ = -1000.0f;
 	constexpr float kStageMaxZ = 1000.0f;
-	constexpr float kCameraRadius = 20.0f; // カメラの当たり判定用半径
+	constexpr float kCameraRadius = 2000.0f; // カメラの当たり判定用半径
 
-
+	constexpr float kMaxLockonRange = 100.0f;
 }
 Camera::Camera():
 	m_cameraPos({0.0f,0.0f,0.0f}),

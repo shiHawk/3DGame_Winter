@@ -1,0 +1,32 @@
+#include "EnemyDataManager.h"
+
+EnemyDataManager::EnemyDataManager()
+{
+}
+
+void EnemyDataManager::LoadEnemyData(const std::string fileName)
+{
+	std::ifstream file(fileName);
+	if (!file.is_open())
+	{
+		printfDx(L"CSVファイルが開けませんでした:%s\n",fileName.c_str());
+	}
+	std::string line;
+	std::getline(file, line); // 最初の行を読み飛ばす
+	while (std::getline(file, line))
+	{
+		std::istringstream stream(line); // 一行分をストリームに変換する
+		std::string type, strX, strY, strZ;
+
+		if (!std::getline(stream, type, ',')) continue; // 敵の種類
+		if (!std::getline(stream, strX, ',')) continue;	// x座標
+		if (!std::getline(stream, strY, ',')) continue;	// y座標
+		if (!std::getline(stream, strZ, ',')) continue;	// z座標
+
+		// 文字列をfloatに変換する
+		float x = std::stof(strX);
+		float y = std::stof(strY);
+		float z = std::stof(strZ);
+		VECTOR enemyPos = VGet(x, y, z); // VECTOR型に変換する
+	}
+}

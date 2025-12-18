@@ -7,20 +7,21 @@ public:
 	CharacterBase();
 	virtual ~CharacterBase();
 	virtual void Update() = 0;
-	bool IsDead() { return m_isDead; }
 	VECTOR GetPos() { return m_pos; }
+	VECTOR GetVec() { return m_vec; }
+	VECTOR GetPrevPos() { return m_prevPos; }
 	void AddPos(VECTOR offset) { m_pos = VAdd(m_pos, offset); }
 	void SetPos(VECTOR newPos) { m_pos = newPos; }
 	void SetVecX(float newVecX) { m_vec.x = newVecX; }
 	void SetVecY(float newVecY) { m_vec.y = newVecY; }
 	void SetVecZ(float newVecZ) { m_vec.z = newVecZ; }
 	void SetIsJump(bool isJumping) { m_isJump = isJumping; }
-	VECTOR GetVec() { return m_vec; }
-	virtual VECTOR GetDir() = 0;
 	void SetVec(VECTOR vec) { m_vec = vec; }
+	virtual VECTOR GetDir() = 0;
+	bool IsDead() { return m_isDead; }
 	bool IsSpecialSkilFlag() { return m_isSpecialSkilFlag; }
 	bool IsJumpFlag() { return m_isJump; }
-	VECTOR GetPrevPos() { return m_prevPos; }
+	bool IsHitFlag() { return m_isHitFlag; }
 	enum class ControlMode
 	{
 		PLAYER,

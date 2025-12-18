@@ -141,6 +141,7 @@
     <ClCompile Include="Companion.cpp" />
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="EnemyDataManager.cpp" />
     <ClCompile Include="FlyingEnemy.cpp" />
     <ClCompile Include="GameplayCollision.cpp" />
     <ClCompile Include="GameScene.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="ControlMode.h" />
     <ClInclude Include="EffectManager.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="EnemyDataManager.h" />
     <ClInclude Include="FlyingEnemy.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="GameplayCollision.h" />

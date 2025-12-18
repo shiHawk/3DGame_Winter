@@ -18,6 +18,10 @@ public:
 	virtual VECTOR GetDir() override;
 	void ApplyKnockback(VECTOR direction, float power);
 	void SetIsKnockbackFlag(bool flag) { m_isKnockbackFlag = flag; }
+	bool IsAttackFlag() { return m_enemyAttack.active; }
+	float GetAttackRadius() { return m_enemyAttack.radius; }
+	int GetAttackPower() { return m_attackPower; }
+	AttackSphere GetAttackInfo() { return m_enemyAttack; }
 private:
 	AttackSphere m_enemyAttack;
 	float m_alpha;

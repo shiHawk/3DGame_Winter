@@ -163,9 +163,9 @@ void Stage::Init()
 	modelScaleFix[10] = 100.0f; // barrier_colum_half
 	modelScaleFix[11] = 100.0f; // barrier_corner
 	modelScaleFix[12] = 100.0f; // barrier
-	modelScaleFix[13] = 100.0f; // ramp
-	modelScaleFix[14] = 100.0f; // cube6
-	modelScaleFix[15] = 100.0f; // cube7
+	modelScaleFix[13] = 100.0f; // Primitive_Slope
+	modelScaleFix[14] = 100.0f; // Primitive_Floor
+	modelScaleFix[15] = 100.0f; // Primitive_Cube
 	modelScaleFix[16] = 1.0f; // floor_tile_grate_open
 	modelScaleFix[17] = 1.0f; // floor_tile_large
 	modelScaleFix[18] = 100.0f; // pillar_decorated

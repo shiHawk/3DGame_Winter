@@ -27,6 +27,7 @@ void GameplayCollision::Update()
 {
 	CheckPlayerAttack();
 	CheckCompanionAttack();
+	CheckNormalEnemyAttack();
 	PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pPlayer.get());
 	PushBackCharacter(m_pCompanion->GetPos(), m_pCompanion->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pCompanion.get());
 }
@@ -41,7 +42,7 @@ void GameplayCollision::CheckPlayerAttack()
 	{
 		return; // プレイヤーが攻撃中でなければ処理を終わる
 	}
-	// コンパニオンの現在の攻撃情報を取得
+	// プレイヤーの現在の攻撃情報を取得
 	float playerAttackRadius = m_pPlayer->GetAttackRadius();
 	// HitDetectionInfo を一時的な計算用に作成
 	HitDetectionInfo hitInfo;
@@ -66,9 +67,9 @@ void GameplayCollision::CheckCompanionAttack()
 {
 	if (!m_pCompanion->IsAttackActive())
 	{
-		return; // プレイヤーが攻撃中でなければ処理を終わる
+		return; // コンパニオンが攻撃中でなければ処理を終わる
 	}
-	// プレイヤーの現在の攻撃情報を取得
+	// コンパニオンの現在の攻撃情報を取得
 	float companionAttackRadius = m_pCompanion->GetAttackRadius();
 	// HitDetectionInfo を一時的な計算用に作成
 	HitDetectionInfo hitInfo;
@@ -79,6 +80,26 @@ void GameplayCollision::CheckCompanionAttack()
 	if (hitInfo.m_distance < companionAttackRadius + enemyColRadius)
 	{
 		m_pNormalEnemy->OnDamage();
+	}
+}
+
+void GameplayCollision::CheckNormalEnemyAttack()
+{
+	if (!m_pNormalEnemy->GetAttackInfo().active)
+	{
+		return; // normalEnemyが攻撃中でなければ処理を終わる
+	}
+	// normalEnemyの現在の攻撃情報を取得
+	float normalEnemyAttackRadius = m_pNormalEnemy->GetAttackInfo().radius;
+	// HitDetectionInfo を一時的な計算用に作成
+	HitDetectionInfo hitInfo;
+	// プレイヤーの当たり判定情報を取得
+	float playerColRadius = m_pPlayer->GetColRadius();
+	hitInfo.m_deltaVector = VSub(m_pPlayer->GetPos(), m_pNormalEnemy->GetAttackInfo().pos);
+	hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+	if (hitInfo.m_distance < normalEnemyAttackRadius + playerColRadius && !m_pPlayer->IsHitFlag())
+	{
+		m_pPlayer->OnDamage(m_pNormalEnemy->GetAttackPower());
 	}
 }
 

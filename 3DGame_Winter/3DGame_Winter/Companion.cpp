@@ -249,7 +249,7 @@ void Companion::Draw()
 #ifdef _DEBUG
 	if (m_companionState == CompanionState::NORMAL_ATTACK)
 	{
-		DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+		//DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 	}
 	//DrawLine3D(lineStart, lineEnd, kSphereDifColor);
 #endif 
