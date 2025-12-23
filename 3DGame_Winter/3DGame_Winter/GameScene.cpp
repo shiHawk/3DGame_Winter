@@ -126,7 +126,7 @@ void GameScene::Draw()
 	m_pNormalEnemy->Draw();
 	m_pEffectManager->Draw();
 	//m_pFlyingEnemy->Draw();
-	//m_pStrongEnemy->Draw();
+	m_pStrongEnemy->Draw();
 	//DrawGrid();
 }
 

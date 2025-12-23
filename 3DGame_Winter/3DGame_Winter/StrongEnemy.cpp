@@ -4,7 +4,7 @@ namespace
 {
 	constexpr float kAttackRadius = 30.0f;
 	constexpr float kColRadius = 25.0f;
-	constexpr VECTOR kDefaultPos = { 500.0f,0.0f,500.0f };
+	constexpr VECTOR kDefaultPos = { 500.0f,-59.0f,500.0f };
 	constexpr float kModelScale = 70.0f; // モデルのスケール
 	constexpr float kChageTime = 1.5f;
 	constexpr float kCoolDownTime = 1.5f;
@@ -14,6 +14,17 @@ namespace
 	constexpr float kNormalAttackDuration = 20.0f;
 	constexpr float kNormalAttackRange = 90.0f;
 	constexpr float kMoveSpeed = 5.0f;
+	// 各アニメーション番号
+	constexpr int kIdleAnimNo = 9;
+	constexpr int kWalkAnimNo = 15;
+	constexpr int kAttackAnimNo = 13;
+	constexpr int kRangeAttackAnimNo = 1;
+	constexpr int kDamageAnimNo = 40;
+	// アニメーション速度
+	constexpr float kWalkAnimIncrement = 0.2f; // 歩行アニメーションの再生速度
+	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
+	constexpr float kAttackAnimIncrement = 0.5f; // 攻撃アニメーションの再生速度
+
 	constexpr int kRandMax = 100;
 	constexpr int kRangeAttackProbability = 30;
 	constexpr float kFramesPerSecond = 60.0f; // 秒数変換
@@ -41,12 +52,15 @@ StrongEnemy::~StrongEnemy()
 void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
 {
 	Enemy::Init(pPlayer, pCompanion);
+	m_modelHandle = MV1LoadModel(L"Data/model/StrongEnemy.mv1");
+	AttachAnim(m_modelHandle, kIdleAnimNo);
 	m_pos = kDefaultPos;
 	m_hp = kMaxHp;
 }
 
 void StrongEnemy::End()
 {
+	MV1DeleteModel(m_modelHandle);
 }
 
 void StrongEnemy::Update()
@@ -99,6 +113,7 @@ void StrongEnemy::Update()
 		{
 			m_pos.x += m_toPlayerDir.x * kMoveSpeed;
 			m_pos.z += m_toPlayerDir.z * kMoveSpeed;
+			ChangeAnim(m_modelHandle,kWalkAnimNo,true,kWalkAnimIncrement);
 		}
 		break;
 	case StrongEnemy::NORMALATTACK:
@@ -132,11 +147,14 @@ void StrongEnemy::Update()
 		}
 		break;
 	}
+	UpdateAnim();
+	MV1SetPosition(m_modelHandle, m_pos);
 }
 
 void StrongEnemy::Draw()
 {
-	DrawSphere3D(m_pos,kColRadius,kDivNum,0x000000,0xffffff,true);
+	//DrawSphere3D(m_pos,kColRadius,kDivNum,0x000000,0xffffff,true);
+	MV1DrawModel(m_modelHandle);
 	if (m_state == StrongEnemyState::RANGEATTACK_CHARGE)
 	{
 		float progress = 1.0f - (m_attackTimer / kChageTime);
