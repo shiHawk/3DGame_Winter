@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "Companion.h"
 #include "NormalEnemy.h"
+#include "StrongEnemy.h"
 #include "DxLib.h"
 #include <memory>
 #include <vector>
@@ -11,7 +12,7 @@ class GameplayCollision
 public:
 	GameplayCollision();
 	~GameplayCollision();
-	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<NormalEnemy> pNormalEnemy);
+	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<NormalEnemy> pNormalEnemy, std::shared_ptr<StrongEnemy> pStrongEnemy);
 	void End();
 	void Update();
 	void Draw();
@@ -24,6 +25,7 @@ private:
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;
 	std::shared_ptr<NormalEnemy> m_pNormalEnemy;
+	std::shared_ptr<StrongEnemy> m_pStrongEnemy;
 
 	struct CollisionOverlapData // 衝突によるめり込み(オーバーラップ)と押し戻しに関するデータ
 	{

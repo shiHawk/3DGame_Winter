@@ -12,11 +12,12 @@ GameplayCollision::~GameplayCollision()
 {
 }
 
-void GameplayCollision::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<NormalEnemy> pNormalEnemy)
+void GameplayCollision::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<NormalEnemy> pNormalEnemy, std::shared_ptr<StrongEnemy> pStrongEnemy)
 {
 	m_pPlayer = pPlayer;
 	m_pCompanion = pCompanion;
 	m_pNormalEnemy = pNormalEnemy;
+	m_pStrongEnemy = pStrongEnemy;
 }
 
 void GameplayCollision::End()
@@ -28,6 +29,7 @@ void GameplayCollision::Update()
 	CheckPlayerAttack();
 	CheckCompanionAttack();
 	CheckNormalEnemyAttack();
+	CheckStrongEnemyRangeAttack(m_pStrongEnemy->GetAttackInfo().pos, m_pStrongEnemy->GetAttackInfo().radius, m_pStrongEnemy->GetStrongEnemyAttackPower());
 	PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pPlayer.get());
 	PushBackCharacter(m_pCompanion->GetPos(), m_pCompanion->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pCompanion.get());
 }
@@ -105,14 +107,18 @@ void GameplayCollision::CheckNormalEnemyAttack()
 
 void GameplayCollision::CheckStrongEnemyRangeAttack(VECTOR attackCenter, float attackRadius, int enemyPower)
 {
-	// 攻撃の中心とプレイヤーの位置の差分ベクトルを取得
-	VECTOR deltaVector = VSub(m_pPlayer->GetPos(), attackCenter);
-	// 距離を計算
-	float distance = VSize(deltaVector);
-	float totalRadius = attackRadius + m_pPlayer->GetColRadius();
-	if (distance < totalRadius)
+	if (m_pStrongEnemy->GetAttackInfo().active)
 	{
-		m_pPlayer->OnDamage(enemyPower);
+		// 攻撃の中心とプレイヤーの位置の差分ベクトルを取得
+		VECTOR deltaVector = VSub(m_pPlayer->GetPos(), attackCenter);
+		// 距離を計算
+		float distance = VSize(deltaVector);
+		float totalRadius = attackRadius + m_pPlayer->GetColRadius();
+		if (distance < totalRadius && !m_pPlayer->IsDamageFlag())
+		{
+			m_pPlayer->OnDamage(enemyPower);
+			//printfDx(L"Hit\n");
+		}
 	}
 }
 

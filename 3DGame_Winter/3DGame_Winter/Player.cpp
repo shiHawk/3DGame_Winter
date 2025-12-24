@@ -97,7 +97,7 @@ Player::Player():
     m_playerState(PlayerState::NORMAL),
     m_angleY(0.0f),
     m_enemyPos({0.0f,0.0f,0.0f}),
-    m_followTargetPos(0.0f,0.0f,0.0f),
+    m_followTargetPos({ 0.0f,0.0f,0.0f }),
     m_attack(kAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
     m_dirToEnemy({0.0f,0.0f,0.0f}),
     m_distanceToEnemy(0.0f),
@@ -255,7 +255,7 @@ void Player::Draw()
     }
     //DrawSphere3D({m_pos.x,m_pos.y+50.0f,m_pos.z}, kColRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 #endif
-    printfDx(L"pos.x:%f ,pos.y:%f ,pos.z:%f\n",m_pos.x,m_pos.y,m_pos.z);
+    //printfDx(L"pos.x:%f ,pos.y:%f ,pos.z:%f\n",m_pos.x,m_pos.y,m_pos.z);
 }
 
 void Player::OnAttack()

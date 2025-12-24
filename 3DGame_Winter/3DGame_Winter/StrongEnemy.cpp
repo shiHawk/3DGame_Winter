@@ -10,6 +10,7 @@ namespace
 	constexpr float kCoolDownTime = 1.5f;
 	constexpr float kRangeAttackRadius = 150.0f;
 	constexpr float kRangeAttackDuration = 30.0f;
+	constexpr float kTrackingRange = 200.0f;
 	constexpr float kActionCheckInterval = 0.5f; // 抽選頻度
 	constexpr float kNormalAttackDuration = 20.0f;
 	constexpr float kNormalAttackRange = 90.0f;
@@ -18,12 +19,13 @@ namespace
 	constexpr int kIdleAnimNo = 9;
 	constexpr int kWalkAnimNo = 15;
 	constexpr int kAttackAnimNo = 13;
-	constexpr int kRangeAttackAnimNo = 1;
-	constexpr int kDamageAnimNo = 40;
+	constexpr int kRangeAttackAnimNo = 0;
+	constexpr int kDamageAnimNo = 8;
 	// アニメーション速度
-	constexpr float kWalkAnimIncrement = 0.2f; // 歩行アニメーションの再生速度
+	constexpr float kWalkAnimIncrement = 0.15f; // 歩行アニメーションの再生速度
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
 	constexpr float kAttackAnimIncrement = 0.5f; // 攻撃アニメーションの再生速度
+	constexpr float kDamageAnimIncrement = 0.6f; // 被弾アニメーションの再生速度
 
 	constexpr int kRandMax = 100;
 	constexpr int kRangeAttackProbability = 30;
@@ -54,6 +56,7 @@ void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 	Enemy::Init(pPlayer, pCompanion);
 	m_modelHandle = MV1LoadModel(L"Data/model/StrongEnemy.mv1");
 	AttachAnim(m_modelHandle, kIdleAnimNo);
+	MV1SetScale(m_modelHandle,VGet(1.3f,1.3f,1.3f));
 	m_pos = kDefaultPos;
 	m_hp = kMaxHp;
 }
@@ -78,6 +81,7 @@ void StrongEnemy::Update()
 		if (kMaxHp * 0.5f >= m_hp)
 		{
 			// HPが半分以下なら怯む(ダメージリアクションをとる)
+			ChangeAnim(m_modelHandle, kDamageAnimNo, true, kDamageAnimIncrement);
 		}
 		if (m_invincibilityTimer < 0.0f)
 		{
@@ -109,15 +113,17 @@ void StrongEnemy::Update()
 		}
 
 		// 移動
-		if (m_toPlayerDistance > kColRadius)
+		if (m_toPlayerDistance > kColRadius /*&& m_toPlayerDistance < kTrackingRange*/)
 		{
 			m_pos.x += m_toPlayerDir.x * kMoveSpeed;
 			m_pos.z += m_toPlayerDir.z * kMoveSpeed;
 			ChangeAnim(m_modelHandle,kWalkAnimNo,true,kWalkAnimIncrement);
 		}
+		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 		break;
 	case StrongEnemy::NORMALATTACK:
 		m_enemyAttack.timer--;
+		ChangeAnim(m_modelHandle, kAttackAnimNo, false, kAttackAnimIncrement);
 		if (m_enemyAttack.timer < 0.0f)
 		{
 			m_state = StrongEnemyState::DEFAULT;
@@ -125,6 +131,7 @@ void StrongEnemy::Update()
 		break;
 	case StrongEnemy::RANGEATTACK_CHARGE:
 		m_attackTimer -= 1.0f / kFramesPerSecond;
+		ChangeAnim(m_modelHandle, 4, false, kAttackAnimIncrement);
 		if (m_attackTimer < 0.0f)
 		{
 			OnRangeAttack();
@@ -133,6 +140,7 @@ void StrongEnemy::Update()
 		break;
 	case StrongEnemy::RANGEATTACK:
 		m_enemyAttack.timer--;
+		ChangeAnim(m_modelHandle,kRangeAttackAnimNo,false,kAttackAnimIncrement);
 		if (m_enemyAttack.timer < 0.0f)
 		{
 			m_state = StrongEnemyState::COOLDOWN;
@@ -141,6 +149,7 @@ void StrongEnemy::Update()
 		break;
 	case StrongEnemy::COOLDOWN:
 		m_attackTimer -= 1.0f / kFramesPerSecond;
+		ChangeAnim(m_modelHandle, kIdleAnimNo, false, kAttackAnimIncrement);
 		if (m_attackTimer < 0.0f)
 		{
 			m_state = StrongEnemyState::DEFAULT;
@@ -169,6 +178,10 @@ void StrongEnemy::Draw()
 	if (m_state == StrongEnemyState::NORMALATTACK)
 	{
 		DrawSphere3D(m_enemyAttack.pos, kColRadius, kDivNum, 0xffffff, 0xffffff, false);
+	}
+	if (m_state == StrongEnemyState::RANGEATTACK)
+	{
+		DrawSphere3D(m_enemyAttack.pos, m_enemyAttack.radius, kDivNum, 0xffffff, 0xffffff, false);
 	}
 }
 

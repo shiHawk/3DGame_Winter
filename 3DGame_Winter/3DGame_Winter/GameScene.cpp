@@ -38,7 +38,7 @@ void GameScene::Init()
 	m_pStage->Init();
 	m_pNormalEnemy->Init(m_pPlayer,m_pCompanion);
 	m_pCompanion->Init(m_pCamera);
-	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemy);
+	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemy,m_pStrongEnemy);
 	m_pWorldCollision->Init(m_pPlayer, m_pStage, m_pCompanion);
 	m_pFlyingEnemy->Init(m_pPlayer, m_pCompanion);
 	m_pStrongEnemy->Init(m_pPlayer, m_pCompanion);

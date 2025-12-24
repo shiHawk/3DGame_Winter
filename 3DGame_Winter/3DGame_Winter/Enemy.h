@@ -14,6 +14,7 @@ public:
 	virtual void Update()= 0;
 	virtual void Draw() = 0;
 	virtual void OnAttack();
+	virtual void OnDamage();
 protected:
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;

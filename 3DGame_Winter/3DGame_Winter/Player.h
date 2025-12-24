@@ -36,6 +36,7 @@ public:
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
 	void OnDamage(int enemyPower);
+	bool IsDamageFlag() { return m_isHitFlag; }
 	enum class PlayerState
 	{
 		NORMAL,

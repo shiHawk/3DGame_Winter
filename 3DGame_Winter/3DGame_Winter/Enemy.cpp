@@ -33,3 +33,7 @@ void Enemy::OnAttack()
 {
 
 }
+
+void Enemy::OnDamage()
+{
+}

@@ -11,10 +11,11 @@ public:
 	void Draw() override;
 	virtual void OnAttack() override;
 	void OnRangeAttack();
-	void OnDamage();
+	virtual void OnDamage()override;
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
 	int GetStrongEnemyAttackPower();
+	AttackSphere GetAttackInfo() { return m_enemyAttack; }
 private:
 	enum StrongEnemyState
 	{
