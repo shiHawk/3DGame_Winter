@@ -114,7 +114,7 @@ void GameplayCollision::CheckStrongEnemyRangeAttack(VECTOR attackCenter, float a
 		// ‹——£‚ðŒvŽZ
 		float distance = VSize(deltaVector);
 		float totalRadius = attackRadius + m_pPlayer->GetColRadius();
-		if (distance < totalRadius && !m_pPlayer->IsDamageFlag())
+		if (distance < totalRadius && !m_pPlayer->IsHitFlag())
 		{
 			m_pPlayer->OnDamage(enemyPower);
 			//printfDx(L"Hit\n");

@@ -435,7 +435,7 @@ VECTOR Player::HandleInput()
 
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
-    m_isInAttackSequence = m_playerState != PlayerState::NORMAL;
+    m_isInAttackSequence = (m_playerState != PlayerState::NORMAL && m_playerState != PlayerState::DAMAGE);
     // 攻撃中でなければ、移動状態に応じてアニメーションを切り替える
     if (!m_isInAttackSequence)
     {
