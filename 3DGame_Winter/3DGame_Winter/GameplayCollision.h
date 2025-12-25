@@ -26,6 +26,8 @@ private:
 	std::shared_ptr<Companion> m_pCompanion;
 	std::shared_ptr<NormalEnemy> m_pNormalEnemy;
 	std::shared_ptr<StrongEnemy> m_pStrongEnemy;
+	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;
+	std::vector<std::shared_ptr<StrongEnemy>> m_pStrongEnemies;
 
 	struct CollisionOverlapData // 衝突によるめり込み(オーバーラップ)と押し戻しに関するデータ
 	{

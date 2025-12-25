@@ -33,6 +33,7 @@ void GameScene::Init()
 	m_pFlyingEnemy = std::make_shared<FlyingEnemy>();
 	m_pStrongEnemy = std::make_shared<StrongEnemy>();
 	m_pEffectManager = std::make_shared<EffectManager>();
+	m_pEnemyDataManager = std::make_unique<EnemyDataManager>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
 	m_pStage->Init();

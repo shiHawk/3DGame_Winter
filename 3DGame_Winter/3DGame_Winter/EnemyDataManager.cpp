@@ -4,12 +4,15 @@ EnemyDataManager::EnemyDataManager()
 {
 }
 
-void EnemyDataManager::LoadEnemyData(const std::string fileName)
+void EnemyDataManager::LoadEnemyData(const std::string fileName, 
+									 std::vector<std::shared_ptr<NormalEnemy>>& pNormalEnemies, 
+									 std::vector<std::shared_ptr<StrongEnemy>>& pStrongEnemies,
+									 std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
 {
 	std::ifstream file(fileName);
 	if (!file.is_open())
 	{
-		printfDx(L"CSVファイルが開けませんでした:%s\n",fileName.c_str());
+		printfDx(L"CSVファイルが開けませんでした:%s\n", fileName.c_str());
 	}
 	std::string line;
 	std::getline(file, line); // 最初の行を読み飛ばす
@@ -28,5 +31,18 @@ void EnemyDataManager::LoadEnemyData(const std::string fileName)
 		float y = std::stof(strY);
 		float z = std::stof(strZ);
 		VECTOR enemyPos = VGet(x, y, z); // VECTOR型に変換する
+
+		if (type == "normalEnemy")
+		{
+			auto normalEnemy = std::make_shared<NormalEnemy>();
+			normalEnemy->Init(pPlayer,pCompanion);
+			pNormalEnemies.push_back(normalEnemy);
+		}
+		if (type == "strongEnemy")
+		{
+			auto strongEnemy = std::make_shared<StrongEnemy>();
+			strongEnemy->Init(pPlayer, pCompanion);
+			pStrongEnemies.push_back(strongEnemy);
+		}
 	}
 }

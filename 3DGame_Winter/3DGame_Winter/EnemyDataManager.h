@@ -1,6 +1,9 @@
 #pragma once
 #include "DxLib.h"
 #include "NormalEnemy.h"
+#include "StrongEnemy.h"
+#include "Player.h"
+#include "Companion.h"
 #include <memory>
 #include <vector>
 #include <fstream>
@@ -11,8 +14,15 @@ class EnemyDataManager
 public:
 	EnemyDataManager();
 	~EnemyDataManager() {};
-	void LoadEnemyData(const std::string fileName);
+	void LoadEnemyData(const std::string fileName,
+					   std::vector<std::shared_ptr<NormalEnemy>>& pNormalEnemies,
+					   std::vector<std::shared_ptr<StrongEnemy>>& pStrongEnemies,
+					   std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion);
 private:
-	std::shared_ptr<NormalEnemy> m_pNormalEnemy;
+	//std::shared_ptr<NormalEnemy> m_pNormalEnemy;
+	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;
+	std::vector<std::shared_ptr<StrongEnemy>> m_pStrongEnemies;
+	std::shared_ptr<Player> m_pPlayer;
+	std::shared_ptr<Companion> m_pCompanion;
 };
 

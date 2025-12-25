@@ -11,6 +11,7 @@
 #include "FlyingEnemy.h"
 #include "StrongEnemy.h"
 #include "EffectManager.h"
+#include "EnemyDataManager.h"
 #include "DxLib.h"
 #include "Pad.h"
 #include "CharacterBase.h"
@@ -29,6 +30,8 @@ private:
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Enemy> m_pEnemy;
+	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;
+	std::vector<std::shared_ptr<StrongEnemy>> m_pStrongEnemies;
 	std::shared_ptr<NormalEnemy> m_pNormalEnemy;
 	std::shared_ptr<Companion> m_pCompanion;
 	std::shared_ptr<Stage> m_pStage;
@@ -37,5 +40,6 @@ private:
 	std::shared_ptr<FlyingEnemy> m_pFlyingEnemy;
 	std::shared_ptr<StrongEnemy> m_pStrongEnemy;
 	std::shared_ptr<EffectManager> m_pEffectManager;
+	std::unique_ptr<EnemyDataManager> m_pEnemyDataManager;
 };
 
