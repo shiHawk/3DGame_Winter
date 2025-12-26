@@ -1,0 +1,3 @@
+type,strX,strY,strZ
+normalEnemy,-500,-59,300
+strongEnemy,500,-59,500
