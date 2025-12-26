@@ -12,7 +12,8 @@ class GameplayCollision
 public:
 	GameplayCollision();
 	~GameplayCollision();
-	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<NormalEnemy> pNormalEnemy, std::shared_ptr<StrongEnemy> pStrongEnemy);
+	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::vector<std::shared_ptr<NormalEnemy>>& pNormalEnemies,
+		const std::vector<std::shared_ptr<StrongEnemy>>& pStrongEnemies);
 	void End();
 	void Update();
 	void Draw();

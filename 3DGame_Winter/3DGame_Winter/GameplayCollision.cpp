@@ -12,12 +12,15 @@ GameplayCollision::~GameplayCollision()
 {
 }
 
-void GameplayCollision::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<NormalEnemy> pNormalEnemy, std::shared_ptr<StrongEnemy> pStrongEnemy)
+void GameplayCollision::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::vector<std::shared_ptr<NormalEnemy>>& pNormalEnemies,
+	const std::vector<std::shared_ptr<StrongEnemy>>& pStrongEnemies)
 {
 	m_pPlayer = pPlayer;
 	m_pCompanion = pCompanion;
-	m_pNormalEnemy = pNormalEnemy;
-	m_pStrongEnemy = pStrongEnemy;
+	/*m_pNormalEnemy = pNormalEnemy;
+	m_pStrongEnemy = pStrongEnemy;*/
+	m_pNormalEnemies = pNormalEnemies;
+	m_pStrongEnemies = pStrongEnemies;
 }
 
 void GameplayCollision::End()
@@ -29,9 +32,9 @@ void GameplayCollision::Update()
 	CheckPlayerAttack();
 	CheckCompanionAttack();
 	CheckNormalEnemyAttack();
-	CheckStrongEnemyRangeAttack(m_pStrongEnemy->GetAttackInfo().pos, m_pStrongEnemy->GetAttackInfo().radius, m_pStrongEnemy->GetStrongEnemyAttackPower());
-	PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pPlayer.get());
-	PushBackCharacter(m_pCompanion->GetPos(), m_pCompanion->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pCompanion.get());
+	//CheckStrongEnemyRangeAttack(m_pStrongEnemy->GetAttackInfo().pos, m_pStrongEnemy->GetAttackInfo().radius, m_pStrongEnemy->GetStrongEnemyAttackPower());
+	//PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pPlayer.get());
+	//PushBackCharacter(m_pCompanion->GetPos(), m_pCompanion->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pCompanion.get());
 }
 
 void GameplayCollision::Draw()
@@ -49,20 +52,38 @@ void GameplayCollision::CheckPlayerAttack()
 	// HitDetectionInfo を一時的な計算用に作成
 	HitDetectionInfo hitInfo;
 	// 敵の当たり判定情報を取得
-	float enemyColRadius = m_pNormalEnemy->GetColRadius();
-	hitInfo.m_deltaVector = VSub(m_pNormalEnemy->GetPos(), m_pPlayer->GetAttackPos());
-	hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
-	if (hitInfo.m_distance < playerAttackRadius + enemyColRadius)
+	for (auto& enemy : m_pNormalEnemies)
 	{
-		m_pNormalEnemy->OnDamage();
-		if (m_pPlayer->IsComboFinish())
+		float enemyColRadius = enemy->GetColRadius();
+		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pPlayer->GetAttackPos());
+		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+		if (hitInfo.m_distance < playerAttackRadius + enemyColRadius)
 		{
-			// 敵を吹き飛ばすベクトルと強さを計算し、敵に適用する
-			VECTOR pushDirection = VNorm(hitInfo.m_deltaVector); // 攻撃の中心から敵への方向
-			//m_pNormalEnemy->ApplyKnockback(pushDirection, kKnockbackPower);
-			m_pNormalEnemy->SetIsKnockbackFlag(true);
+			enemy->OnDamage();
+			if (m_pPlayer->IsComboFinish())
+			{
+				// 敵を吹き飛ばすベクトルと強さを計算し、敵に適用する
+				VECTOR pushDirection = VNorm(hitInfo.m_deltaVector); // 攻撃の中心から敵への方向
+				//m_pNormalEnemy->ApplyKnockback(pushDirection, kKnockbackPower);
+				enemy->SetIsKnockbackFlag(true);
+			}
 		}
 	}
+
+	//float enemyColRadius = m_pNormalEnemy->GetColRadius();
+	//hitInfo.m_deltaVector = VSub(m_pNormalEnemy->GetPos(), m_pPlayer->GetAttackPos());
+	//hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+	//if (hitInfo.m_distance < playerAttackRadius + enemyColRadius)
+	//{
+	//	m_pNormalEnemy->OnDamage();
+	//	if (m_pPlayer->IsComboFinish())
+	//	{
+	//		// 敵を吹き飛ばすベクトルと強さを計算し、敵に適用する
+	//		VECTOR pushDirection = VNorm(hitInfo.m_deltaVector); // 攻撃の中心から敵への方向
+	//		//m_pNormalEnemy->ApplyKnockback(pushDirection, kKnockbackPower);
+	//		m_pNormalEnemy->SetIsKnockbackFlag(true);
+	//	}
+	//}
 }
 
 void GameplayCollision::CheckCompanionAttack()
@@ -76,50 +97,98 @@ void GameplayCollision::CheckCompanionAttack()
 	// HitDetectionInfo を一時的な計算用に作成
 	HitDetectionInfo hitInfo;
 	// 敵の当たり判定情報を取得
-	float enemyColRadius = m_pNormalEnemy->GetColRadius();
+	for (auto& enemy : m_pNormalEnemies)
+	{
+		float enemyColRadius = enemy->GetColRadius();
+		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pCompanion->GetAttackPos());
+		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+		if (hitInfo.m_distance < companionAttackRadius + enemyColRadius)
+		{
+			enemy->OnDamage();
+		}
+	}
+
+	/*float enemyColRadius = m_pNormalEnemy->GetColRadius();
 	hitInfo.m_deltaVector = VSub(m_pNormalEnemy->GetPos(), m_pCompanion->GetAttackPos());
 	hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
 	if (hitInfo.m_distance < companionAttackRadius + enemyColRadius)
 	{
 		m_pNormalEnemy->OnDamage();
-	}
+	}*/
 }
 
 void GameplayCollision::CheckNormalEnemyAttack()
 {
-	if (!m_pNormalEnemy->GetAttackInfo().active)
+	for (auto& enemy : m_pNormalEnemies)
 	{
-		return; // normalEnemyが攻撃中でなければ処理を終わる
+		if (!enemy->GetAttackInfo().active)
+		{
+			return; // normalEnemyが攻撃中でなければ処理を終わる
+		}
+		//normalEnemyの現在の攻撃情報を取得
+		float normalEnemyAttackRadius = enemy->GetAttackInfo().radius;
+		//HitDetectionInfo を一時的な計算用に作成
+		HitDetectionInfo hitInfo;
+		//プレイヤーの当たり判定情報を取得
+		float playerColRadius = m_pPlayer->GetColRadius();
+		hitInfo.m_deltaVector = VSub(m_pPlayer->GetPos(), enemy->GetAttackInfo().pos);
+		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+		if (hitInfo.m_distance < normalEnemyAttackRadius + playerColRadius && !m_pPlayer->IsHitFlag())
+		{
+			m_pPlayer->OnDamage(enemy->GetAttackPower());
+		}
 	}
-	// normalEnemyの現在の攻撃情報を取得
-	float normalEnemyAttackRadius = m_pNormalEnemy->GetAttackInfo().radius;
-	// HitDetectionInfo を一時的な計算用に作成
-	HitDetectionInfo hitInfo;
-	// プレイヤーの当たり判定情報を取得
-	float playerColRadius = m_pPlayer->GetColRadius();
-	hitInfo.m_deltaVector = VSub(m_pPlayer->GetPos(), m_pNormalEnemy->GetAttackInfo().pos);
-	hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
-	if (hitInfo.m_distance < normalEnemyAttackRadius + playerColRadius && !m_pPlayer->IsHitFlag())
-	{
-		m_pPlayer->OnDamage(m_pNormalEnemy->GetAttackPower());
-	}
+	
+	//if (!m_pNormalEnemy->GetAttackInfo().active)
+	//{
+	//	return; // normalEnemyが攻撃中でなければ処理を終わる
+	//}
+	//// normalEnemyの現在の攻撃情報を取得
+	//float normalEnemyAttackRadius = m_pNormalEnemy->GetAttackInfo().radius;
+	//// HitDetectionInfo を一時的な計算用に作成
+	//HitDetectionInfo hitInfo;
+	//// プレイヤーの当たり判定情報を取得
+	//float playerColRadius = m_pPlayer->GetColRadius();
+	//hitInfo.m_deltaVector = VSub(m_pPlayer->GetPos(), m_pNormalEnemy->GetAttackInfo().pos);
+	//hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+	//if (hitInfo.m_distance < normalEnemyAttackRadius + playerColRadius && !m_pPlayer->IsHitFlag())
+	//{
+	//	m_pPlayer->OnDamage(m_pNormalEnemy->GetAttackPower());
+	//}
 }
 
 void GameplayCollision::CheckStrongEnemyRangeAttack(VECTOR attackCenter, float attackRadius, int enemyPower)
 {
-	if (m_pStrongEnemy->GetAttackInfo().active)
+	for (auto& enemy : m_pStrongEnemies)
 	{
-		// 攻撃の中心とプレイヤーの位置の差分ベクトルを取得
-		VECTOR deltaVector = VSub(m_pPlayer->GetPos(), attackCenter);
-		// 距離を計算
-		float distance = VSize(deltaVector);
-		float totalRadius = attackRadius + m_pPlayer->GetColRadius();
-		if (distance < totalRadius && !m_pPlayer->IsHitFlag())
+		if (enemy->GetAttackInfo().active)
 		{
-			m_pPlayer->OnDamage(enemyPower);
-			//printfDx(L"Hit\n");
+			// 攻撃の中心とプレイヤーの位置の差分ベクトルを取得
+			VECTOR deltaVector = VSub(m_pPlayer->GetPos(), attackCenter);
+			// 距離を計算
+			float distance = VSize(deltaVector);
+			float totalRadius = attackRadius + m_pPlayer->GetColRadius();
+			if (distance < totalRadius && !m_pPlayer->IsHitFlag())
+			{
+				m_pPlayer->OnDamage(enemyPower);
+				//printfDx(L"Hit\n");
+			}
 		}
 	}
+
+	//if (m_pStrongEnemy->GetAttackInfo().active)
+	//{
+	//	// 攻撃の中心とプレイヤーの位置の差分ベクトルを取得
+	//	VECTOR deltaVector = VSub(m_pPlayer->GetPos(), attackCenter);
+	//	// 距離を計算
+	//	float distance = VSize(deltaVector);
+	//	float totalRadius = attackRadius + m_pPlayer->GetColRadius();
+	//	if (distance < totalRadius && !m_pPlayer->IsHitFlag())
+	//	{
+	//		m_pPlayer->OnDamage(enemyPower);
+	//		//printfDx(L"Hit\n");
+	//	}
+	//}
 }
 
 void GameplayCollision::PushBackCharacter(VECTOR pos1, float pos1Radius, VECTOR pos2, float pos2Radius, CharacterBase* pTargetCharacter)

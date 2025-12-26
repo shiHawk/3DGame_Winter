@@ -27,6 +27,7 @@ public:
 	virtual void Draw() override;
 private:
 	void DrawGrid();
+	VECTOR GetNearestEnemyPos(VECTOR basePos);
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Enemy> m_pEnemy;

@@ -25,24 +25,26 @@ void GameScene::Init()
 	m_pCamera = std::make_shared<Camera>();
 	m_pPlayer = std::make_shared<Player>();
 	//m_pEnemy = std::make_shared<Enemy>();
-	m_pNormalEnemy = std::make_shared<NormalEnemy>();
+	//m_pNormalEnemy = std::make_shared<NormalEnemy>();
 	m_pCompanion = std::make_shared<Companion>();
 	m_pStage = std::make_shared<Stage>();
 	m_pGameplayCollision = std::make_shared<GameplayCollision>();
 	m_pWorldCollision = std::make_shared<WorldCollision>();
 	m_pFlyingEnemy = std::make_shared<FlyingEnemy>();
-	m_pStrongEnemy = std::make_shared<StrongEnemy>();
+	//m_pStrongEnemy = std::make_shared<StrongEnemy>();
 	m_pEffectManager = std::make_shared<EffectManager>();
 	m_pEnemyDataManager = std::make_unique<EnemyDataManager>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
 	m_pStage->Init();
-	m_pNormalEnemy->Init(m_pPlayer,m_pCompanion);
+	m_pEnemyDataManager->LoadEnemyData("Data/enemyData/enemyData.csv",m_pNormalEnemies,m_pStrongEnemies,
+									   m_pPlayer,m_pCompanion);
+	//m_pNormalEnemy->Init(m_pPlayer,m_pCompanion);
 	m_pCompanion->Init(m_pCamera);
-	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemy,m_pStrongEnemy);
+	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemies, m_pStrongEnemies);
 	m_pWorldCollision->Init(m_pPlayer, m_pStage, m_pCompanion);
 	m_pFlyingEnemy->Init(m_pPlayer, m_pCompanion);
-	m_pStrongEnemy->Init(m_pPlayer, m_pCompanion);
+	//m_pStrongEnemy->Init(m_pPlayer, m_pCompanion);
 	m_pEffectManager->Init(m_pPlayer,m_pCompanion);
 }
 
@@ -51,18 +53,30 @@ void GameScene::End()
 	m_pCamera->End();
 	m_pPlayer->End();
 	//m_pEnemy->End();
-	m_pNormalEnemy->End();
+	//m_pNormalEnemy->End();
+	for (auto& enemy : m_pNormalEnemies) 
+	{ 
+		enemy->End(); 
+	}
+	for (auto& enemy : m_pStrongEnemies)
+	{
+		enemy->End();
+	}
 	m_pCompanion->End();
 	m_pEffectManager->End();
 	m_pFlyingEnemy->End();
-	m_pStrongEnemy->End();
+	//m_pStrongEnemy->End();
 	m_pStage->End();
 }
 
 SceneBase* GameScene::Update()
 {
 	m_pPlayer->Update();
-	m_pNormalEnemy->Update();
+	for (auto& enemy : m_pNormalEnemies)
+	{
+		enemy->Update();
+	}
+	//m_pNormalEnemy->Update();
 	m_pCompanion->Update();
 	m_pStage->Update();
 	if (Pad::isTrigger(PAD_INPUT_6)) // RBボタンでプレイヤーとコンパニオンの切り替え
@@ -105,15 +119,32 @@ SceneBase* GameScene::Update()
 		m_pCamera->SetControlledCharacterPosition(m_pCompanion->GetPos());
 		m_pCamera->SetPlayerDir(m_pCompanion->GetPlayerDir());
 	}
-	m_pPlayer->SetEnemyPos(m_pNormalEnemy->GetPos());
+	//m_pPlayer->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pPlayer->SetFollowTargetPos(m_pCompanion->GetPos());
-	m_pCamera->SetLockOnPosition(m_pNormalEnemy->GetPos());
-	m_pCompanion->SetEnemyPos(m_pNormalEnemy->GetPos());
+	//m_pCamera->SetLockOnPosition(m_pNormalEnemy->GetPos());
+	//m_pCompanion->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pCompanion->SetPlayerPos(m_pPlayer->GetPos());
+
+	// 最も近い敵の座標を取得
+	VECTOR currentBasePos = (currentControlMode == CharacterBase::ControlMode::PLAYER)
+						     ? m_pPlayer->GetPos()
+							 : m_pCompanion->GetPos();
+
+	VECTOR targetEnemyPos = GetNearestEnemyPos(currentBasePos);
+
+	// 取得した「一番近い敵の座標」を各クラスに渡す
+	m_pPlayer->SetEnemyPos(targetEnemyPos);
+	m_pCompanion->SetEnemyPos(targetEnemyPos);
+	m_pCamera->SetLockOnPosition(targetEnemyPos); // ロックオン対象も一番近い敵にする
+
 	m_pGameplayCollision->Update();
 	m_pWorldCollision->Update();
 	m_pFlyingEnemy->Update();
-	m_pStrongEnemy->Update();
+	//m_pStrongEnemy->Update();
+	for (auto& enemy : m_pStrongEnemies)
+	{
+		enemy->Update();
+	}
 	m_pEffectManager->Update();
 	m_pCamera->Update();
 	return this;
@@ -124,10 +155,18 @@ void GameScene::Draw()
 	m_pStage->Draw();
 	m_pPlayer->Draw();
 	m_pCompanion->Draw();
-	m_pNormalEnemy->Draw();
+	//m_pNormalEnemy->Draw();
+	for (auto& enemy : m_pNormalEnemies)
+	{
+		enemy->Draw();
+	}
 	m_pEffectManager->Draw();
 	//m_pFlyingEnemy->Draw();
-	m_pStrongEnemy->Draw();
+	//m_pStrongEnemy->Draw();
+	for (auto& enemy : m_pStrongEnemies)
+	{
+		enemy->Draw();
+	}
 	//DrawGrid();
 }
 
@@ -150,4 +189,33 @@ void GameScene::DrawGrid()
 			kGridColor
 		);
 	}
+}
+
+VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos)
+{
+	float minDistanceSq = 99999.0f; // 十分に大きな値
+	VECTOR nearestPos = basePos; // 敵がいない場合は自分の位置を返す（あるいは特定の初期値）
+	bool found = false;
+
+	// NormalEnemiesから探す
+	for (auto& enemy : m_pNormalEnemies) {
+		float distSq = VSquareSize(VSub(enemy->GetPos(), basePos));
+		if (distSq < minDistanceSq) {
+			minDistanceSq = distSq;
+			nearestPos = enemy->GetPos();
+			found = true;
+		}
+	}
+
+	// StrongEnemiesからも探す
+	for (auto& enemy : m_pStrongEnemies) {
+		float distSq = VSquareSize(VSub(enemy->GetPos(), basePos));
+		if (distSq < minDistanceSq) {
+			minDistanceSq = distSq;
+			nearestPos = enemy->GetPos();
+			found = true;
+		}
+	}
+
+	return nearestPos;
 }
