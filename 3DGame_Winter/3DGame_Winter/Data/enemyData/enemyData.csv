@@ -1,3 +1,13 @@
 type,strX,strY,strZ
-normalEnemy,-500,-59,300
-strongEnemy,500,-59,500
+normalEnemy,2131,339,453
+normalEnemy,2473,339,407
+normalEnemy,2257,339,888
+normalEnemy,732,-59,1127
+normalEnemy,866,-59,1794
+normalEnemy,2310,338,3099
+strongEnemy,2283,338,3739
+strongEnemy,1127,339,9191
+normalEnemy,231,742,7858
+normalEnemy,-164,742,7840
+strongEnemy,2846,1135,6170
+strongEnemy,2364,1135,6179

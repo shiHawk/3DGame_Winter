@@ -143,7 +143,7 @@ void Player::Update()
     //printfDx(L"m_attack2.timer:%f\n", m_attack2.timer);
     if (m_controlMode == ControlMode::PLAYER)
     {
-        if (Pad::isTrigger(PAD_INPUT_1) && !m_isJump)
+        if (Pad::isTrigger(PAD_INPUT_1) /*&& !m_isJump*/)
         {
             m_vec.y = kJumpPower;
             m_isJump = true;
@@ -255,7 +255,7 @@ void Player::Draw()
     }
     //DrawSphere3D({m_pos.x,m_pos.y+50.0f,m_pos.z}, kColRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 #endif
-    //printfDx(L"pos.x:%f ,pos.y:%f ,pos.z:%f\n",m_pos.x,m_pos.y,m_pos.z);
+    printfDx(L"pos.x:%f ,pos.y:%f ,pos.z:%f\n",m_pos.x,m_pos.y,m_pos.z);
 }
 
 void Player::OnAttack()

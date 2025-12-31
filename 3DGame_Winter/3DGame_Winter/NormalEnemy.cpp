@@ -13,6 +13,7 @@ namespace
 	constexpr float kMoveDecRate = 0.8f;
 	constexpr float kModelScale = 60.0f; // モデルのスケール
 	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
+	constexpr float kTrackingRange = 400.0f;
 
 	constexpr float kAttackRadius = 30.0f;
 	constexpr float kAttackRange = 90.0f;
@@ -128,7 +129,7 @@ void NormalEnemy::Update()
 		m_toPlayerDistance = VSize(VSub(m_pPlayer->GetPos(), m_pos));
 		m_toPlayerDir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
 		m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
-		if (m_toPlayerDistance > kSphereRadius)
+		if (m_toPlayerDistance > kSphereRadius && m_toPlayerDistance < kTrackingRange)
 		{
 			m_pos.x += m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
 			m_pos.z += m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;

@@ -10,7 +10,7 @@ namespace
 	constexpr float kCoolDownTime = 1.5f;
 	constexpr float kRangeAttackRadius = 150.0f;
 	constexpr float kRangeAttackDuration = 30.0f;
-	constexpr float kTrackingRange = 200.0f;
+	constexpr float kTrackingRange = 400.0f;
 	constexpr float kActionCheckInterval = 0.5f; // ’Š‘I•p“x
 	constexpr float kNormalAttackDuration = 20.0f;
 	constexpr float kNormalAttackRange = 90.0f;
@@ -113,7 +113,7 @@ void StrongEnemy::Update()
 		}
 
 		// ˆÚ“®
-		if (m_toPlayerDistance > kColRadius /*&& m_toPlayerDistance < kTrackingRange*/)
+		if (m_toPlayerDistance > kColRadius && m_toPlayerDistance < kTrackingRange)
 		{
 			m_pos.x += m_toPlayerDir.x * kMoveSpeed;
 			m_pos.z += m_toPlayerDir.z * kMoveSpeed;
