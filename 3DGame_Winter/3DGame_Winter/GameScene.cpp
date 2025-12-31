@@ -15,6 +15,8 @@ namespace
 	constexpr float kGridSize = 1000.0f;   // グリッド全体の半径
 	constexpr float kGridInterval = 100.0f; // 線と線の間隔
 	constexpr int kGridColor = 0xffffff;    // グリッドの色
+	constexpr float kEnemySearchRange = 800.0f; // 敵を探す最大範囲
+	constexpr VECTOR kInvalidPos = { 1000000.0f, 1000000.0f, 1000000.0f }; // 無効な座標（超遠方）
 }
 GameScene::GameScene()
 {
@@ -131,6 +133,7 @@ SceneBase* GameScene::Update()
 							 : m_pCompanion->GetPos();
 
 	VECTOR targetEnemyPos = GetNearestEnemyPos(currentBasePos);
+	//printfDx(L"targetPosX:%f,targetPosY:%f,targetPosZ:%f\n",targetEnemyPos.x,targetEnemyPos.y,targetEnemyPos.z);
 
 	// 取得した「一番近い敵の座標」を各クラスに渡す
 	m_pPlayer->SetEnemyPos(targetEnemyPos);
@@ -193,8 +196,8 @@ void GameScene::DrawGrid()
 
 VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos)
 {
-	float minDistanceSq = 99999.0f; // 十分に大きな値
-	VECTOR nearestPos = basePos; // 敵がいない場合は自分の位置を返す（あるいは特定の初期値）
+	float minDistanceSq = kEnemySearchRange * kEnemySearchRange;
+	VECTOR nearestPos = kInvalidPos; // 初期値として「無効な座標」を設定
 	bool found = false;
 
 	// NormalEnemiesから探す

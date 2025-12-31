@@ -118,11 +118,23 @@ void Companion::End()
 
 void Companion::Update()
 {
-	// 敵の位置が未設定（初期値）なら何もしない
-	if (m_enemyPos.x == 0.0f && m_enemyPos.y == 0.0f && m_enemyPos.z == 0.0f)
+	// 敵との距離を計算（GameSceneから渡された座標を使用）
+	m_companionToEnemy = VSub(m_enemyPos, m_pos);
+	m_distanceToEnemy = VSize(m_companionToEnemy);
+
+	// 敵が有効な距離にいる場合のみ方向を更新
+	if (m_distanceToEnemy < 100000.0f && m_distanceToEnemy > 0.01f)
 	{
-		return;
+		m_dirToEnemy = VNorm(m_companionToEnemy);
 	}
+	else
+	{
+		m_dirToEnemy = VGet(0.0f, 0.0f, 0.0f);
+	}
+
+	m_companionToPlayer = VSub(m_playerPos, m_pos);
+	m_distanceToPlayer = VSize(m_companionToPlayer);
+
 	//printfDx(L"m_distanceToEnemy:%f\n", m_distanceToEnemy);
 	if (m_controlMode == ControlMode::PLAYER)
 	{
@@ -163,6 +175,7 @@ void Companion::Update()
 			m_companionState = CompanionState::FOLLOW_PLAYER;
 		}
 	}
+
 	m_isInAttackSequence = m_companionState != CompanionState::NORMAL && m_companionState != CompanionState::FOLLOW_PLAYER
 						 && m_companionState != CompanionState::TRACK_ENEMY;
 	if (m_isInAttackSequence)

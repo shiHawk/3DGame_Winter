@@ -365,40 +365,35 @@ VECTOR Player::HandleInput()
 {
     if (m_controlMode == ControlMode::COMPANION)
     {
-        // 敵との距離を計算し、メンバー変数に保存
         m_dirToEnemy = VSub(m_enemyPos, m_pos);
-        m_dirToEnemy.y = 0.0f; // 高低差は無視
+        m_dirToEnemy.y = 0.0f;
         m_distanceToEnemy = VSize(m_dirToEnemy);
 
-        // 追従対象（プレイヤー）との距離を計算
         VECTOR dirToTarget = VSub(m_followTargetPos, m_pos);
         dirToTarget.y = 0.0f;
         float distanceToTarget = VSize(dirToTarget);
 
-        // 距離に基づいた移動判断
-        // 敵が非常に遠い(kEnemyLeashDistance)場合、プレイヤーを追従する
+        // 敵が検索範囲外（非常に遠い）またはリーシュ距離より遠い場合
         if (m_distanceToEnemy > kEnemyLeashDistance)
         {
             // プレイヤーを追従
-            if (distanceToTarget > kFollowTargetDistance) // プレイヤーから離れていたら近づく
+            if (distanceToTarget > kFollowTargetDistance)
             {
                 return VNorm(dirToTarget);
             }
             else
             {
-                return VGet(0.0f, 0.0f, 0.0f); // プレイヤーの近くで停止
+                return VGet(0.0f, 0.0f, 0.0f);
             }
         }
-        // 敵が近距離攻撃の間合い (kNearAttackDistance) の外にいる場合
+        // 敵が射程外だが追跡可能な距離にいる場合
         else if (m_distanceToEnemy > kNearAttackDistance)
         {
-            // 敵を追跡する
-            return VNorm(m_dirToEnemy); // 正規化した敵への方向を返す
+            return VNorm(m_dirToEnemy);
         }
         else
         {
-            // 敵が近距離攻撃の間合いに入った場合、停止する
-            // (攻撃の実行は UpdatePlayerState が担当)
+            // 射程圏内なら停止して攻撃準備
             return VGet(0.0f, 0.0f, 0.0f);
         }
     }
@@ -530,7 +525,7 @@ void Player::UpdatePlayerState()
     {
         // HandleInput で計算済みの距離 m_distanceToEnemy を使う
         // 敵が攻撃範囲内 (kNearAttackDistance) にいたら攻撃開始
-        if (m_distanceToEnemy <= kNearAttackDistance && !m_attack.active)
+        if (m_distanceToEnemy <= kNearAttackDistance && m_distanceToEnemy > 1.0f && !m_attack.active)
         {
             aiWantsToAttack = true;
         }
