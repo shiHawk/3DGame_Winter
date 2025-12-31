@@ -58,12 +58,12 @@ NormalEnemy::~NormalEnemy()
 {
 }
 
-void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
+void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, VECTOR pos)
 {
 	Enemy::Init(pPlayer, pCompanion);
 	m_hp = kMaxHp;
 	m_attackPower = kAttackPower;
-	m_pos = kDefaultPos;
+	m_pos = pos;
 	m_modelHandle = MV1LoadModel(L"Data/model/Skeleton_Warrior.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
 	MV1SetRotationXYZ(m_modelHandle, kDefaultDir);

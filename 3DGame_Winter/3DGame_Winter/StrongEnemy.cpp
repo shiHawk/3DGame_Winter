@@ -51,13 +51,13 @@ StrongEnemy::~StrongEnemy()
 {
 }
 
-void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
+void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, VECTOR pos)
 {
 	Enemy::Init(pPlayer, pCompanion);
 	m_modelHandle = MV1LoadModel(L"Data/model/StrongEnemy.mv1");
 	AttachAnim(m_modelHandle, kIdleAnimNo);
 	MV1SetScale(m_modelHandle,VGet(1.3f,1.3f,1.3f));
-	m_pos = kDefaultPos;
+	m_pos = pos;
 	m_hp = kMaxHp;
 }
 

@@ -35,13 +35,13 @@ void EnemyDataManager::LoadEnemyData(const std::string fileName,
 		if (type == "normalEnemy")
 		{
 			auto normalEnemy = std::make_shared<NormalEnemy>();
-			normalEnemy->Init(pPlayer,pCompanion);
+			normalEnemy->Init(pPlayer,pCompanion,enemyPos);
 			pNormalEnemies.push_back(normalEnemy);
 		}
 		if (type == "strongEnemy")
 		{
 			auto strongEnemy = std::make_shared<StrongEnemy>();
-			strongEnemy->Init(pPlayer, pCompanion);
+			strongEnemy->Init(pPlayer, pCompanion,enemyPos);
 			pStrongEnemies.push_back(strongEnemy);
 		}
 	}
