@@ -178,7 +178,7 @@ void BattleAreaManager::EnterBattle(const VECTOR& centerPos, const std::vector<s
 
 	// 戦闘エリアの中心を設定（Y軸は0固定あるいはキャラの高さに合わせる）
 	// ここではシンプルにY=0平面でエリアを作る想定にします
-	m_battleAreaCenterPos = VGet(centerPos.x, 0.0f, centerPos.z);
+	m_battleAreaCenterPos = centerPos;
 
 	// 以前のアクティブリストをクリア
 	m_activeNormalenemies.clear();
@@ -207,26 +207,26 @@ void BattleAreaManager::EnterBattle(const VECTOR& centerPos, const std::vector<s
 
 void BattleAreaManager::ConstraintCharacterMovement(std::shared_ptr<CharacterBase> character)
 {
-	// キャラクターから中心へのベクトル
-	VECTOR toChara = VSub(character->GetPos(), m_battleAreaCenterPos);
+	VECTOR charaPos = character->GetPos();
 
-	// 中心からの距離（平面距離で見るためYは無視するか、球体として見るか。ここでは球/円柱として扱います）
-	// 完全な3D距離で判定
-	float dist = VSize(toChara);
+	// Y座標の差を無視したベクトルを作成
+	VECTOR toCharaXZ = VSub(charaPos, m_battleAreaCenterPos);
+	toCharaXZ.y = 0.0f;
 
-	// バトルエリアから出ようとしたら
-	if (dist > m_battleAreaRadius)
+	float distXZ = VSize(toCharaXZ);
+
+	// バトルエリア（円柱）から出ようとしたら
+	if (distXZ > m_battleAreaRadius)
 	{
-		// 中心からそのキャラへの向き
-		VECTOR dir = VNorm(toChara);
+		// 中心からそのキャラへの向き（水平方向のみ）
+		VECTOR dirXZ = VNorm(toCharaXZ);
 
-		// バトルエリアの縁の位置を計算
-		VECTOR correctPos = VAdd(m_battleAreaCenterPos, VScale(dir, m_battleAreaRadius));
+		// バトルエリアの縁の座標を計算
+		VECTOR correctPos = VAdd(m_battleAreaCenterPos, VScale(dirXZ, m_battleAreaRadius));
 
-		// キャラの高さを維持したい場合、Y座標だけ元のキャラのYに戻す処理が必要かもしれません。
-		// ここでは単純に押し戻し位置を適用します。
-		// もしY座標がおかしくなる場合は以下のようにしてください：
-		// correctPos.y = character->GetPos().y;
+		// 【重要】高さを現在のキャラクターの状態に合わせる
+		// これにより、ジャンプ中や坂道でも不自然に高さが変わりません
+		correctPos.y = charaPos.y;
 
 		character->SetPos(correctPos);
 	}

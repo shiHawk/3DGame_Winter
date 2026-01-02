@@ -70,6 +70,17 @@ void GameplayCollision::CheckPlayerAttack()
 		}
 	}
 
+	for (auto& enemy : m_pStrongEnemies)
+	{
+		float enemyColRadius = enemy->GetColRadius();
+		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pPlayer->GetAttackPos());
+		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+		if (hitInfo.m_distance < playerAttackRadius + enemyColRadius)
+		{
+			enemy->OnDamage();
+		}
+	}
+
 	//float enemyColRadius = m_pNormalEnemy->GetColRadius();
 	//hitInfo.m_deltaVector = VSub(m_pNormalEnemy->GetPos(), m_pPlayer->GetAttackPos());
 	//hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
@@ -108,6 +119,17 @@ void GameplayCollision::CheckCompanionAttack()
 		}
 	}
 
+	for (auto& enemy : m_pStrongEnemies)
+	{
+		float enemyColRadius = enemy->GetColRadius();
+		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pCompanion->GetAttackPos());
+		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+		if (hitInfo.m_distance < companionAttackRadius + enemyColRadius)
+		{
+			enemy->OnDamage();
+		}
+	}
+
 	/*float enemyColRadius = m_pNormalEnemy->GetColRadius();
 	hitInfo.m_deltaVector = VSub(m_pNormalEnemy->GetPos(), m_pCompanion->GetAttackPos());
 	hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
@@ -123,7 +145,7 @@ void GameplayCollision::CheckNormalEnemyAttack()
 	{
 		if (!enemy->GetAttackInfo().active)
 		{
-			return; // normalEnemy‚ªUŒ‚’†‚Å‚È‚¯‚ê‚Îˆ—‚ðI‚í‚é
+			continue; // normalEnemy‚ªUŒ‚’†‚Å‚È‚¯‚ê‚Îˆ—‚ðI‚í‚é
 		}
 		//normalEnemy‚ÌŒ»Ý‚ÌUŒ‚î•ñ‚ðŽæ“¾
 		float normalEnemyAttackRadius = enemy->GetAttackInfo().radius;

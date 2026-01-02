@@ -12,6 +12,7 @@
 #include "StrongEnemy.h"
 #include "EffectManager.h"
 #include "EnemyDataManager.h"
+#include "BattleAreaManager.h"
 #include "DxLib.h"
 #include "Pad.h"
 #include "CharacterBase.h"
@@ -42,5 +43,6 @@ private:
 	std::shared_ptr<StrongEnemy> m_pStrongEnemy;
 	std::shared_ptr<EffectManager> m_pEffectManager;
 	std::unique_ptr<EnemyDataManager> m_pEnemyDataManager;
+	std::unique_ptr<BattleAreaManager> m_pBattleAreaManager;
 };
 

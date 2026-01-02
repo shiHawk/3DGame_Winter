@@ -156,6 +156,13 @@ void StrongEnemy::Update()
 		}
 		break;
 	}
+	if (m_isDead)
+	{
+		//m_alpha -= 0.01f;
+		m_enemyAttack.active = false;
+		End();
+		return;
+	}
 	UpdateAnim();
 	MV1SetPosition(m_modelHandle, m_pos);
 }
@@ -164,24 +171,27 @@ void StrongEnemy::Draw()
 {
 	//DrawSphere3D(m_pos,kColRadius,kDivNum,0x000000,0xffffff,true);
 	MV1DrawModel(m_modelHandle);
-	if (m_state == StrongEnemyState::RANGEATTACK_CHARGE)
+	if (m_enemyAttack.active)
 	{
-		float progress = 1.0f - (m_attackTimer / kChageTime);
-		float currentRadius = kRangeAttackRadius * progress; // Œ»Ý‚Ì”¼Œa‚ðŒvŽZ(Å‘å”¼Œa*is—¦)
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-		VECTOR drawPos = VAdd(m_pos, VGet(0.0f, 1.0f, 0.0f));
-		DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.1f, 0.0f)),drawPos, currentRadius, kDivNum, kAreaColor, kAreaColor,true);
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
-		DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.2f, 0.0f)), drawPos, kRangeAttackRadius, kDivNum, kOutLineColor, kOutLineColor, true);
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	}
-	if (m_state == StrongEnemyState::NORMALATTACK)
-	{
-		DrawSphere3D(m_enemyAttack.pos, kColRadius, kDivNum, 0xffffff, 0xffffff, false);
-	}
-	if (m_state == StrongEnemyState::RANGEATTACK)
-	{
-		DrawSphere3D(m_enemyAttack.pos, m_enemyAttack.radius, kDivNum, 0xffffff, 0xffffff, false);
+		if (m_state == StrongEnemyState::RANGEATTACK_CHARGE)
+		{
+			float progress = 1.0f - (m_attackTimer / kChageTime);
+			float currentRadius = kRangeAttackRadius * progress; // Œ»Ý‚Ì”¼Œa‚ðŒvŽZ(Å‘å”¼Œa*is—¦)
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+			VECTOR drawPos = VAdd(m_pos, VGet(0.0f, 1.0f, 0.0f));
+			DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.1f, 0.0f)), drawPos, currentRadius, kDivNum, kAreaColor, kAreaColor, true);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+			DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.2f, 0.0f)), drawPos, kRangeAttackRadius, kDivNum, kOutLineColor, kOutLineColor, true);
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+		}
+		if (m_state == StrongEnemyState::NORMALATTACK)
+		{
+			DrawSphere3D(m_enemyAttack.pos, kColRadius, kDivNum, 0xffffff, 0xffffff, false);
+		}
+		if (m_state == StrongEnemyState::RANGEATTACK)
+		{
+			DrawSphere3D(m_enemyAttack.pos, m_enemyAttack.radius, kDivNum, 0xffffff, 0xffffff, false);
+		}
 	}
 }
 
@@ -207,6 +217,10 @@ void StrongEnemy::OnRangeAttack()
 void StrongEnemy::OnDamage()
 {
 	if (m_invincibilityTimer > 0.0f) return;
+	if (m_hp <= 0)
+	{
+		m_isDead = true;
+	}
 	m_isHitFlag = true;
 	m_hp -= m_pPlayer->GetAttackPower();
 	m_invincibilityTimer = kInvincibilityTime;

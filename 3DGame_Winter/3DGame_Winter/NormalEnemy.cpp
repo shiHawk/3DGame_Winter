@@ -34,7 +34,7 @@ namespace
 	constexpr float kMaxCoolTime = 60.0f;
 	constexpr float kAttackHitStartTime = 25.0f; // 判定が出始めるタイミング
 	constexpr float kAttackHitEndTime = 10.0f;   // 判定が終わるタイミング
-	constexpr int kMaxHp = 50;
+	constexpr int kMaxHp = 500;
 	constexpr int kAttackPower = 30;
 
 	constexpr float kKnockbackDuration = 0.4f;
@@ -164,20 +164,23 @@ void NormalEnemy::Update()
 		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 	}
 	
-	/*if (m_hp < 0)
+	if (m_isDead)
 	{
-		m_alpha -= 0.01f;
-	}*/
+		//m_alpha -= 0.01f;
+		m_enemyAttack.active = false;
+		End();
+		return;
+	}
 	MV1SetPosition(m_modelHandle,m_pos);
 	UpdateAnim();
 }
 
 void NormalEnemy::Draw()
 {
-	/*if (m_enemyAttack.active)
+	if (m_enemyAttack.active)
 	{
 		DrawSphere3D(m_enemyAttack.pos, kAttackRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
-	}*/
+	}
 	
 	//MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, m_alpha));
 	MV1DrawModel(m_modelHandle);
@@ -195,6 +198,10 @@ void NormalEnemy::OnAttack()
 
 void NormalEnemy::OnDamage()
 {
+	if (m_hp <= 0)
+	{
+		m_isDead = true;
+	}
 	if (m_invincibilityTimer > 0.0f) return;
 	m_isHitFlag = true;
 	m_hp -= m_pPlayer->GetAttackPower();

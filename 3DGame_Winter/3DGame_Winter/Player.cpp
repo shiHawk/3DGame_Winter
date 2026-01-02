@@ -208,7 +208,14 @@ void Player::Update()
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim();
     //printfDx(L"Pos.y:%f\n",m_pos.y);
-
+    if (m_isHitFlag)
+    {
+        printfDx(L"HIt\n");
+    }
+    else
+    {
+        printfDx(L"   \n");
+    }
     //printfDx(L"m_pos.y;%.02f\n", m_pos.y);
     //printfDx(L"m_pos.x:%f\nm_pos.z:%f\n\n",m_pos.x,m_pos.z);
     //DINPUT_JOYSTATE input;
@@ -255,7 +262,8 @@ void Player::Draw()
     }
     //DrawSphere3D({m_pos.x,m_pos.y+50.0f,m_pos.z}, kColRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 #endif
-    printfDx(L"pos.x:%f ,pos.y:%f ,pos.z:%f\n",m_pos.x,m_pos.y,m_pos.z);
+    //printfDx(L"pos.x:%f ,pos.y:%f ,pos.z:%f\n",m_pos.x,m_pos.y,m_pos.z);
+    printfDx(L"hp:%d\n",m_hp);
 }
 
 void Player::OnAttack()

@@ -36,6 +36,7 @@ void GameScene::Init()
 	//m_pStrongEnemy = std::make_shared<StrongEnemy>();
 	m_pEffectManager = std::make_shared<EffectManager>();
 	m_pEnemyDataManager = std::make_unique<EnemyDataManager>();
+	m_pBattleAreaManager = std::make_unique<BattleAreaManager>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
 	m_pStage->Init();
@@ -48,6 +49,8 @@ void GameScene::Init()
 	m_pFlyingEnemy->Init(m_pPlayer, m_pCompanion);
 	//m_pStrongEnemy->Init(m_pPlayer, m_pCompanion);
 	m_pEffectManager->Init(m_pPlayer,m_pCompanion);
+	m_pBattleAreaManager->Init(m_pPlayer, m_pCompanion);
+	m_pBattleAreaManager->SetEnemy(m_pNormalEnemies, m_pStrongEnemies);
 }
 
 void GameScene::End()
@@ -75,6 +78,10 @@ SceneBase* GameScene::Update()
 {
 	m_pPlayer->Update();
 	for (auto& enemy : m_pNormalEnemies)
+	{
+		enemy->Update();
+	}
+	for (auto& enemy : m_pStrongEnemies)
 	{
 		enemy->Update();
 	}
@@ -144,11 +151,24 @@ SceneBase* GameScene::Update()
 	m_pWorldCollision->Update();
 	m_pFlyingEnemy->Update();
 	//m_pStrongEnemy->Update();
-	for (auto& enemy : m_pStrongEnemies)
-	{
-		enemy->Update();
-	}
+	
 	m_pEffectManager->Update();
+
+	// 操作中のキャラクター（スマートポインタ）を決定
+	std::shared_ptr<CharacterBase> activeCharacter = nullptr;
+	if (currentControlMode == CharacterBase::ControlMode::PLAYER)
+	{
+		activeCharacter = m_pPlayer; // プレイヤー操作中
+	}
+	else
+	{
+		activeCharacter = m_pCompanion; // コンパニオン操作中
+	}
+
+	// BattleAreaManagerの更新
+	// activeCharacter を渡すことで、操作中のキャラの位置を基準にエリア判定が行われます
+	m_pBattleAreaManager->Update(activeCharacter, m_pNormalEnemies, m_pStrongEnemies);
+
 	m_pCamera->Update();
 	return this;
 }
@@ -170,6 +190,8 @@ void GameScene::Draw()
 	{
 		enemy->Draw();
 	}
+	m_pBattleAreaManager->DrawBattleAreaBodary();
+	m_pBattleAreaManager->DebugDraw();
 	//DrawGrid();
 }
 
@@ -202,6 +224,10 @@ VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos)
 
 	// NormalEnemiesから探す
 	for (auto& enemy : m_pNormalEnemies) {
+		if (enemy->IsDead())
+		{
+			continue;
+		}
 		float distSq = VSquareSize(VSub(enemy->GetPos(), basePos));
 		if (distSq < minDistanceSq) {
 			minDistanceSq = distSq;
@@ -212,6 +238,10 @@ VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos)
 
 	// StrongEnemiesからも探す
 	for (auto& enemy : m_pStrongEnemies) {
+		if (enemy->IsDead())
+		{
+			continue;
+		}
 		float distSq = VSquareSize(VSub(enemy->GetPos(), basePos));
 		if (distSq < minDistanceSq) {
 			minDistanceSq = distSq;
