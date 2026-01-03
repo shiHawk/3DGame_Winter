@@ -33,6 +33,7 @@ void GameScene::Init()
 	m_pGameplayCollision = std::make_shared<GameplayCollision>();
 	m_pWorldCollision = std::make_shared<WorldCollision>();
 	m_pFlyingEnemy = std::make_shared<FlyingEnemy>();
+	m_pBossEnemy = std::make_shared<BossEnemy>();
 	//m_pStrongEnemy = std::make_shared<StrongEnemy>();
 	m_pEffectManager = std::make_shared<EffectManager>();
 	m_pEnemyDataManager = std::make_unique<EnemyDataManager>();
@@ -47,6 +48,7 @@ void GameScene::Init()
 	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemies, m_pStrongEnemies);
 	m_pWorldCollision->Init(m_pPlayer, m_pStage, m_pCompanion);
 	m_pFlyingEnemy->Init(m_pPlayer, m_pCompanion);
+	m_pBossEnemy->Init(m_pPlayer, m_pCompanion);
 	//m_pStrongEnemy->Init(m_pPlayer, m_pCompanion);
 	m_pEffectManager->Init(m_pPlayer,m_pCompanion);
 	m_pBattleAreaManager->Init(m_pPlayer, m_pCompanion);
@@ -70,6 +72,7 @@ void GameScene::End()
 	m_pCompanion->End();
 	m_pEffectManager->End();
 	m_pFlyingEnemy->End();
+	m_pBossEnemy->End();
 	//m_pStrongEnemy->End();
 	m_pStage->End();
 }
@@ -150,6 +153,7 @@ SceneBase* GameScene::Update()
 	m_pGameplayCollision->Update();
 	m_pWorldCollision->Update();
 	m_pFlyingEnemy->Update();
+	m_pBossEnemy->Update();
 	//m_pStrongEnemy->Update();
 	
 	m_pEffectManager->Update();
@@ -190,6 +194,7 @@ void GameScene::Draw()
 	{
 		enemy->Draw();
 	}
+	m_pBossEnemy->Draw();
 	m_pBattleAreaManager->DrawBattleAreaBodary();
 	m_pBattleAreaManager->DebugDraw();
 	//DrawGrid();

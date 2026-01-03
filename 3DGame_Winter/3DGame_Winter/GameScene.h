@@ -10,6 +10,7 @@
 #include "WorldCollision.h"
 #include "FlyingEnemy.h"
 #include "StrongEnemy.h"
+#include "BossEnemy.h"
 #include "EffectManager.h"
 #include "EnemyDataManager.h"
 #include "BattleAreaManager.h"
@@ -41,6 +42,7 @@ private:
 	std::shared_ptr<WorldCollision> m_pWorldCollision;
 	std::shared_ptr<FlyingEnemy> m_pFlyingEnemy;
 	std::shared_ptr<StrongEnemy> m_pStrongEnemy;
+	std::shared_ptr<BossEnemy> m_pBossEnemy;
 	std::shared_ptr<EffectManager> m_pEffectManager;
 	std::unique_ptr<EnemyDataManager> m_pEnemyDataManager;
 	std::unique_ptr<BattleAreaManager> m_pBattleAreaManager;
