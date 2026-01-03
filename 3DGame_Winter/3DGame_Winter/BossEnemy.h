@@ -38,4 +38,7 @@ private:
 	float m_targetAngle;
 	float m_attackTimer;
 	float m_actionCheckTimer; // 行動抽選のクールダウンタイマー
+	// 強攻撃の直線範囲（AABB）
+	VECTOR m_strongAttackPos1;
+	VECTOR m_strongAttackPos2;
 };

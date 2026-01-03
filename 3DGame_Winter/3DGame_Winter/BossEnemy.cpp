@@ -92,6 +92,7 @@ void BossEnemy::Update()
         if (m_enemyAttack.timer <= 0)
         {
             m_state = BossEnemyState::COOLDOWN;
+            m_enemyAttack.active = false;
             m_attackTimer = kCoolDownTime;
         }
         break;
@@ -151,6 +152,31 @@ void BossEnemy::Update()
 void BossEnemy::Draw()
 {
     DrawSphere3D(m_pos, kColRadius, kDivNum, 0xff0000, 0xffffff, true);
+    if (m_enemyAttack.active)
+    {
+        if (m_state == BossEnemyState::RANGE_ATTACK_CHARGE || m_state == BossEnemyState::STRONG_ATTACK_CHARGE)
+        {
+            // progress‚ð 0.0f ` 1.0f ‚ÌŠÔ‚É‚·‚é
+            float progress = 1.0f - (m_attackTimer / kChageTime);
+            if (progress < 0.0f) progress = 0.0f;
+            if (progress > 1.0f) progress = 1.0f;
+
+            float currentRadius = kRangeAttackRadius * progress;
+
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+            VECTOR drawPos = VAdd(m_pos, VGet(0.0f, 1.0f, 0.0f));
+            // —\’›‚Ì•`‰æ
+            DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.1f, 0.0f)), drawPos, currentRadius, kDivNum, kAreaColor, kAreaColor, true);
+
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+            DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.2f, 0.0f)), drawPos, kRangeAttackRadius, kDivNum, kOutLineColor, kOutLineColor, true);
+            SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+        }
+        if (m_state == BossEnemyState::NORMAL_ATTACK)
+        {
+            DrawSphere3D(m_enemyAttack.pos, m_enemyAttack.radius, kDivNum, 0xffff00, 0xffffff, false);
+        }
+    }
 }
 
 void BossEnemy::OnAttack()
@@ -203,30 +229,30 @@ void BossEnemy::UpdateDefault()
     if (m_actionCheckTimer > 0) return;
     m_actionCheckTimer = kActionCheckInterval;
 
-    // --- ‹——£‚É‚æ‚é•ªŠò ---
     if (m_toPlayerDistance < kNormalAttackRange)
     {
-        // ŽŠ‹ß‹——£F’ÊíUŒ‚
         OnAttack();
         m_state = BossEnemyState::NORMAL_ATTACK;
     }
     else if (m_toPlayerDistance < kRangeAttackRadius)
     {
-        // ’†‹——£F‹­UŒ‚‚©”ÍˆÍUŒ‚‚ðƒ‰ƒ“ƒ_ƒ€‚Å
         int rand = GetRand(100);
         if (rand < 40)
         {
             m_state = BossEnemyState::STRONG_ATTACK_CHARGE;
-            m_attackTimer = kChageTime;
+            m_attackTimer = kChageTime; // Šî€‚Ì—­‚ßŽžŠÔ
+            m_enemyAttack.active = true; // •`‰æ‚ðŠJŽn‚·‚é‚½‚ß‚É‚±‚±‚ÅON‚É‚·‚é
         }
         else if (rand < 70)
         {
             m_state = BossEnemyState::RANGE_ATTACK_CHARGE;
-            m_attackTimer = kChageTime * 1.5f; // ”ÍˆÍUŒ‚‚Í—­‚ß‚ð’·‚­
+            // C³ƒ|ƒCƒ“ƒgF—­‚ßŽžŠÔ‚ð’è”‚Æˆê’v‚³‚¹‚é‚©Aê—p‚Ì’è”‚ðì‚é
+            m_attackTimer = kChageTime;
+            m_enemyAttack.active = true; // ON‚É‚·‚é
         }
         else
         {
-            m_state = BossEnemyState::MOVE; // 30%‚Å‚³‚ç‚É‹ß‚Ã‚­
+            m_state = BossEnemyState::MOVE;
         }
     }
     else if (m_toPlayerDistance < kTrackingRange)
