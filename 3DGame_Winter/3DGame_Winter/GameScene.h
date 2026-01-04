@@ -14,6 +14,7 @@
 #include "EffectManager.h"
 #include "EnemyDataManager.h"
 #include "BattleAreaManager.h"
+#include "UIManager.h"
 #include "DxLib.h"
 #include "Pad.h"
 #include "CharacterBase.h"
@@ -46,5 +47,6 @@ private:
 	std::shared_ptr<EffectManager> m_pEffectManager;
 	std::unique_ptr<EnemyDataManager> m_pEnemyDataManager;
 	std::unique_ptr<BattleAreaManager> m_pBattleAreaManager;
+	std::unique_ptr<UIManager> m_pUIManager;
 };
 

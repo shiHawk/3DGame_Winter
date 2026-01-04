@@ -28,7 +28,9 @@ public:
 	VECTOR GetAttackPos() { return m_attack.pos; }
 	bool IsAttackActive() { return m_attack.active; }
 	int GetAttackPower() { return m_attackPower; }
+	void AddSpecialGauge(int increment) { m_specialGauge += increment; }
 	float GetColRadius();
+	int GetMaxHp();
 	virtual VECTOR GetDir() override;
 private:
 	void UpdateMovement(const VECTOR& moveDir);
@@ -58,7 +60,6 @@ private:
 	float m_distanceToEnemy;
 	float m_distanceToPlayer;
 	float m_angleY;
-	float m_specialGauge;
 	float m_attackCoolTimer;
 	float m_avoidanceTimer;
 	bool m_isAvoidanceFlag;

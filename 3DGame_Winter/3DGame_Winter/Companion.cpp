@@ -15,6 +15,7 @@ namespace
 	constexpr float kGravity = -0.7f;
 	constexpr float kAirResistance = 0.99f;
 	constexpr float kMoveThreshold = 0.1f; // ˆÚ“®‚Æ‚Ý‚È‚·è‡’l
+	constexpr int kMaxHp = 800;
 	// Œ¸‘¬
 	constexpr float kMoveDecRate = 0.80f;
 	constexpr float kRotateSpeed = 0.4f; // •ûŒü“]Š·‚Ì‘¬“x
@@ -104,6 +105,7 @@ void Companion::Init(std::shared_ptr<Camera> pCamera)
 	m_pos = kDefaultPos;
 	m_vec = kDefaultVec;
 	m_distanceToEnemy = 0.0f;
+	m_hp = kMaxHp;
 	m_attack.active = false;
 	m_modelHandle = MV1LoadModel(L"Data/model/Mage.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
@@ -604,6 +606,11 @@ void Companion::UpdatePlayerControlState()
 float Companion::GetColRadius()
 {
 	return kColRadius;
+}
+
+int Companion::GetMaxHp()
+{
+	return kMaxHp;
 }
 
 VECTOR Companion::GetDir()

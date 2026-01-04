@@ -369,6 +369,11 @@ void Player::OnDamage(int enemyPower)
     m_playerState = PlayerState::DAMAGE;
 }
 
+int Player::GetMaxHp()
+{
+    return kMaxHp;
+}
+
 VECTOR Player::HandleInput()
 {
     if (m_controlMode == ControlMode::COMPANION)

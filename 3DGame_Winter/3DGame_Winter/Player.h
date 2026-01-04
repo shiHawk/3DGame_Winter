@@ -27,6 +27,7 @@ public:
 	VECTOR GetAttackPos() { return m_attack.pos; }
 	bool IsAttackActive() { return m_attack.active; }
 	int GetAttackPower() { return m_attackPower; }
+	void AddSpecialGauge(int increment) { m_specialGauge += increment; }
 	// WorldCollisionから呼ばれる関数群
 	void SetPos(VECTOR newPos) { m_pos = newPos; }
 	void SetVecY(float newVecY) { m_vec.y = newVecY; }
@@ -37,6 +38,7 @@ public:
 	virtual VECTOR GetDir() override;
 	void OnDamage(int enemyPower);
 	bool IsDamageFlag() { return m_isHitFlag; }
+	int GetMaxHp();
 	enum class PlayerState
 	{
 		NORMAL,
@@ -74,7 +76,6 @@ private:
 	int m_comboStep; // コンボの段階
 	float m_comboWindowTimer; // コンボの受付時間
 	float m_comboCoolTimer; // AIのコンボ用クールタイム
-	int m_specialGauge; // 必殺ゲージ
 	bool m_aiWillDo3HitCombo; // AIが3コンボ攻撃をするかどうかのフラグ
 
 	// ステートごとのハンドラ関数

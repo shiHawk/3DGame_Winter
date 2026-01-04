@@ -60,6 +60,7 @@ void GameplayCollision::CheckPlayerAttack()
 		if (hitInfo.m_distance < playerAttackRadius + enemyColRadius)
 		{
 			enemy->OnDamage();
+			m_pPlayer->AddSpecialGauge(5);
 			if (m_pPlayer->IsComboFinish())
 			{
 				// 敵を吹き飛ばすベクトルと強さを計算し、敵に適用する
@@ -78,6 +79,7 @@ void GameplayCollision::CheckPlayerAttack()
 		if (hitInfo.m_distance < playerAttackRadius + enemyColRadius)
 		{
 			enemy->OnDamage();
+			m_pPlayer->AddSpecialGauge(5);
 		}
 	}
 
@@ -116,6 +118,7 @@ void GameplayCollision::CheckCompanionAttack()
 		if (hitInfo.m_distance < companionAttackRadius + enemyColRadius)
 		{
 			enemy->OnDamage();
+			m_pCompanion->AddSpecialGauge(5);
 		}
 	}
 
@@ -127,6 +130,7 @@ void GameplayCollision::CheckCompanionAttack()
 		if (hitInfo.m_distance < companionAttackRadius + enemyColRadius)
 		{
 			enemy->OnDamage();
+			m_pCompanion->AddSpecialGauge(5);
 		}
 	}
 

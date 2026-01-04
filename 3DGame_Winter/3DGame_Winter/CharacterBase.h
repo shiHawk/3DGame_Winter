@@ -22,6 +22,8 @@ public:
 	bool IsSpecialSkilFlag() { return m_isSpecialSkilFlag; }
 	bool IsJumpFlag() { return m_isJump; }
 	bool IsHitFlag() { return m_isHitFlag; }
+	int GetHp() { return m_hp; }
+	int GetSpecialGauge() { return m_specialGauge; }
 	enum class ControlMode
 	{
 		PLAYER,
@@ -53,5 +55,6 @@ protected:
 	float m_angleY;
 	bool m_isSpecialSkilFlag;
 	VECTOR m_prevPos;
+	int m_specialGauge; // ïKéEÉQÅ[ÉW
 };
 

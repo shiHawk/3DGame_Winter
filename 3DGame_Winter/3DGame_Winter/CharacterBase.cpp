@@ -16,7 +16,8 @@ CharacterBase::CharacterBase():
 	m_forwardDir({ 0.0f,0.0f,0.0f }),
 	m_angleY(0.0f),
 	m_isSpecialSkilFlag(false),
-	m_prevPos({ 0.0f,0.0f,0.0f })
+	m_prevPos({ 0.0f,0.0f,0.0f }),
+	m_specialGauge(0)
 {
 }
 

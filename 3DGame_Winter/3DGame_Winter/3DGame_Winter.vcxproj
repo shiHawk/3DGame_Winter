@@ -156,6 +156,7 @@
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StrongEnemy.cpp" />
+    <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="WorldCollision.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +182,7 @@
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="StrongEnemy.h" />
+    <ClInclude Include="UIManager.h" />
     <ClInclude Include="WorldCollision.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

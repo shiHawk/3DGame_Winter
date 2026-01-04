@@ -38,6 +38,7 @@ void GameScene::Init()
 	m_pEffectManager = std::make_shared<EffectManager>();
 	m_pEnemyDataManager = std::make_unique<EnemyDataManager>();
 	m_pBattleAreaManager = std::make_unique<BattleAreaManager>();
+	m_pUIManager = std::make_unique<UIManager>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
 	m_pStage->Init();
@@ -53,6 +54,7 @@ void GameScene::Init()
 	m_pEffectManager->Init(m_pPlayer,m_pCompanion);
 	m_pBattleAreaManager->Init(m_pPlayer, m_pCompanion);
 	m_pBattleAreaManager->SetEnemy(m_pNormalEnemies, m_pStrongEnemies);
+	m_pUIManager->Init(m_pPlayer, m_pCompanion);
 }
 
 void GameScene::End()
@@ -75,6 +77,7 @@ void GameScene::End()
 	m_pBossEnemy->End();
 	//m_pStrongEnemy->End();
 	m_pStage->End();
+	m_pUIManager->End();
 }
 
 SceneBase* GameScene::Update()
@@ -172,7 +175,7 @@ SceneBase* GameScene::Update()
 	// BattleAreaManagerの更新
 	// activeCharacter を渡すことで、操作中のキャラの位置を基準にエリア判定が行われます
 	m_pBattleAreaManager->Update(activeCharacter, m_pNormalEnemies, m_pStrongEnemies);
-
+	m_pUIManager->Updata();
 	m_pCamera->Update();
 	return this;
 }
@@ -197,6 +200,7 @@ void GameScene::Draw()
 	m_pBossEnemy->Draw();
 	m_pBattleAreaManager->DrawBattleAreaBodary();
 	m_pBattleAreaManager->DebugDraw();
+	m_pUIManager->Draw();
 	//DrawGrid();
 }
 
