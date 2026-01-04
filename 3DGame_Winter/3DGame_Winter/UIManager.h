@@ -22,8 +22,11 @@ private:
 	void DrawSg();
 	float m_playerHpGaugeRate;
 	float m_companionHpGaugeRate;
+	float m_playerSpecialGaugeRate;
+	float m_companionSpecialGaugeRate;
 	int m_hpGaugeFrameHandle;
 	int m_hpGaugeHandle;
+	int m_sgGaugeHandle;
 	std::shared_ptr<Player> m_pPlayer;
 	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;
 	std::vector<std::shared_ptr<StrongEnemy>> m_pStrongEnemies;

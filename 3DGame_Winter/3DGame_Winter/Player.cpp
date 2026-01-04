@@ -107,7 +107,6 @@ Player::Player():
     m_comboStep(0),
     m_comboWindowTimer(0.0f),
     m_comboCoolTimer(0.0f),
-    m_specialGauge(0),
     m_aiWillDo3HitCombo(false)
 {
 }
@@ -121,6 +120,7 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
     m_isJump = false;
     m_attackPower = kAttackPower;
     m_hp = kMaxHp;
+    m_specialGauge = 10;
     m_playerState = PlayerState::NORMAL;
     m_attack.active = false;
     m_distanceToEnemy = 0.0f;

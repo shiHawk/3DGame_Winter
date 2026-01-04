@@ -6,6 +6,12 @@ namespace
 	constexpr int kPlayerHpGaugeLeft = 150;
 	constexpr int kCompanionHpGaugeLeft = 750;
 	constexpr int kHpGaugeTop = 650;
+	// Specialゲージ
+	constexpr int kSpecialGaugeWidth = 370;
+	constexpr int kPlayerSpecialGaugeLeft = 150;
+	constexpr int kCompanionSpecialGaugeLeft = 750;
+	constexpr int kSpecialGaugeTop = 700;
+
 	constexpr int kHpTextPosY = 14;
 	constexpr int kSrcX = 462; // 切り出し位置(X)
 	constexpr int kSrcY = 293; // 切り出し位置(Y)
@@ -27,8 +33,11 @@ namespace
 UIManager::UIManager():
 	m_playerHpGaugeRate(0.0f),
 	m_companionHpGaugeRate(0.0f),
+	m_playerSpecialGaugeRate(0.0f),
+	m_companionSpecialGaugeRate(0.0f),
 	m_hpGaugeFrameHandle(-1),
-	m_hpGaugeHandle(-1)
+	m_hpGaugeHandle(-1),
+	m_sgGaugeHandle(-1)
 {
 }
 
@@ -42,19 +51,24 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_pCompanion = pCompanion;
 	m_hpGaugeFrameHandle = LoadGraph(L"Data/UI/HPGaugeFrame.png");
 	m_hpGaugeHandle = LoadGraph(L"Data/UI/HP.png");
+	m_sgGaugeHandle = LoadGraph(L"Data/UI/SG.png");
 }
 
 void UIManager::End()
 {
 	DeleteGraph(m_hpGaugeFrameHandle);
 	DeleteGraph(m_hpGaugeHandle);
+	DeleteGraph(m_sgGaugeHandle);
 }
 
 void UIManager::Updata()
 {
 	// 残りHPの割合を更新
 	m_playerHpGaugeRate = static_cast<float>(m_pPlayer->GetHp()) / m_pPlayer->GetMaxHp();
-	m_companionHpGaugeRate = static_cast<float>(m_pCompanion->GetHp()) / m_pCompanion->GetMaxHp(); 
+	m_companionHpGaugeRate = static_cast<float>(m_pCompanion->GetHp()) / m_pCompanion->GetMaxHp();
+
+	m_playerSpecialGaugeRate = static_cast<float>(m_pPlayer->GetSpecialGauge()) / 100.0f;
+	m_companionSpecialGaugeRate = static_cast<float>(m_pCompanion->GetSpecialGauge()) / 100.0f;
 }
 
 void UIManager::Draw()
@@ -71,8 +85,18 @@ void UIManager::DrawHp()
 
 	// コンパニオンのHPバーの描画
 	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
-	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_playerHpGaugeRate),
+	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_companionHpGaugeRate),
 		kHpTextPosY, m_hpGaugeHandle, true);
+
+	// プレイヤーのSpecialゲージの描画
+	DrawRectGraph(kPlayerSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
+	DrawRectGraph(kPlayerSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, 281, static_cast<int>(kHpGaugeWidth * m_playerSpecialGaugeRate),
+		kHpTextPosY, m_sgGaugeHandle, true);
+
+	// コンパニオンのSpecialゲージの描画
+	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
+	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, 281, static_cast<int>(kHpGaugeWidth * m_companionSpecialGaugeRate),
+		kHpTextPosY, m_sgGaugeHandle, true);
 }
 
 void UIManager::DrawSg()

@@ -88,7 +88,6 @@ Companion::Companion():
 	m_distanceToEnemy(0.0f),
 	m_distanceToPlayer(0.0f),
 	m_angleY(0.0f),
-	m_specialGauge(0.0f),
 	m_attackCoolTimer(0.0f),
 	m_avoidanceTimer(0.0f),
 	m_isAvoidanceFlag(false)
@@ -106,6 +105,7 @@ void Companion::Init(std::shared_ptr<Camera> pCamera)
 	m_vec = kDefaultVec;
 	m_distanceToEnemy = 0.0f;
 	m_hp = kMaxHp;
+	m_specialGauge = 10;
 	m_attack.active = false;
 	m_modelHandle = MV1LoadModel(L"Data/model/Mage.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
