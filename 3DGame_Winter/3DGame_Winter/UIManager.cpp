@@ -10,11 +10,13 @@ namespace
 	constexpr int kSpecialGaugeWidth = 370;
 	constexpr int kPlayerSpecialGaugeLeft = 150;
 	constexpr int kCompanionSpecialGaugeLeft = 750;
-	constexpr int kSpecialGaugeTop = 700;
+	constexpr int kSpecialGaugeTop = 680;
 
 	constexpr int kHpTextPosY = 14;
 	constexpr int kSrcX = 462; // 切り出し位置(X)
 	constexpr int kSrcY = 293; // 切り出し位置(Y)
+	constexpr int kSgSrcX = 333; // Secialゲージ切り出し位置(X)
+	constexpr int kSgSrcY = 207; // Secialゲージ切り出し位置(Y)
 	constexpr int kHpGaugeFrameWidth = 370; // ゲージの横幅
 	// スコアの位置
 	constexpr int kScorePosX = 650;
@@ -74,6 +76,7 @@ void UIManager::Updata()
 void UIManager::Draw()
 {
 	DrawHp();
+	DrawSg();
 }
 
 void UIManager::DrawHp()
@@ -87,18 +90,17 @@ void UIManager::DrawHp()
 	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_companionHpGaugeRate),
 		kHpTextPosY, m_hpGaugeHandle, true);
-
-	// プレイヤーのSpecialゲージの描画
-	DrawRectGraph(kPlayerSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
-	DrawRectGraph(kPlayerSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, 281, static_cast<int>(kHpGaugeWidth * m_playerSpecialGaugeRate),
-		kHpTextPosY, m_sgGaugeHandle, true);
-
-	// コンパニオンのSpecialゲージの描画
-	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
-	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, 281, static_cast<int>(kHpGaugeWidth * m_companionSpecialGaugeRate),
-		kHpTextPosY, m_sgGaugeHandle, true);
 }
 
 void UIManager::DrawSg()
 {
+	// プレイヤーのSpecialゲージの描画
+	DrawRectGraph(kPlayerSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
+	DrawRectGraph(kPlayerSpecialGaugeLeft, kSpecialGaugeTop, kSgSrcX, kSgSrcY, static_cast<int>(kHpGaugeWidth * m_playerSpecialGaugeRate),
+		kHpTextPosY, m_sgGaugeHandle, true);
+
+	// コンパニオンのSpecialゲージの描画
+	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
+	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSgSrcX, kSgSrcY, static_cast<int>(kHpGaugeWidth * m_companionSpecialGaugeRate),
+		kHpTextPosY, m_sgGaugeHandle, true);
 }

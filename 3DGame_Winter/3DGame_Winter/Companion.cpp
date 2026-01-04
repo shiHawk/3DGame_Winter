@@ -16,6 +16,7 @@ namespace
 	constexpr float kAirResistance = 0.99f;
 	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
 	constexpr int kMaxHp = 800;
+	constexpr int kMaxGauge = 100; // ゲージの最大量
 	// 減速
 	constexpr float kMoveDecRate = 0.80f;
 	constexpr float kRotateSpeed = 0.4f; // 方向転換の速度
@@ -105,7 +106,6 @@ void Companion::Init(std::shared_ptr<Camera> pCamera)
 	m_vec = kDefaultVec;
 	m_distanceToEnemy = 0.0f;
 	m_hp = kMaxHp;
-	m_specialGauge = 10;
 	m_attack.active = false;
 	m_modelHandle = MV1LoadModel(L"Data/model/Mage.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
@@ -536,7 +536,7 @@ void Companion::UpdatePlayerControlState()
 		{
 			m_attack.timer--;
 			
-			if (m_attack.timer < 0.0f || VSize(VSub(m_attack.pos,m_enemyPos)) <= m_attack.radius*2.0f)
+			if (m_attack.timer < 0.0f)
 			{
 				m_attack.active = false;
 				m_companionState = CompanionState::NORMAL;
@@ -600,6 +600,17 @@ void Companion::UpdatePlayerControlState()
 		}
 		break;
 	}
+	}
+}
+
+void Companion::AddSpecialGauge(int increment)
+{
+	m_specialGauge += increment;
+
+	// 加算後に上限（kMaxGauge = 100）を超えていたら、上限値に固定する
+	if (m_specialGauge > kMaxGauge)
+	{
+		m_specialGauge = kMaxGauge;
 	}
 }
 

@@ -27,7 +27,6 @@ public:
 	VECTOR GetAttackPos() { return m_attack.pos; }
 	bool IsAttackActive() { return m_attack.active; }
 	int GetAttackPower() { return m_attackPower; }
-	void AddSpecialGauge(int increment) { m_specialGauge += increment; }
 	// WorldCollision‚©‚çŒÄ‚Î‚ê‚éŠÖ”ŒQ
 	void SetPos(VECTOR newPos) { m_pos = newPos; }
 	void SetVecY(float newVecY) { m_vec.y = newVecY; }
@@ -39,6 +38,7 @@ public:
 	void OnDamage(int enemyPower);
 	bool IsDamageFlag() { return m_isHitFlag; }
 	int GetMaxHp();
+	void AddSpecialGauge(int increment);
 	enum class PlayerState
 	{
 		NORMAL,

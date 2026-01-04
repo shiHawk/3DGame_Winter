@@ -28,7 +28,7 @@ public:
 	VECTOR GetAttackPos() { return m_attack.pos; }
 	bool IsAttackActive() { return m_attack.active; }
 	int GetAttackPower() { return m_attackPower; }
-	void AddSpecialGauge(int increment) { m_specialGauge += increment; }
+	void AddSpecialGauge(int increment);
 	float GetColRadius();
 	int GetMaxHp();
 	virtual VECTOR GetDir() override;

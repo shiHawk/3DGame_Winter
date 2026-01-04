@@ -62,7 +62,7 @@ namespace
     constexpr float kSpecialSkilRadius = 300.0f;
 
     constexpr int kGaugeIncreaseAmount = 5; // 必殺ゲージ増加量
-    constexpr int kMaxGauge = 200; // ゲージの最大量
+    constexpr int kMaxGauge = 100; // ゲージの最大量
     constexpr int kGaugeConsumption = 100; // ゲージの消費量
 
     constexpr float kComboWindowTime = 20.0f;
@@ -120,7 +120,6 @@ void Player::Init(std::shared_ptr<Camera> pCamera)
     m_isJump = false;
     m_attackPower = kAttackPower;
     m_hp = kMaxHp;
-    m_specialGauge = 10;
     m_playerState = PlayerState::NORMAL;
     m_attack.active = false;
     m_distanceToEnemy = 0.0f;
@@ -372,6 +371,17 @@ void Player::OnDamage(int enemyPower)
 int Player::GetMaxHp()
 {
     return kMaxHp;
+}
+
+void Player::AddSpecialGauge(int increment)
+{
+    m_specialGauge += increment;
+
+    // 加算後に上限（kMaxGauge = 100）を超えていたら、上限値に固定する
+    if (m_specialGauge > kMaxGauge)
+    {
+        m_specialGauge = kMaxGauge;
+    }
 }
 
 VECTOR Player::HandleInput()
