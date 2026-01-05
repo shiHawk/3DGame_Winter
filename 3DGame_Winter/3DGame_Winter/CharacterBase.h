@@ -29,6 +29,7 @@ public:
 		PLAYER,
 		COMPANION
 	};
+	float GetInvincibilityTimer() { return m_invincibilityTimer; }
 protected:
 	virtual void OnAttack() abstract;
 	void ApplyMovement();

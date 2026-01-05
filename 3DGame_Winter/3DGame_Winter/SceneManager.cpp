@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 #include "DxLib.h"
 #include "GameScene.h"
+#include "TitleScene.h"
 #include "Pad.h"
 
 SceneManager::SceneManager()
@@ -10,7 +11,7 @@ SceneManager::SceneManager()
 
 void SceneManager::Init()
 {
-	m_pScene = new GameScene;
+	m_pScene = new TitleScene;
 	m_pScene->Init();
 }
 
@@ -22,8 +23,9 @@ void SceneManager::End()
 	delete m_pScene;
 }
 
-SceneBase* SceneManager::Update()
+void SceneManager::Update()
 {
+	if (!m_pScene)	return;
 	Pad::Update();
 	SceneBase* pScene = m_pScene->Update();
 	if (pScene != m_pScene)
@@ -35,7 +37,6 @@ SceneBase* SceneManager::Update()
 		m_pScene = pScene;
 		m_pScene->Init();
 	}
-	return this;
 }
 
 void SceneManager::Draw()

@@ -198,6 +198,8 @@ void NormalEnemy::OnAttack()
 
 void NormalEnemy::OnDamage()
 {
+	m_enemyAttack.active = false;
+	m_enemyAttack.timer = 0.0f;
 	if (m_hp <= 0)
 	{
 		m_isDead = true;
@@ -210,7 +212,7 @@ void NormalEnemy::OnDamage()
 
 	}
 	m_invincibilityTimer = kInvincibilityTime;
-	//printfDx(L"m_hp:%d\n",m_hp);
+	printfDx(L"m_hp:%d\n",m_hp);
 }
 
 float NormalEnemy::GetColRadius()

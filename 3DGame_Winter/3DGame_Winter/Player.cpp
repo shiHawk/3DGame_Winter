@@ -53,7 +53,7 @@ namespace
     constexpr float kAvoidanceFrame = 15.0f;
     constexpr float kAvoidanceMoveSpeed = 0.3f;
 
-    constexpr float kInvincibilityTime = 15.0f;
+    constexpr float kInvincibilityTime = 60.0f;
 
     // 各攻撃の攻撃範囲
     constexpr float kAttackRadius = 30.0f;
@@ -262,7 +262,7 @@ void Player::Draw()
     //DrawSphere3D({m_pos.x,m_pos.y+50.0f,m_pos.z}, kColRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 #endif
     //printfDx(L"pos.x:%f ,pos.y:%f ,pos.z:%f\n",m_pos.x,m_pos.y,m_pos.z);
-    printfDx(L"hp:%d\n",m_hp);
+    //printfDx(L"hp:%d\n",m_hp);
 }
 
 void Player::OnAttack()
@@ -362,6 +362,11 @@ VECTOR Player::GetDir()
 
 void Player::OnDamage(int enemyPower)
 {
+    //  ダメージを受けた時攻撃をキャンセル
+    m_attack.active = false;
+    m_attack.timer = 0.0f;
+    m_comboStep = 0;
+
     m_hp -= enemyPower;
     m_isHitFlag = true;
     m_invincibilityTimer = kInvincibilityTime;

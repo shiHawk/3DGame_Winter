@@ -54,10 +54,11 @@ void GameplayCollision::CheckPlayerAttack()
 	// “G‚Ì“–‚½‚è”»’èî•ñ‚ðŽæ“¾
 	for (auto& enemy : m_pNormalEnemies)
 	{
+		if (enemy->IsDead() || enemy->GetInvincibilityTimer() > 0.0f) continue;
 		float enemyColRadius = enemy->GetColRadius();
 		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pPlayer->GetAttackPos());
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
-		if (hitInfo.m_distance < playerAttackRadius + enemyColRadius)
+		if (hitInfo.m_distance < playerAttackRadius + enemyColRadius )
 		{
 			enemy->OnDamage();
 			m_pPlayer->AddSpecialGauge(5);
@@ -112,6 +113,7 @@ void GameplayCollision::CheckCompanionAttack()
 	// “G‚Ì“–‚½‚è”»’èî•ñ‚ðŽæ“¾
 	for (auto& enemy : m_pNormalEnemies)
 	{
+		if (enemy->IsDead() || enemy->GetInvincibilityTimer() > 0.0f) continue;
 		float enemyColRadius = enemy->GetColRadius();
 		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pCompanion->GetAttackPos());
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
@@ -150,6 +152,10 @@ void GameplayCollision::CheckNormalEnemyAttack()
 		if (!enemy->GetAttackInfo().active)
 		{
 			continue; // normalEnemy‚ªUŒ‚’†‚Å‚È‚¯‚ê‚Îˆ—‚ðI‚í‚é
+		}
+		if (m_pPlayer->IsHitFlag() || m_pPlayer->GetInvincibilityTimer() > 0.0f)
+		{
+			continue;
 		}
 		//normalEnemy‚ÌŒ»Ý‚ÌUŒ‚î•ñ‚ðŽæ“¾
 		float normalEnemyAttackRadius = enemy->GetAttackInfo().radius;

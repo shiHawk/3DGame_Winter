@@ -156,6 +156,7 @@
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StrongEnemy.cpp" />
+    <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="WorldCollision.cpp" />
   </ItemGroup>
@@ -182,6 +183,7 @@
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="StrongEnemy.h" />
+    <ClInclude Include="TitleScene.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="WorldCollision.h" />
   </ItemGroup>

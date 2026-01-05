@@ -2,17 +2,17 @@
 #include "SceneBase.h"
 #include "GameScene.h"
 #include "DxLib.h"
-class SceneManager : public SceneBase
+class SceneManager
 {
 public:
 	SceneManager();
 	virtual ~SceneManager() {};
 
-	virtual void Init() override;
-	virtual void End() override;
+	void Init();
+	void End();
 
-	virtual SceneBase* Update() override;
-	virtual void Draw() override;
+	void Update();
+	void Draw();
 private:
 	SceneBase* m_pScene;
 };
