@@ -32,7 +32,7 @@ void GameplayCollision::Update()
 	CheckPlayerAttack();
 	CheckCompanionAttack();
 	CheckNormalEnemyAttack();
-	//CheckStrongEnemyRangeAttack(m_pStrongEnemy->GetAttackInfo().pos, m_pStrongEnemy->GetAttackInfo().radius, m_pStrongEnemy->GetStrongEnemyAttackPower());
+	CheckStrongEnemyRangeAttack();
 	//PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pPlayer.get());
 	//PushBackCharacter(m_pCompanion->GetPos(), m_pCompanion->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pCompanion.get());
 }
@@ -153,21 +153,44 @@ void GameplayCollision::CheckNormalEnemyAttack()
 		{
 			continue; // normalEnemyが攻撃中でなければ処理を終わる
 		}
-		if (m_pPlayer->IsHitFlag() || m_pPlayer->GetInvincibilityTimer() > 0.0f)
+		// 1. 敵が攻撃中でなければ、この敵の判定は行わずに次の敵へ
+		if (!enemy->GetAttackInfo().active)
 		{
 			continue;
 		}
-		//normalEnemyの現在の攻撃情報を取得
-		float normalEnemyAttackRadius = enemy->GetAttackInfo().radius;
-		//HitDetectionInfo を一時的な計算用に作成
+
+		// 共通の攻撃情報を取得
+		float enemyAttackRadius = enemy->GetAttackInfo().radius;
+		VECTOR enemyAttackPos = enemy->GetAttackInfo().pos;
+		int attackPower = enemy->GetAttackPower();
 		HitDetectionInfo hitInfo;
-		//プレイヤーの当たり判定情報を取得
-		float playerColRadius = m_pPlayer->GetColRadius();
-		hitInfo.m_deltaVector = VSub(m_pPlayer->GetPos(), enemy->GetAttackInfo().pos);
-		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
-		if (hitInfo.m_distance < normalEnemyAttackRadius + playerColRadius && !m_pPlayer->IsHitFlag())
+
+		// --- プレイヤーへの当たり判定 ---
+		// プレイヤーがダメージ中ではなく、かつ無敵時間でもない場合のみチェック
+		if (!m_pPlayer->IsHitFlag() && m_pPlayer->GetInvincibilityTimer() <= 0.0f)
 		{
-			m_pPlayer->OnDamage(enemy->GetAttackPower());
+			hitInfo.m_deltaVector = VSub(m_pPlayer->GetPos(), enemyAttackPos);
+			hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+
+			if (hitInfo.m_distance < enemyAttackRadius + m_pPlayer->GetColRadius())
+			{
+				m_pPlayer->OnDamage(attackPower);
+			}
+		}
+
+		// --- コンパニオンへの当たり判定 ---
+		// コンパニオンが無敵状態（ダメージ中含む）でない場合のみチェック
+		// ※CompanionクラスにIsInvincible()（無敵かどうか）を判定する関数があると仮定しています
+		if (!m_pCompanion->IsHitFlag() && m_pCompanion->GetInvincibilityTimer() <= 0.0f)
+		{
+			hitInfo.m_deltaVector = VSub(m_pCompanion->GetPos(), enemyAttackPos);
+			hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+
+			if (hitInfo.m_distance < enemyAttackRadius + m_pCompanion->GetColRadius())
+			{
+				// 前回追加したCompanion::OnDamageを呼び出す
+				m_pCompanion->OnDamage(attackPower);
+			}
 		}
 	}
 	
@@ -189,20 +212,20 @@ void GameplayCollision::CheckNormalEnemyAttack()
 	//}
 }
 
-void GameplayCollision::CheckStrongEnemyRangeAttack(VECTOR attackCenter, float attackRadius, int enemyPower)
+void GameplayCollision::CheckStrongEnemyRangeAttack()
 {
 	for (auto& enemy : m_pStrongEnemies)
 	{
 		if (enemy->GetAttackInfo().active)
 		{
 			// 攻撃の中心とプレイヤーの位置の差分ベクトルを取得
-			VECTOR deltaVector = VSub(m_pPlayer->GetPos(), attackCenter);
+			VECTOR deltaVector = VSub(m_pPlayer->GetPos(), enemy->GetAttackInfo().pos);
 			// 距離を計算
 			float distance = VSize(deltaVector);
-			float totalRadius = attackRadius + m_pPlayer->GetColRadius();
+			float totalRadius = enemy->GetAttackInfo().radius + m_pPlayer->GetColRadius();
 			if (distance < totalRadius && !m_pPlayer->IsHitFlag())
 			{
-				m_pPlayer->OnDamage(enemyPower);
+				m_pPlayer->OnDamage(enemy->GetAttackPos());
 				//printfDx(L"Hit\n");
 			}
 		}

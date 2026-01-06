@@ -53,7 +53,7 @@ namespace
     constexpr float kAvoidanceFrame = 15.0f;
     constexpr float kAvoidanceMoveSpeed = 0.3f;
 
-    constexpr float kInvincibilityTime = 60.0f;
+    constexpr float kInvincibilityTime = 100.0f;
 
     // 各攻撃の攻撃範囲
     constexpr float kAttackRadius = 30.0f;
@@ -137,6 +137,14 @@ void Player::End()
 
 void Player::Update()
 {
+    if (m_invincibilityTimer > 0.0f)
+    {
+        m_invincibilityTimer--;
+        if (m_invincibilityTimer <= 0.0f)
+        {
+            m_isHitFlag = false; // タイマーが切れたらヒットフラグを下ろす
+        }
+    }
     m_moveInput = HandleInput();
     UpdatePlayerState();
     //printfDx(L"m_attack2.timer:%f\n", m_attack2.timer);
@@ -458,7 +466,7 @@ VECTOR Player::HandleInput()
 
 void Player::UpdateMovement(const VECTOR& moveDir)
 {
-    m_isInAttackSequence = (m_playerState != PlayerState::NORMAL && m_playerState != PlayerState::DAMAGE);
+    m_isInAttackSequence = (m_playerState != PlayerState::NORMAL);
     // 攻撃中でなければ、移動状態に応じてアニメーションを切り替える
     if (!m_isInAttackSequence)
     {
@@ -689,10 +697,10 @@ void Player::HandleStateDamage()
 {
     UpdateMovement(m_moveInput);
     ChangeAnim(m_modelHandle,kDamageAnimNo,false,0.4f);
-    m_invincibilityTimer--;
-    if (m_invincibilityTimer <= 0.0f)
+    //m_invincibilityTimer--;
+    if (GetIsAnimEnd())
     {
-        m_isHitFlag = false;
+        //m_isHitFlag = false;
         m_playerState = PlayerState::NORMAL;
     }
 }

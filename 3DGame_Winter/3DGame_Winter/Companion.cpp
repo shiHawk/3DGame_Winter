@@ -35,6 +35,7 @@ namespace
 	constexpr int kSpecialSkilAnimNo = 62;
 	constexpr float kComboFinishAttackAnimNo = 41;
 	constexpr int kAvoidanceAnimNo = 15;
+	constexpr int kDamageAnimNo = 24;
 	constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
 	constexpr float kAttackAnimIncrement = 0.5f; // 攻撃アニメーションの再生速度
@@ -73,6 +74,10 @@ namespace
 	constexpr float kAvoidanceFrame = 15.0f;
 	constexpr float kAvoidanceMoveSpeed = 0.2f;
 	constexpr float kColRadius = 40.0f;
+
+	constexpr float kDamageDuration = 30.0f;      // ダメージ硬直（動けない時間）
+	constexpr float kInvincibleDuration = 60.0f;  // ダメージ後の無敵時間
+	constexpr float kDamageAnimIncrement = 0.5f;  // ダメージアニメの速度
 }
 
 Companion::Companion():
@@ -91,7 +96,9 @@ Companion::Companion():
 	m_angleY(0.0f),
 	m_attackCoolTimer(0.0f),
 	m_avoidanceTimer(0.0f),
-	m_isAvoidanceFlag(false)
+	m_isAvoidanceFlag(false),
+	m_damageTimer(0.0f),
+	m_isHitFlag(false)
 {
 }
 
@@ -120,6 +127,14 @@ void Companion::End()
 
 void Companion::Update()
 {
+	if (m_invincibilityTimer > 0.0f)
+	{
+		m_invincibilityTimer -= 1.0f;
+		if (m_invincibilityTimer <= 0.0f)
+		{
+			m_isHitFlag = false;
+		}
+	}
 	// 敵との距離を計算（GameSceneから渡された座標を使用）
 	m_companionToEnemy = VSub(m_enemyPos, m_pos);
 	m_distanceToEnemy = VSize(m_companionToEnemy);
@@ -273,6 +288,7 @@ void Companion::Draw()
 		DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
 	}
 	MV1DrawModel(m_modelHandle);
+	printfDx(L"hp:%d\n", m_hp);
 }
 
 void Companion::OnAttack()
@@ -445,6 +461,16 @@ void Companion::UpdateAIState()
 			}
 		}
 		break;
+	case Companion::CompanionState::DAMAGE:
+	{
+		// アニメーション再生
+		ChangeAnim(m_modelHandle, kDamageAnimNo, false, kDamageAnimIncrement);
+		if (GetIsAnimEnd())
+		{
+			m_companionState = CompanionState::NORMAL;
+		}
+		break;
+	}
 	}
 }
 
@@ -600,6 +626,16 @@ void Companion::UpdatePlayerControlState()
 		}
 		break;
 	}
+	case CompanionState::DAMAGE:
+	{
+		// アニメーション再生
+		ChangeAnim(m_modelHandle, kDamageAnimNo, false, kDamageAnimIncrement);
+		if (GetIsAnimEnd())
+		{
+			m_companionState = CompanionState::NORMAL;
+		}
+		break;
+	}
 	}
 }
 
@@ -622,6 +658,27 @@ float Companion::GetColRadius()
 int Companion::GetMaxHp()
 {
 	return kMaxHp;
+}
+
+void Companion::OnDamage(int damage)
+{
+	// 無敵中、または既に死亡している場合は処理しない
+	if (m_isHitFlag || m_hp <= 0) return;
+
+	// HP減少
+	m_hp -= damage;
+	if (m_hp < 0) m_hp = 0;
+
+	// ダメージ状態へ遷移
+	m_companionState = CompanionState::DAMAGE;
+	m_damageTimer = kDamageDuration;
+
+	// 無敵時間の設定
+	m_isHitFlag = true;
+	m_invincibilityTimer = kInvincibleDuration;
+
+	// 攻撃中だった場合は攻撃判定を消す
+	m_attack.active = false;
 }
 
 VECTOR Companion::GetDir()

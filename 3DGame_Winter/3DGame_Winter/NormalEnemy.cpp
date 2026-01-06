@@ -126,8 +126,8 @@ void NormalEnemy::Update()
 			m_AttackCoolTime--; // クールタイムを減らす
 		}
 		MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
-		m_toPlayerDistance = VSize(VSub(m_pPlayer->GetPos(), m_pos));
-		m_toPlayerDir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
+		m_toPlayerDistance = VSize(VSub(m_pCompanion->GetPos(), m_pos));
+		m_toPlayerDir = VNorm(VSub(m_pCompanion->GetPos(), m_pos));
 		m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
 		if (m_toPlayerDistance > kSphereRadius && m_toPlayerDistance < kTrackingRange)
 		{
@@ -212,7 +212,7 @@ void NormalEnemy::OnDamage()
 
 	}
 	m_invincibilityTimer = kInvincibilityTime;
-	printfDx(L"m_hp:%d\n",m_hp);
+	//printfDx(L"m_hp:%d\n",m_hp);
 }
 
 float NormalEnemy::GetColRadius()

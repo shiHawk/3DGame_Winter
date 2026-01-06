@@ -35,6 +35,7 @@ namespace
 	constexpr int kDivNum = 32;
 	constexpr float kInvincibilityTime = 30.0f;
 	constexpr int kMaxHp = 400;
+	constexpr int kAttackPower = 50;
 }
 
 StrongEnemy::StrongEnemy():
@@ -239,4 +240,9 @@ VECTOR StrongEnemy::GetDir()
 int StrongEnemy::GetStrongEnemyAttackPower()
 {
 	return m_attackPower;
+}
+
+int StrongEnemy::GetAttackPos()
+{
+	return kAttackPower;
 }

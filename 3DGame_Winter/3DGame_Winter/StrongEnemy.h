@@ -16,6 +16,7 @@ public:
 	virtual VECTOR GetDir() override;
 	int GetStrongEnemyAttackPower();
 	AttackSphere GetAttackInfo() { return m_enemyAttack; }
+	int GetAttackPos();
 private:
 	enum StrongEnemyState
 	{

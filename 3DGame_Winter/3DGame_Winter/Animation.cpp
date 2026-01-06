@@ -170,4 +170,5 @@ bool Animation::GetIsAnimEnd()
 	if (m_currentAttachNo == -1) return false;
 	if (m_currentPlayTime >= m_animTotalTime) return true;
 	//return m_currentPlayTime >= m_animTotalTime;
+	return false;
 }

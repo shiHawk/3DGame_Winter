@@ -31,6 +31,7 @@ public:
 	void AddSpecialGauge(int increment);
 	float GetColRadius();
 	int GetMaxHp();
+	void OnDamage(int damage);
 	virtual VECTOR GetDir() override;
 private:
 	void UpdateMovement(const VECTOR& moveDir);
@@ -45,6 +46,7 @@ private:
 		SPECIALSKIL,
 		TURN_FOR_STRONG_ATTACK, // ‹­UŒ‚‘O‚Ì‰ñ“]
 		TURN_FOR_SPECIALSKIL,   // •KE‹Z‘O‚Ì‰ñ“]
+		DAMAGE
 	};
 	ControlMode m_controlMode;
 	CompanionState m_companionState;
@@ -63,6 +65,8 @@ private:
 	float m_attackCoolTimer;
 	float m_avoidanceTimer;
 	bool m_isAvoidanceFlag;
+	float m_damageTimer;      // d’¼ƒ^ƒCƒ}[
+	bool  m_isHitFlag;    // –³“Gƒtƒ‰ƒO
 	void RotatingToAttack();
 	void OnAvoidance();
 };
