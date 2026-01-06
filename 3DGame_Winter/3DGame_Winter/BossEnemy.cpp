@@ -4,24 +4,26 @@ namespace
     constexpr float kAttackRadius = 30.0f;
     constexpr float kColRadius = 50.0f;
     constexpr VECTOR kDefaultPos = { 500.0f,-59.0f,500.0f };
-    constexpr float kModelScale = 70.0f; // モデルのスケール
+    constexpr VECTOR kDefaultDir = { 0.0,270.0f,0.0f };
+    constexpr float kModelScale = 180.0f; // モデルのスケール
     constexpr float kChageTime = 1.5f;
     constexpr float kCoolDownTime = 1.5f;
     constexpr float kRangeAttackRadius = 150.0f;
-    constexpr float kRangeAttackDuration = 30.0f;
-    constexpr float kTrackingRange = 400.0f;
+    constexpr float kRangeAttackDuration = 60.0f;
+    constexpr float kTrackingRange = 1000.0f;
     constexpr float kActionCheckInterval = 0.5f; // 抽選頻度
     constexpr float kNormalAttackDuration = 20.0f;
     constexpr float kNormalAttackRange = 90.0f;
     constexpr float kMoveSpeed = 5.0f;
     // 各アニメーション番号
-    constexpr int kIdleAnimNo = 9;
-    constexpr int kWalkAnimNo = 15;
-    constexpr int kAttackAnimNo = 13;
-    constexpr int kRangeAttackAnimNo = 0;
+    constexpr int kIdleAnimNo = 42;
+    constexpr int kWalkAnimNo = 54;
+    constexpr int kAttackAnimNo = 16;
+    constexpr int kStrongAttackAnimNo = 84;
+    constexpr int kRangeAttackAnimNo = 2;
     constexpr int kDamageAnimNo = 8;
     // アニメーション速度
-    constexpr float kWalkAnimIncrement = 0.15f; // 歩行アニメーションの再生速度
+    constexpr float kWalkAnimIncrement = 0.4f; // 歩行アニメーションの再生速度
     constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
     constexpr float kAttackAnimIncrement = 0.5f; // 攻撃アニメーションの再生速度
     constexpr float kDamageAnimIncrement = 0.6f; // 被弾アニメーションの再生速度
@@ -55,10 +57,15 @@ void BossEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
     Enemy::Init(pPlayer, pCompanion);
     m_pos = kDefaultPos;
     m_hp = kMaxHp;
+    m_modelHandle = MV1LoadModel(L"Data/model/Skeleton_Rogue.mv1");
+    MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
+    MV1SetRotationXYZ(m_modelHandle, kDefaultDir);
+    AttachAnim(m_modelHandle, kIdleAnimNo);
 }
 
 void BossEnemy::End()
 {
+    MV1DeleteModel(m_modelHandle);
 }
 
 void BossEnemy::Update()
@@ -109,7 +116,7 @@ void BossEnemy::Update()
 
     case BossEnemyState::RANGE_ATTACK_CHARGE: // 範囲攻撃の溜め（予兆）
         m_attackTimer -= 1.0f / kFramesPerSecond;
-        ChangeAnim(m_modelHandle, kRangeAttackAnimNo, false, 0.2f);
+        ChangeAnim(m_modelHandle, kAttackAnimNo, false, 0.2f);
         if (m_attackTimer <= 0)
         {
             OnRangeAttack(); // 範囲攻撃実行
@@ -118,9 +125,21 @@ void BossEnemy::Update()
         break;
 
     case BossEnemyState::STRONG_ATTACK:
+    {
+        // 攻撃演出中
+        m_enemyAttack.timer--;
+        ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, kAttackAnimIncrement);
+        if (m_enemyAttack.timer <= 0)
+        {
+            m_state = BossEnemyState::COOLDOWN;
+            m_attackTimer = kCoolDownTime * (m_hp < kMaxHp * 0.5f ? 0.5f : 1.0f); // HP半分以下で隙短縮
+        }
+        break;
+    }
     case BossEnemyState::RANGE_ATTACK:
         // 攻撃演出中
         m_enemyAttack.timer--;
+        ChangeAnim(m_modelHandle, kRangeAttackAnimNo, false, kAttackAnimIncrement);
         if (m_enemyAttack.timer <= 0)
         {
             m_state = BossEnemyState::COOLDOWN;
@@ -151,7 +170,8 @@ void BossEnemy::Update()
 
 void BossEnemy::Draw()
 {
-    DrawSphere3D(m_pos, kColRadius, kDivNum, 0xff0000, 0xffffff, true);
+    MV1DrawModel(m_modelHandle);
+    //DrawSphere3D(m_pos, kColRadius, kDivNum, 0xff0000, 0xffffff, true);
     if (m_enemyAttack.active)
     {
         if (m_state == BossEnemyState::RANGE_ATTACK_CHARGE || m_state == BossEnemyState::STRONG_ATTACK_CHARGE)
@@ -189,10 +209,20 @@ void BossEnemy::OnAttack()
 
 void BossEnemy::OnStrongAttack()
 {
+    m_enemyAttack.pos = m_pos;
+    m_enemyAttack.active = true;
+    m_enemyAttack.dir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
+    m_enemyAttack.timer = kRangeAttackDuration;
+    m_enemyAttack.radius = kRangeAttackRadius;
 }
 
 void BossEnemy::OnRangeAttack()
 {
+    m_enemyAttack.pos = m_pos;
+    m_enemyAttack.active = true;
+    m_enemyAttack.dir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
+    m_enemyAttack.timer = kRangeAttackDuration;
+    m_enemyAttack.radius = kRangeAttackRadius;
 }
 
 void BossEnemy::OnDamage()
