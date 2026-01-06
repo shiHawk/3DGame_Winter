@@ -16,6 +16,7 @@ public:
 	virtual void OnAttack();
 	virtual void OnDamage();
 protected:
+	void SearchTarget();
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;
 	// プレイヤーに向かうベクトル
@@ -23,6 +24,7 @@ protected:
 	float m_toPlayerDistance;
 	// コンパニオンに向かうベクトル
 	VECTOR m_toCompanionDir;
+	VECTOR m_targetPos;
 	float m_toCompanionDistance;
 	float m_AttackCoolTime;
 };

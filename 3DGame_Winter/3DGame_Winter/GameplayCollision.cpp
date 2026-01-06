@@ -74,6 +74,7 @@ void GameplayCollision::CheckPlayerAttack()
 
 	for (auto& enemy : m_pStrongEnemies)
 	{
+		if (enemy->IsDead() || enemy->GetInvincibilityTimer() > 0.0f) continue;
 		float enemyColRadius = enemy->GetColRadius();
 		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pPlayer->GetAttackPos());
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
@@ -126,6 +127,7 @@ void GameplayCollision::CheckCompanionAttack()
 
 	for (auto& enemy : m_pStrongEnemies)
 	{
+		if (enemy->IsDead() || enemy->GetInvincibilityTimer() > 0.0f) continue;
 		float enemyColRadius = enemy->GetColRadius();
 		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pCompanion->GetAttackPos());
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
@@ -165,7 +167,7 @@ void GameplayCollision::CheckNormalEnemyAttack()
 		int attackPower = enemy->GetAttackPower();
 		HitDetectionInfo hitInfo;
 
-		// --- プレイヤーへの当たり判定 ---
+		// プレイヤーへの当たり判定
 		// プレイヤーがダメージ中ではなく、かつ無敵時間でもない場合のみチェック
 		if (!m_pPlayer->IsHitFlag() && m_pPlayer->GetInvincibilityTimer() <= 0.0f)
 		{

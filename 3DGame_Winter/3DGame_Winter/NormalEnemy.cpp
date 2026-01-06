@@ -78,6 +78,7 @@ void NormalEnemy::End()
 
 void NormalEnemy::Update()
 {
+	SearchTarget();
 	if (m_knockbackTimer > 0.0f)
 	{
 		ChangeAnim(m_modelHandle, kKnockbackAnimNo, false, kKnockbackAnimIncrement);
@@ -126,8 +127,8 @@ void NormalEnemy::Update()
 			m_AttackCoolTime--; // クールタイムを減らす
 		}
 		MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
-		m_toPlayerDistance = VSize(VSub(m_pCompanion->GetPos(), m_pos));
-		m_toPlayerDir = VNorm(VSub(m_pCompanion->GetPos(), m_pos));
+		m_toPlayerDistance = VSize(VSub(m_targetPos, m_pos));
+		m_toPlayerDir = VNorm(VSub(m_targetPos, m_pos));
 		m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
 		if (m_toPlayerDistance > kSphereRadius && m_toPlayerDistance < kTrackingRange)
 		{
@@ -139,10 +140,13 @@ void NormalEnemy::Update()
 				ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
 			}
 		}
+		else if (m_toPlayerDistance >= kTrackingRange) // 追跡範囲外なら待機
+		{
+			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+			m_enemyAttack.active = false; // 攻撃もリセット
+		}
 		else
 		{
-			// 停止後→待機アニメーションへ変更
-			// ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 			if (m_enemyAttack.timer <= 0.0f && m_enemyAttack.active)
 			{
 				m_enemyAttack.active = false;

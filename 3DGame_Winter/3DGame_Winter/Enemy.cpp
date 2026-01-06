@@ -15,7 +15,8 @@ m_toPlayerDir({0.0f,0.0f,0.0f}),
 m_toPlayerDistance(0.0f),
 m_toCompanionDir({ 0.0f,0.0f,0.0f }),
 m_toCompanionDistance(0.0f),
-m_AttackCoolTime(0.0f)
+m_AttackCoolTime(0.0f),
+m_targetPos({ 0.0f,0.0f,0.0f })
 {
 }
 
@@ -36,4 +37,20 @@ void Enemy::OnAttack()
 
 void Enemy::OnDamage()
 {
+}
+
+void Enemy::SearchTarget()
+{
+	// プレイヤーとの距離
+	float distToPlayer = VSize(VSub(m_pPlayer->GetPos(), m_pos));
+	// 仲間との距離
+	float distToCompanion = VSize(VSub(m_pCompanion->GetPos(), m_pos));
+
+	// 近い方をターゲットに設定する
+	if (distToPlayer < distToCompanion) {
+		m_targetPos = m_pPlayer->GetPos();
+	}
+	else {
+		m_targetPos = m_pCompanion->GetPos();
+	}
 }

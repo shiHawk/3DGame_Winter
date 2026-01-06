@@ -69,8 +69,9 @@ void StrongEnemy::End()
 
 void StrongEnemy::Update()
 {
-	m_toPlayerDistance = VSize(VSub(m_pPlayer->GetPos(), m_pos));
-	m_toPlayerDir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
+	SearchTarget();
+	m_toPlayerDistance = VSize(VSub(m_targetPos, m_pos));
+	m_toPlayerDir = VNorm(VSub(m_targetPos, m_pos));
 	m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
 	if (m_actionCheckTimer > 0.0f)
 	{
@@ -119,6 +120,10 @@ void StrongEnemy::Update()
 			m_pos.x += m_toPlayerDir.x * kMoveSpeed;
 			m_pos.z += m_toPlayerDir.z * kMoveSpeed;
 			ChangeAnim(m_modelHandle,kWalkAnimNo,true,kWalkAnimIncrement);
+		}
+		else 
+		{
+			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 		}
 		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 		break;
