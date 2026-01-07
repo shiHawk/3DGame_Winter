@@ -34,7 +34,7 @@ namespace
 	constexpr unsigned int kOutLineColor = 0xff0000;
 	constexpr int kDivNum = 32;
 	constexpr float kInvincibilityTime = 30.0f;
-	constexpr int kMaxHp = 400;
+	constexpr int kMaxHp = 200;
 	constexpr int kAttackPower = 50;
 }
 

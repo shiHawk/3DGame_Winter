@@ -13,7 +13,7 @@ GameplayCollision::~GameplayCollision()
 }
 
 void GameplayCollision::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::vector<std::shared_ptr<NormalEnemy>>& pNormalEnemies,
-	const std::vector<std::shared_ptr<StrongEnemy>>& pStrongEnemies)
+	const std::vector<std::shared_ptr<StrongEnemy>>& pStrongEnemies, std::shared_ptr<BossEnemy> pBossEnemy)
 {
 	m_pPlayer = pPlayer;
 	m_pCompanion = pCompanion;
@@ -21,6 +21,7 @@ void GameplayCollision::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Co
 	m_pStrongEnemy = pStrongEnemy;*/
 	m_pNormalEnemies = pNormalEnemies;
 	m_pStrongEnemies = pStrongEnemies;
+	m_pBossEnemy = pBossEnemy;
 }
 
 void GameplayCollision::End()
@@ -85,6 +86,18 @@ void GameplayCollision::CheckPlayerAttack()
 		}
 	}
 
+	if (!m_pBossEnemy->IsDead() || m_pBossEnemy->GetInvincibilityTimer() < 0.0f)
+	{
+		float bossEnemyColRadius = m_pBossEnemy->GetColRadius();
+		hitInfo.m_deltaVector = VSub(m_pBossEnemy->GetPos(), m_pPlayer->GetAttackPos());
+		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+		if (hitInfo.m_distance < playerAttackRadius + bossEnemyColRadius)
+		{
+			m_pBossEnemy->OnDamage();
+			m_pPlayer->AddSpecialGauge(5);
+		}
+	}
+
 	//float enemyColRadius = m_pNormalEnemy->GetColRadius();
 	//hitInfo.m_deltaVector = VSub(m_pNormalEnemy->GetPos(), m_pPlayer->GetAttackPos());
 	//hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
@@ -135,6 +148,18 @@ void GameplayCollision::CheckCompanionAttack()
 		{
 			enemy->OnDamage();
 			m_pCompanion->AddSpecialGauge(5);
+		}
+	}
+
+	if (!m_pBossEnemy->IsDead() || m_pBossEnemy->GetInvincibilityTimer() < 0.0f)
+	{
+		float bossEnemyColRadius = m_pBossEnemy->GetColRadius();
+		hitInfo.m_deltaVector = VSub(m_pBossEnemy->GetPos(), m_pPlayer->GetAttackPos());
+		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+		if (hitInfo.m_distance < companionAttackRadius + bossEnemyColRadius && m_pBossEnemy->GetInvincibilityTimer() > 0.0f)
+		{
+			m_pBossEnemy->OnDamage();
+			m_pPlayer->AddSpecialGauge(5);
 		}
 	}
 

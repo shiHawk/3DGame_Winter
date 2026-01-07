@@ -46,7 +46,7 @@ void GameScene::Init()
 									   m_pPlayer,m_pCompanion);
 	//m_pNormalEnemy->Init(m_pPlayer,m_pCompanion);
 	m_pCompanion->Init(m_pCamera);
-	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemies, m_pStrongEnemies);
+	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemies, m_pStrongEnemies,m_pBossEnemy);
 	m_pWorldCollision->Init(m_pPlayer, m_pStage, m_pCompanion);
 	m_pFlyingEnemy->Init(m_pPlayer, m_pCompanion);
 	m_pBossEnemy->Init(m_pPlayer, m_pCompanion);
@@ -255,6 +255,17 @@ VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos)
 		if (distSq < minDistanceSq) {
 			minDistanceSq = distSq;
 			nearestPos = enemy->GetPos();
+			found = true;
+		}
+	}
+
+	if (m_pBossEnemy != nullptr && !m_pBossEnemy->IsDead())
+	{
+		float distSq = VSquareSize(VSub(m_pBossEnemy->GetPos(), basePos));
+		if (distSq < minDistanceSq)
+		{
+			minDistanceSq = distSq;
+			nearestPos = m_pBossEnemy->GetPos();
 			found = true;
 		}
 	}

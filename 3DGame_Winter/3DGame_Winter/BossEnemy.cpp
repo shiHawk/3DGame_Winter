@@ -3,7 +3,7 @@ namespace
 {
     constexpr float kAttackRadius = 30.0f;
     constexpr float kColRadius = 50.0f;
-    constexpr VECTOR kDefaultPos = { 500.0f,-59.0f,500.0f };
+    constexpr VECTOR kDefaultPos = { -5405.0f,741.0f,9199.0f };
     constexpr VECTOR kDefaultDir = { 0.0,270.0f,0.0f };
     constexpr float kModelScale = 180.0f; // モデルのスケール
     constexpr float kChageTime = 1.5f;
@@ -78,7 +78,14 @@ void BossEnemy::Update()
     // 2. 無敵時間とダメージ処理
     if (m_invincibilityTimer > 0.0f) {
         m_invincibilityTimer--;
-        if (m_invincibilityTimer <= 0.0f) m_isHitFlag = false;
+        if (m_hp < m_hp * 0.3f)
+        {
+            ChangeAnim(m_modelHandle, kDamageAnimNo, true, kDamageAnimIncrement);
+        }
+        if (m_invincibilityTimer <= 0.0f)
+        {
+            m_isHitFlag = false;
+        }
     }
 
     // 3. 状態遷移
@@ -155,6 +162,9 @@ void BossEnemy::Update()
         {
             m_state = BossEnemyState::DEFAULT;
         }
+        break;
+    case BossEnemyState::DAMAGE:
+
         break;
     }
 

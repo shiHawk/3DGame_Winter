@@ -34,7 +34,7 @@ namespace
 	constexpr float kMaxCoolTime = 60.0f;
 	constexpr float kAttackHitStartTime = 25.0f; // 判定が出始めるタイミング
 	constexpr float kAttackHitEndTime = 10.0f;   // 判定が終わるタイミング
-	constexpr int kMaxHp = 500;
+	constexpr int kMaxHp = 100;
 	constexpr int kAttackPower = 30;
 
 	constexpr float kKnockbackDuration = 0.4f;

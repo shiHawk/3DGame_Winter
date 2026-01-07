@@ -4,6 +4,7 @@
 #include "Companion.h"
 #include "NormalEnemy.h"
 #include "StrongEnemy.h"
+#include "BossEnemy.h"
 #include "DxLib.h"
 #include <memory>
 #include <vector>
@@ -13,7 +14,7 @@ public:
 	GameplayCollision();
 	~GameplayCollision();
 	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::vector<std::shared_ptr<NormalEnemy>>& pNormalEnemies,
-		const std::vector<std::shared_ptr<StrongEnemy>>& pStrongEnemies);
+		const std::vector<std::shared_ptr<StrongEnemy>>& pStrongEnemies, std::shared_ptr<BossEnemy> pBossEnemy);
 	void End();
 	void Update();
 	void Draw();
@@ -29,6 +30,7 @@ private:
 	std::shared_ptr<StrongEnemy> m_pStrongEnemy;
 	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;
 	std::vector<std::shared_ptr<StrongEnemy>> m_pStrongEnemies;
+	std::shared_ptr<BossEnemy> m_pBossEnemy;
 
 	struct CollisionOverlapData // 衝突によるめり込み(オーバーラップ)と押し戻しに関するデータ
 	{

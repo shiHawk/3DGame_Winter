@@ -29,7 +29,7 @@ private:
 		RANGE_ATTACK_CHARGE,  // 範囲攻撃の溜め（予兆表示）
 		RANGE_ATTACK,         // 範囲攻撃（周囲円形）
 		COOLDOWN,       // 攻撃後の隙
-		DAMAGE,         // 怯み
+		DAMAGE,         // 被弾
 		DEAD            // 死亡
 	};
 	BossEnemyState m_state;

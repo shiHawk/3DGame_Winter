@@ -79,7 +79,7 @@ namespace
     constexpr int kDamageAnimNo = 24;
     constexpr float kAnimIncrement = 0.4f; // アニメーションの再生速度
     constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
-    constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
+    constexpr float kWalkAnimIncrement = 1.0f; // 歩行アニメーションの再生速度
     constexpr float kAttackAnimIncrement = 0.7f; // 攻撃アニメーションの再生速度
     constexpr float kStrongAttackAnimIncrement = 0.9f; // 強攻撃アニメーションの再生速度
     constexpr float kComboFinishAttackAnimIncrement = 0.6f; 
