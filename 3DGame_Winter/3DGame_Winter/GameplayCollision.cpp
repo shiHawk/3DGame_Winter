@@ -86,11 +86,12 @@ void GameplayCollision::CheckPlayerAttack()
 		}
 	}
 
-	if (!m_pBossEnemy->IsDead() || m_pBossEnemy->GetInvincibilityTimer() < 0.0f)
+	if (!m_pBossEnemy->IsDead() && m_pBossEnemy->GetInvincibilityTimer() <= 0.0f)
 	{
 		float bossEnemyColRadius = m_pBossEnemy->GetColRadius();
 		hitInfo.m_deltaVector = VSub(m_pBossEnemy->GetPos(), m_pPlayer->GetAttackPos());
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+
 		if (hitInfo.m_distance < playerAttackRadius + bossEnemyColRadius)
 		{
 			m_pBossEnemy->OnDamage();
@@ -151,7 +152,7 @@ void GameplayCollision::CheckCompanionAttack()
 		}
 	}
 
-	if (!m_pBossEnemy->IsDead() || m_pBossEnemy->GetInvincibilityTimer() < 0.0f)
+	if (!m_pBossEnemy->IsDead() || m_pBossEnemy->GetInvincibilityTimer() <= 0.0f)
 	{
 		float bossEnemyColRadius = m_pBossEnemy->GetColRadius();
 		hitInfo.m_deltaVector = VSub(m_pBossEnemy->GetPos(), m_pPlayer->GetAttackPos());
@@ -159,7 +160,7 @@ void GameplayCollision::CheckCompanionAttack()
 		if (hitInfo.m_distance < companionAttackRadius + bossEnemyColRadius && m_pBossEnemy->GetInvincibilityTimer() > 0.0f)
 		{
 			m_pBossEnemy->OnDamage();
-			m_pPlayer->AddSpecialGauge(5);
+			m_pCompanion->AddSpecialGauge(5);
 		}
 	}
 

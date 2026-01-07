@@ -199,7 +199,7 @@ void GameScene::Draw()
 	}
 	m_pBossEnemy->Draw();
 	m_pBattleAreaManager->DrawBattleAreaBodary();
-	m_pBattleAreaManager->DebugDraw();
+	//m_pBattleAreaManager->DebugDraw();
 	m_pUIManager->Draw();
 	//DrawGrid();
 }

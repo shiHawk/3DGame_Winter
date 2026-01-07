@@ -60,6 +60,7 @@ void BossEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
     m_modelHandle = MV1LoadModel(L"Data/model/Skeleton_Rogue.mv1");
     MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
     MV1SetRotationXYZ(m_modelHandle, kDefaultDir);
+    MV1SetPosition(m_modelHandle,kDefaultPos);
     AttachAnim(m_modelHandle, kIdleAnimNo);
 }
 
@@ -286,7 +287,7 @@ void BossEnemy::UpdateDefault()
         else if (rand < 70)
         {
             m_state = BossEnemyState::RANGE_ATTACK_CHARGE;
-            // C³ƒ|ƒCƒ“ƒgF—­‚ßŽžŠÔ‚ð’è”‚Æˆê’v‚³‚¹‚é‚©Aê—p‚Ì’è”‚ðì‚é
+            // —­‚ßŽžŠÔ‚ð’è”‚Æˆê’v‚³‚¹‚é
             m_attackTimer = kChageTime;
             m_enemyAttack.active = true; // ON‚É‚·‚é
         }

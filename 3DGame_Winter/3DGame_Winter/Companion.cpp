@@ -15,7 +15,7 @@ namespace
 	constexpr float kGravity = -0.7f;
 	constexpr float kAirResistance = 0.99f;
 	constexpr float kMoveThreshold = 0.1f; // à⁄ìÆÇ∆Ç›Ç»Ç∑Ëáíl
-	constexpr int kMaxHp = 800;
+	constexpr int kMaxHp = 500;
 	constexpr int kMaxGauge = 100; // ÉQÅ[ÉWÇÃç≈ëÂó 
 	// å∏ë¨
 	constexpr float kMoveDecRate = 0.80f;
@@ -288,7 +288,7 @@ void Companion::Draw()
 		DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
 	}
 	MV1DrawModel(m_modelHandle);
-	printfDx(L"hp:%d\n", m_hp);
+	//printfDx(L"hp:%d\n", m_hp);
 }
 
 void Companion::OnAttack()

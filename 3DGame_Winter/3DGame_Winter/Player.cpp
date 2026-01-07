@@ -35,7 +35,7 @@ namespace
     constexpr float kRightLimit = 1000.0f;  // ステージ右
     constexpr float kWallOffset = 0.001f;
 
-    constexpr int kMaxHp = 200;
+    constexpr int kMaxHp = 500;
     // 各攻撃の攻撃力
     constexpr int kAttackPower = 15;
     constexpr int kStrongAttackPower = 35;
@@ -150,7 +150,7 @@ void Player::Update()
     //printfDx(L"m_attack2.timer:%f\n", m_attack2.timer);
     if (m_controlMode == ControlMode::PLAYER)
     {
-        if (Pad::isTrigger(PAD_INPUT_1) /*&& !m_isJump*/)
+        if (Pad::isTrigger(PAD_INPUT_1) && !m_isJump)
         {
             m_vec.y = kJumpPower;
             m_isJump = true;
@@ -160,7 +160,7 @@ void Player::Update()
             m_avoidanceTimer = kAvoidanceFrame;
             m_isAvoidanceFlag = true;
         }
-        if (/*m_specialGauge > kGaugeConsumption && */Pad::isTrigger(PAD_INPUT_5))
+        if (m_specialGauge >= kGaugeConsumption && Pad::isTrigger(PAD_INPUT_5))
         {
             m_specialGauge -= kGaugeConsumption;
             OnSpecialSkil();
@@ -215,14 +215,14 @@ void Player::Update()
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim();
     //printfDx(L"Pos.y:%f\n",m_pos.y);
-    if (m_isHitFlag)
+    /*if (m_isHitFlag)
     {
         printfDx(L"HIt\n");
     }
     else
     {
         printfDx(L"   \n");
-    }
+    }*/
     //printfDx(L"m_pos.y;%.02f\n", m_pos.y);
     //printfDx(L"m_pos.x:%f\nm_pos.z:%f\n\n",m_pos.x,m_pos.z);
     //DINPUT_JOYSTATE input;

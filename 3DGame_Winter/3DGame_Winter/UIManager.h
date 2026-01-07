@@ -35,6 +35,5 @@ private:
 	std::shared_ptr<FlyingEnemy> m_pFlyingEnemy;
 	std::shared_ptr<StrongEnemy> m_pStrongEnemy;
 	std::shared_ptr<BossEnemy> m_pBossEnemy;
-
 };
 

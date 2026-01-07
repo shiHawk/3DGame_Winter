@@ -13,7 +13,7 @@ namespace
 	constexpr float kMoveDecRate = 0.8f;
 	constexpr float kModelScale = 60.0f; // モデルのスケール
 	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
-	constexpr float kTrackingRange = 400.0f;
+	constexpr float kTrackingRange = 600.0f;
 
 	constexpr float kAttackRadius = 30.0f;
 	constexpr float kAttackRange = 90.0f;
@@ -35,7 +35,7 @@ namespace
 	constexpr float kAttackHitStartTime = 25.0f; // 判定が出始めるタイミング
 	constexpr float kAttackHitEndTime = 10.0f;   // 判定が終わるタイミング
 	constexpr int kMaxHp = 100;
-	constexpr int kAttackPower = 30;
+	constexpr int kAttackPower = 45;
 
 	constexpr float kKnockbackDuration = 0.4f;
 	constexpr float kKnockBackSpeed = 5.0f;
@@ -68,6 +68,7 @@ void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 	m_modelHandle = MV1LoadModel(L"Data/model/Skeleton_Warrior.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
 	MV1SetRotationXYZ(m_modelHandle, kDefaultDir);
+	MV1SetPosition(m_modelHandle, m_pos);
 	AttachAnim(m_modelHandle, kIdleAnimNo);
 }
 
@@ -183,7 +184,7 @@ void NormalEnemy::Draw()
 {
 	if (m_enemyAttack.active)
 	{
-		DrawSphere3D(m_enemyAttack.pos, kAttackRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
+		//DrawSphere3D(m_enemyAttack.pos, kAttackRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 	}
 	
 	//MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, m_alpha));

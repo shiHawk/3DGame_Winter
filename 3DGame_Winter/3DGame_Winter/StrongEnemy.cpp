@@ -10,7 +10,7 @@ namespace
 	constexpr float kCoolDownTime = 1.5f;
 	constexpr float kRangeAttackRadius = 150.0f;
 	constexpr float kRangeAttackDuration = 30.0f;
-	constexpr float kTrackingRange = 400.0f;
+	constexpr float kTrackingRange = 600.0f;
 	constexpr float kActionCheckInterval = 0.5f; // ’Š‘I•p“x
 	constexpr float kNormalAttackDuration = 20.0f;
 	constexpr float kNormalAttackRange = 90.0f;
@@ -35,7 +35,7 @@ namespace
 	constexpr int kDivNum = 32;
 	constexpr float kInvincibilityTime = 30.0f;
 	constexpr int kMaxHp = 200;
-	constexpr int kAttackPower = 50;
+	constexpr int kAttackPower = 75;
 }
 
 StrongEnemy::StrongEnemy():
@@ -60,6 +60,7 @@ void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 	MV1SetScale(m_modelHandle,VGet(1.3f,1.3f,1.3f));
 	m_pos = pos;
 	m_hp = kMaxHp;
+	MV1SetPosition(m_modelHandle,m_pos);
 }
 
 void StrongEnemy::End()
@@ -103,6 +104,7 @@ void StrongEnemy::Update()
 			{
 				m_state = StrongEnemyState::RANGEATTACK_CHARGE;
 				m_attackTimer = kChageTime;
+				m_enemyAttack.active = true;
 				break;
 			}
 		}
@@ -151,6 +153,7 @@ void StrongEnemy::Update()
 		{
 			m_state = StrongEnemyState::COOLDOWN;
 			m_attackTimer = kCoolDownTime;
+			m_enemyAttack.active = false;
 		}
 		break;
 	case StrongEnemy::COOLDOWN:
