@@ -34,6 +34,7 @@ void GameplayCollision::Update()
 	CheckCompanionAttack();
 	CheckNormalEnemyAttack();
 	CheckStrongEnemyRangeAttack();
+	CheckBossEnemyAttack();
 	//PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pPlayer.get());
 	//PushBackCharacter(m_pCompanion->GetPos(), m_pCompanion->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pCompanion.get());
 }
@@ -61,7 +62,7 @@ void GameplayCollision::CheckPlayerAttack()
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
 		if (hitInfo.m_distance < playerAttackRadius + enemyColRadius )
 		{
-			enemy->OnDamage();
+			enemy->OnDamage(m_pPlayer->GetAttackPower());
 			m_pPlayer->AddSpecialGauge(5);
 			if (m_pPlayer->IsComboFinish())
 			{
@@ -81,7 +82,7 @@ void GameplayCollision::CheckPlayerAttack()
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
 		if (hitInfo.m_distance < playerAttackRadius + enemyColRadius)
 		{
-			enemy->OnDamage();
+			enemy->OnDamage(m_pPlayer->GetAttackPower());
 			m_pPlayer->AddSpecialGauge(5);
 		}
 	}
@@ -94,7 +95,7 @@ void GameplayCollision::CheckPlayerAttack()
 
 		if (hitInfo.m_distance < playerAttackRadius + bossEnemyColRadius)
 		{
-			m_pBossEnemy->OnDamage();
+			m_pBossEnemy->OnDamage(m_pPlayer->GetAttackPower());
 			m_pPlayer->AddSpecialGauge(5);
 		}
 	}
@@ -134,7 +135,7 @@ void GameplayCollision::CheckCompanionAttack()
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
 		if (hitInfo.m_distance < companionAttackRadius + enemyColRadius)
 		{
-			enemy->OnDamage();
+			enemy->OnDamage(m_pCompanion->GetAttackPower());
 			m_pCompanion->AddSpecialGauge(5);
 		}
 	}
@@ -147,19 +148,21 @@ void GameplayCollision::CheckCompanionAttack()
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
 		if (hitInfo.m_distance < companionAttackRadius + enemyColRadius)
 		{
-			enemy->OnDamage();
+			enemy->OnDamage(m_pCompanion->GetAttackPower());
 			m_pCompanion->AddSpecialGauge(5);
 		}
 	}
 
-	if (!m_pBossEnemy->IsDead() || m_pBossEnemy->GetInvincibilityTimer() <= 0.0f)
+	if (!m_pBossEnemy->IsDead() && m_pBossEnemy->GetInvincibilityTimer() <= 0.0f)
 	{
 		float bossEnemyColRadius = m_pBossEnemy->GetColRadius();
-		hitInfo.m_deltaVector = VSub(m_pBossEnemy->GetPos(), m_pPlayer->GetAttackPos());
+
+		hitInfo.m_deltaVector = VSub(m_pBossEnemy->GetPos(), m_pCompanion->GetAttackPos());
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
-		if (hitInfo.m_distance < companionAttackRadius + bossEnemyColRadius && m_pBossEnemy->GetInvincibilityTimer() > 0.0f)
+
+		if (hitInfo.m_distance < companionAttackRadius + bossEnemyColRadius)
 		{
-			m_pBossEnemy->OnDamage();
+			m_pBossEnemy->OnDamage(m_pCompanion->GetAttackPower());
 			m_pCompanion->AddSpecialGauge(5);
 		}
 	}
@@ -206,9 +209,8 @@ void GameplayCollision::CheckNormalEnemyAttack()
 			}
 		}
 
-		// --- コンパニオンへの当たり判定 ---
+		// コンパニオンへの当たり判定
 		// コンパニオンが無敵状態（ダメージ中含む）でない場合のみチェック
-		// ※CompanionクラスにIsInvincible()（無敵かどうか）を判定する関数があると仮定しています
 		if (!m_pCompanion->IsHitFlag() && m_pCompanion->GetInvincibilityTimer() <= 0.0f)
 		{
 			hitInfo.m_deltaVector = VSub(m_pCompanion->GetPos(), enemyAttackPos);
@@ -216,7 +218,6 @@ void GameplayCollision::CheckNormalEnemyAttack()
 
 			if (hitInfo.m_distance < enemyAttackRadius + m_pCompanion->GetColRadius())
 			{
-				// 前回追加したCompanion::OnDamageを呼び出す
 				m_pCompanion->OnDamage(attackPower);
 			}
 		}
@@ -272,6 +273,40 @@ void GameplayCollision::CheckStrongEnemyRangeAttack()
 	//		//printfDx(L"Hit\n");
 	//	}
 	//}
+}
+
+void GameplayCollision::CheckBossEnemyAttack()
+{
+	if (m_pBossEnemy->GetAttackInfo().active)
+	{
+		// 共通の攻撃情報を取得
+		float enemyAttackRadius = m_pBossEnemy->GetAttackInfo().radius;
+		VECTOR enemyAttackPos = m_pBossEnemy->GetAttackInfo().pos;
+		int attackPower = m_pBossEnemy->GetAttackPower();
+		HitDetectionInfo hitInfo;
+
+		if (!m_pPlayer->IsHitFlag() && m_pPlayer->GetInvincibilityTimer() <= 0.0f)
+		{
+			hitInfo.m_deltaVector = VSub(m_pPlayer->GetPos(), enemyAttackPos);
+			hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+
+			if (hitInfo.m_distance < enemyAttackRadius + m_pPlayer->GetColRadius())
+			{
+				m_pPlayer->OnDamage(attackPower);
+			}
+		}
+
+		if (!m_pCompanion->IsHitFlag() && m_pCompanion->GetInvincibilityTimer() <= 0.0f)
+		{
+			hitInfo.m_deltaVector = VSub(m_pCompanion->GetPos(), enemyAttackPos);
+			hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+
+			if (hitInfo.m_distance < enemyAttackRadius + m_pCompanion->GetColRadius())
+			{
+				m_pCompanion->OnDamage(attackPower);
+			}
+		}
+	}
 }
 
 void GameplayCollision::PushBackCharacter(VECTOR pos1, float pos1Radius, VECTOR pos2, float pos2Radius, CharacterBase* pTargetCharacter)

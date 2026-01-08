@@ -9,7 +9,7 @@ namespace
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x00f000;
 	constexpr int kSphereSpcColor = 0xffffff;
-	constexpr float kMoveSpeed = 8.0f;
+	constexpr float kMoveSpeed = 10.0f;
 	constexpr float kPlayerMoveSpeed = 10.0f; // プレイヤー操作モードでの移動速度
 	constexpr float kJumpPower = 15.0f;
 	constexpr float kGravity = -0.7f;
@@ -36,12 +36,14 @@ namespace
 	constexpr float kComboFinishAttackAnimNo = 41;
 	constexpr int kAvoidanceAnimNo = 15;
 	constexpr int kDamageAnimNo = 24;
+	constexpr int kDeathAnimNo = 26;
 	constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
 	constexpr float kAttackAnimIncrement = 0.5f; // 攻撃アニメーションの再生速度
 	constexpr float kStrongAttackAnimIncrement = 0.5f; // 強攻撃アニメーションの再生速度
 	constexpr float kSpecialSkilAnimIncriment = 0.6f;
 	constexpr float kAvoidanceAnimIncrement = 0.4f; // 回避アニメーションの再生速度
+	constexpr float kDeathAnimIncrement = 0.4f; // アニメーションの再生速度
 
 	constexpr int kAttackPower = 10;
 	constexpr int kStrongAttackPower = 30;
@@ -471,6 +473,15 @@ void Companion::UpdateAIState()
 		}
 		break;
 	}
+	case CompanionState::DEATH:
+	{
+		m_vec = { 0.0f,0.0f,0.0f };
+		if (GetIsAnimEnd())
+		{
+			m_isDead = true;
+		}
+		break;
+	}
 	}
 }
 
@@ -636,6 +647,15 @@ void Companion::UpdatePlayerControlState()
 		}
 		break;
 	}
+	case CompanionState::DEATH:
+	{
+		m_vec = { 0.0f,0.0f,0.0f };
+		if (GetIsAnimEnd())
+		{
+			m_isDead = true;
+		}
+		break;
+	}
 	}
 }
 
@@ -667,7 +687,14 @@ void Companion::OnDamage(int damage)
 
 	// HP減少
 	m_hp -= damage;
-	if (m_hp < 0) m_hp = 0;
+	if (m_hp <= 0)
+	{
+		m_hp = 0;
+		m_attack.active = false;
+		m_companionState = CompanionState::DEATH;
+		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDeathAnimIncrement);
+		return;
+	}
 
 	// ダメージ状態へ遷移
 	m_companionState = CompanionState::DAMAGE;

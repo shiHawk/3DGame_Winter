@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include "ResultScene.h"
 #include "DxLib.h"
 namespace
 {
@@ -18,7 +19,8 @@ namespace
 	constexpr float kEnemySearchRange = 800.0f; // 敵を探す最大範囲
 	constexpr VECTOR kInvalidPos = { 1000000.0f, 1000000.0f, 1000000.0f }; // 無効な座標（超遠方）
 }
-GameScene::GameScene()
+GameScene::GameScene():
+	m_isNextScene(false)
 {
 }
 
@@ -82,6 +84,7 @@ void GameScene::End()
 
 SceneBase* GameScene::Update()
 {
+	UpdateFade();
 	m_pPlayer->Update();
 	for (auto& enemy : m_pNormalEnemies)
 	{
@@ -134,8 +137,8 @@ SceneBase* GameScene::Update()
 		m_pCamera->SetControlledCharacterPosition(m_pCompanion->GetPos());
 		m_pCamera->SetPlayerDir(m_pCompanion->GetPlayerDir());
 	}
-	//m_pPlayer->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pPlayer->SetFollowTargetPos(m_pCompanion->GetPos());
+	//m_pPlayer->SetEnemyPos(m_pNormalEnemy->GetPos());
 	//m_pCamera->SetLockOnPosition(m_pNormalEnemy->GetPos());
 	//m_pCompanion->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pCompanion->SetPlayerPos(m_pPlayer->GetPos());
@@ -161,7 +164,7 @@ SceneBase* GameScene::Update()
 	
 	m_pEffectManager->Update();
 
-	// 操作中のキャラクター（スマートポインタ）を決定
+	// 操作中のキャラクターを決定
 	std::shared_ptr<CharacterBase> activeCharacter = nullptr;
 	if (currentControlMode == CharacterBase::ControlMode::PLAYER)
 	{
@@ -177,6 +180,19 @@ SceneBase* GameScene::Update()
 	m_pBattleAreaManager->Update(activeCharacter, m_pNormalEnemies, m_pStrongEnemies);
 	m_pUIManager->Updata();
 	m_pCamera->Update();
+	DeathProcessing();
+
+	if (!m_isNextScene && !IsFadingOut() && m_pBossEnemy->IsDead())
+	{
+		StartFadeOut();
+		m_isNextScene = true;
+	}
+	// フェードが終了したら遷移する
+	if (m_isNextScene && IsFadeComplete())
+	{
+		return new ResultScene();
+	}
+	
 	return this;
 }
 
@@ -201,6 +217,7 @@ void GameScene::Draw()
 	m_pBattleAreaManager->DrawBattleAreaBodary();
 	//m_pBattleAreaManager->DebugDraw();
 	m_pUIManager->Draw();
+	DrawFade();
 	//DrawGrid();
 }
 
@@ -271,4 +288,16 @@ VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos)
 	}
 
 	return nearestPos;
+}
+
+void GameScene::DeathProcessing()
+{
+	if (m_pPlayer->IsDead())
+	{
+		m_pPlayer->End();
+	}
+	if (m_pCompanion->IsDead())
+	{
+		m_pCompanion->End();
+	}
 }

@@ -13,7 +13,7 @@ public:
 	void Update() override;
 	void Draw() override;
 	virtual void OnAttack() override;
-	virtual void OnDamage() override;
+	virtual void OnDamage(int damage) override;
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
 	void ApplyKnockback(VECTOR direction, float power);

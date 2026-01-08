@@ -9,10 +9,12 @@ public:
 	void End();
 	void Update() override;
 	void Draw() override;
-	virtual void OnDamage()override;
+	virtual void OnDamage(int damage)override;
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
 	int GetBossEnemyAttackPower();
+	AttackSphere GetAttackInfo() { return m_enemyAttack; }
+	int GetAttackPower() { return m_attackPower; }
 private:
 	virtual void OnAttack() override;
 	void OnStrongAttack();
@@ -25,7 +27,7 @@ private:
 		MOVE,           // 追跡
 		NORMAL_ATTACK,  // 通常攻撃（素早い）
 		STRONG_ATTACK_CHARGE, // 強攻撃の溜め（予兆表示）
-		STRONG_ATTACK,        // 強攻撃（直線または扇形）
+		STRONG_ATTACK,        // 強攻撃
 		RANGE_ATTACK_CHARGE,  // 範囲攻撃の溜め（予兆表示）
 		RANGE_ATTACK,         // 範囲攻撃（周囲円形）
 		COOLDOWN,       // 攻撃後の隙
@@ -38,7 +40,5 @@ private:
 	float m_targetAngle;
 	float m_attackTimer;
 	float m_actionCheckTimer; // 行動抽選のクールダウンタイマー
-	// 強攻撃の直線範囲（AABB）
-	VECTOR m_strongAttackPos1;
-	VECTOR m_strongAttackPos2;
+	std::shared_ptr<CharacterBase> m_lockedTarget;
 };

@@ -22,6 +22,7 @@ public:
 	void CheckCompanionAttack();
 	void CheckNormalEnemyAttack();
 	void CheckStrongEnemyRangeAttack();
+	void CheckBossEnemyAttack();
 	void PushBackCharacter(VECTOR pos1,float pos1Radius, VECTOR pos2, float pos2Radius,CharacterBase* pTargetCharacter);
 private:
 	std::shared_ptr<Player> m_pPlayer;

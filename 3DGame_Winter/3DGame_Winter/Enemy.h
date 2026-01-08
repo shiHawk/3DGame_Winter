@@ -14,7 +14,7 @@ public:
 	virtual void Update()= 0;
 	virtual void Draw() = 0;
 	virtual void OnAttack();
-	virtual void OnDamage();
+	virtual void OnDamage(int damage);
 protected:
 	void SearchTarget();
 	std::shared_ptr<Player> m_pPlayer;

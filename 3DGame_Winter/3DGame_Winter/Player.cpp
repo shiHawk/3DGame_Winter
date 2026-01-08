@@ -35,7 +35,7 @@ namespace
     constexpr float kRightLimit = 1000.0f;  // ステージ右
     constexpr float kWallOffset = 0.001f;
 
-    constexpr int kMaxHp = 500;
+    constexpr int kMaxHp = 700;
     // 各攻撃の攻撃力
     constexpr int kAttackPower = 15;
     constexpr int kStrongAttackPower = 35;
@@ -77,6 +77,7 @@ namespace
     constexpr int kSpecialSkilAnimNo = 38; // 必殺技アニメーション
     constexpr int kAvoidanceAnimNo = 15;
     constexpr int kDamageAnimNo = 24;
+    constexpr int kDeathAnimNo = 26;
     constexpr float kAnimIncrement = 0.4f; // アニメーションの再生速度
     constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
     constexpr float kWalkAnimIncrement = 1.0f; // 歩行アニメーションの再生速度
@@ -259,7 +260,6 @@ void Player::Draw()
     VECTOR lineStart = VGet(m_pos.x, m_pos.y + kSphereRadius / 2, m_pos.z);
     VECTOR lineEnd = VAdd(lineStart, m_forwardDir);
 
-	//DrawSphere3D(m_pos,kSphereRadius,kDivNum,kSphereDifColor,kSphereSpcColor,true);
     MV1DrawModel(m_modelHandle);
 #ifdef _DEBUG
     //DrawLine3D(lineStart, lineEnd, kSphereDifColor);
@@ -267,7 +267,6 @@ void Player::Draw()
     {
         //DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
     }
-    //DrawSphere3D({m_pos.x,m_pos.y+50.0f,m_pos.z}, kColRadius, kDivNum, kSphereDifColor, kSphereSpcColor, false);
 #endif
     //printfDx(L"pos.x:%f ,pos.y:%f ,pos.z:%f\n",m_pos.x,m_pos.y,m_pos.z);
     //printfDx(L"hp:%d\n",m_hp);
@@ -376,9 +375,23 @@ void Player::OnDamage(int enemyPower)
     m_comboStep = 0;
 
     m_hp -= enemyPower;
-    m_isHitFlag = true;
-    m_invincibilityTimer = kInvincibilityTime;
-    m_playerState = PlayerState::DAMAGE;
+    if (m_hp <= 0)
+    {
+        m_hp = 0;
+        m_playerState = PlayerState::DEATH;
+        ChangeAnim(m_modelHandle,kDeathAnimNo,false, kAnimIncrement);
+    }
+    else
+    {
+        m_isHitFlag = true;
+        m_invincibilityTimer = kInvincibilityTime;
+        m_playerState = PlayerState::DAMAGE;
+    }
+}
+
+void Player::OnDeath()
+{
+
 }
 
 int Player::GetMaxHp()
@@ -599,6 +612,9 @@ void Player::UpdatePlayerState()
     case PlayerState::DAMAGE:
         HandleStateDamage();
         break;
+    case PlayerState::DEATH:
+        HandleStateDeath();
+        break;
     }
 }
 
@@ -702,6 +718,16 @@ void Player::HandleStateDamage()
     {
         //m_isHitFlag = false;
         m_playerState = PlayerState::NORMAL;
+    }
+}
+
+void Player::HandleStateDeath()
+{
+    m_vec.x = 0.0f;
+    m_vec.z = 0.0f;
+    if (GetIsAnimEnd())
+    {
+        m_isDead = true;
     }
 }
 

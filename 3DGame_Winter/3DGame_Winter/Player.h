@@ -50,7 +50,8 @@ public:
 		ATTACKING_COMBOFINISH,
 		COMBO_WINDOW,
 		SPECIALSKIL,
-		DAMAGE
+		DAMAGE,
+		DEATH
 	};
 	bool IsComboFinish() 
 	{
@@ -85,6 +86,7 @@ private:
 	void HandleStateComboWindow();
 	void HandleStateSpecialSkil();
 	void HandleStateDamage();
+	void HandleStateDeath();
 
 	// AI / プレイヤーの分岐を持つハンドラ
 	void HandleAIComboWindow();
@@ -93,5 +95,7 @@ private:
 	// 攻撃開始の共通処理（ヘルパー関数）
 	void TryStartAttack(void(Player::* onAttackFunc)(), PlayerState rotationState, PlayerState attackState);
 	void UpdateAttackState(AttackSphere& attackData, int animNo, float animInc, PlayerState nextState);
+
+	void OnDeath();
 };
 

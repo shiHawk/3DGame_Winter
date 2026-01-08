@@ -39,6 +39,7 @@ protected:
 	int m_hp;
 	int m_attackPower;
 	bool m_isDead;
+	bool m_isDying;
 	bool m_isInAttackSequence; // UŒ‚’†‚©•ûŒü•â³’†‚©
 	int m_modelHandle;
 	bool m_isJump;

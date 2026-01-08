@@ -11,7 +11,7 @@ public:
 	void Draw() override;
 	virtual void OnAttack() override;
 	void OnRangeAttack();
-	virtual void OnDamage()override;
+	virtual void OnDamage(int damage)override;
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
 	int GetStrongEnemyAttackPower();

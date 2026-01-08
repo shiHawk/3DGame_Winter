@@ -31,6 +31,7 @@ public:
 private:
 	void DrawGrid();
 	VECTOR GetNearestEnemyPos(VECTOR basePos);
+	void DeathProcessing();
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Enemy> m_pEnemy;
@@ -48,5 +49,6 @@ private:
 	std::unique_ptr<EnemyDataManager> m_pEnemyDataManager;
 	std::unique_ptr<BattleAreaManager> m_pBattleAreaManager;
 	std::unique_ptr<UIManager> m_pUIManager;
+	bool m_isNextScene;
 };
 

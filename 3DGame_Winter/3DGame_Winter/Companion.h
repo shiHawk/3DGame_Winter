@@ -46,7 +46,8 @@ private:
 		SPECIALSKIL,
 		TURN_FOR_STRONG_ATTACK, // ‹­UŒ‚‘O‚Ì‰ñ“]
 		TURN_FOR_SPECIALSKIL,   // •KE‹Z‘O‚Ì‰ñ“]
-		DAMAGE
+		DAMAGE,
+		DEATH
 	};
 	ControlMode m_controlMode;
 	CompanionState m_companionState;

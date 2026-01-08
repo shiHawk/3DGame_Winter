@@ -1,8 +1,7 @@
+#include "ResultScene.h"
 #include "TitleScene.h"
-#include "Pad.h"
 #include "game.h"
-#include "GameScene.h"
-
+#include "Pad.h"
 namespace
 {
 	constexpr int kMaxFadeBright = 255;
@@ -16,41 +15,25 @@ namespace
 	constexpr float kCameraFarClip = 3000.0f;
 	// 点滅周期
 	constexpr int kBlinkCycleMs = 500;
-
-	constexpr int kTitlePosX = 352;
-	constexpr int kTitlePosY = 75;
-
-	constexpr float kModelScale = 60.0f; // モデルのスケール
+	// フォントのサイズ、太さ
+	constexpr int kFontSize = 60;
+	constexpr int kFontThick = 5;
+	constexpr int kScorePosX = 430; // 合計スコア
+	constexpr int kScorePosY = 280;
 }
 
-
-TitleScene::TitleScene():
+ResultScene::ResultScene():
 	m_isNextScene(false),
-	m_playerPos({0.0f,0.0f,0.0f}),
+	m_playerPos({ 0.0f,0.0f,0.0f }),
 	m_cameraPos({ 0.0f,0.0f,0.0f }),
 	m_cameraTarget({ 0.0f,0.0f,0.0f }),
 	m_viewAngle(0.0f),
-	m_titleLogoHandle(-1),
-	m_BGHandle(-1),
-	m_manualHandle(-1),
-	m_warriorModelHandle(-1),
-	m_wizardModelHandle(-1),
-	m_fontHandle(-1),
-	m_isManualHandle(false),
-	m_isPlayingMovie(false),
-	m_tileTotal(0),
-	m_stageStart(0),
-	m_stageEnd(0),
-	m_tileSize(0),
-	m_tileModelBase(-1),
-	m_tilePos({ 0.0f,0.0f,0.0f }),
-	m_tileStartPos({ 0.0f,0.0f,0.0f })
+	m_fontHandle(-1)
 {
 }
 
-void TitleScene::Init()
+void ResultScene::Init()
 {
-	// 3D表示の設定
 	SetUseZBuffer3D(true);	  // Zバッファを指定する
 	SetWriteZBuffer3D(true);  // Zバッファへの書き込みを行う
 
@@ -74,23 +57,15 @@ void TitleScene::Init()
 	// カメラのnear,farを設定する
 	SetCameraNearFar(kCameraNearClip, kCameraFarClip);
 
-	m_titleLogoHandle = LoadGraph(L"Data/title/titleLogo.png");
-	m_warriorModelHandle = MV1LoadModel(L"Data/model/Barbarian.mv1");
-	m_wizardModelHandle = MV1LoadModel(L"Data/model/Mage.mv1");
-	m_tileModelBase = MV1LoadModel(L"Data/model/floor_tile_large.mv1");
-	MV1SetScale(m_warriorModelHandle,VGet(kModelScale, kModelScale, kModelScale));
-	MV1SetScale(m_wizardModelHandle,VGet(kModelScale, kModelScale, kModelScale));
+	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 }
 
-void TitleScene::End()
+void ResultScene::End()
 {
-	DeleteGraph(m_titleLogoHandle);
-	MV1DeleteModel(m_warriorModelHandle);
-	MV1DeleteModel(m_wizardModelHandle);
-	MV1DeleteModel(m_tileModelBase);
+	DeleteFontToHandle(m_fontHandle);
 }
 
-SceneBase* TitleScene::Update()
+SceneBase* ResultScene::Update()
 {
 	UpdateFade();
 	if (!m_isNextScene && !IsFadingOut() && Pad::isTrigger(PAD_INPUT_2))
@@ -101,14 +76,14 @@ SceneBase* TitleScene::Update()
 	// フェードが終了したら遷移する
 	if (m_isNextScene && IsFadeComplete())
 	{
-		return new GameScene();
+		return new TitleScene();
 	}
 	return this;
 }
 
-void TitleScene::Draw()
+void ResultScene::Draw()
 {
-	DrawBox(0,0,Game::kScreenWidth,Game::kScreenHeight,0xffffff,true);
-	DrawGraph(kTitlePosX,kTitlePosY,m_titleLogoHandle,true);
+	DrawBox(0, 0, Game::kScreenWidth, Game::kScreenHeight, 0xffffff, true);
+	DrawFormatStringToHandle(kScorePosX,kScorePosY,0xff8c00,m_fontHandle,L"GameClear!");
 	DrawFade();
 }

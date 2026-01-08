@@ -21,6 +21,7 @@ namespace
 	constexpr int kAttackAnimNo = 13;
 	constexpr int kRangeAttackAnimNo = 0;
 	constexpr int kDamageAnimNo = 8;
+	constexpr int kDeathAnimNo = 25;
 	// アニメーション速度
 	constexpr float kWalkAnimIncrement = 0.15f; // 歩行アニメーションの再生速度
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
@@ -34,7 +35,7 @@ namespace
 	constexpr unsigned int kOutLineColor = 0xff0000;
 	constexpr int kDivNum = 32;
 	constexpr float kInvincibilityTime = 30.0f;
-	constexpr int kMaxHp = 200;
+	constexpr int kMaxHp = 300;
 	constexpr int kAttackPower = 75;
 }
 
@@ -223,7 +224,7 @@ void StrongEnemy::OnRangeAttack()
 	float distance = VSize(VSub(playerPos,m_enemyAttack.pos));
 }
 
-void StrongEnemy::OnDamage()
+void StrongEnemy::OnDamage(int damage)
 {
 	if (m_invincibilityTimer > 0.0f) return;
 	if (m_hp <= 0)
@@ -231,7 +232,7 @@ void StrongEnemy::OnDamage()
 		m_isDead = true;
 	}
 	m_isHitFlag = true;
-	m_hp -= m_pPlayer->GetAttackPower();
+	m_hp -= damage;
 	m_invincibilityTimer = kInvincibilityTime;
 }
 

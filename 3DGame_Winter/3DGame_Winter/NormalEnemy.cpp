@@ -24,6 +24,7 @@ namespace
 	constexpr int kAttackAnimNo = 5;
 	constexpr int kDamageAnimNo = 40;
 	constexpr int kKnockbackAnimNo = 25;
+	constexpr int kDeathAnimNo = 26;
 	constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
 	constexpr float kAttackAnimIncrement = 0.5f; // 攻撃アニメーションの再生速度
@@ -201,7 +202,7 @@ void NormalEnemy::OnAttack()
 	ChangeAnim(m_modelHandle,kAttackAnimNo,false,kAttackAnimIncrement);
 }
 
-void NormalEnemy::OnDamage()
+void NormalEnemy::OnDamage(int damage)
 {
 	m_enemyAttack.active = false;
 	m_enemyAttack.timer = 0.0f;
@@ -211,7 +212,7 @@ void NormalEnemy::OnDamage()
 	}
 	if (m_invincibilityTimer > 0.0f) return;
 	m_isHitFlag = true;
-	m_hp -= m_pPlayer->GetAttackPower();
+	m_hp -= damage;
 	if (m_isKnockbackFlag)
 	{
 

@@ -35,7 +35,7 @@ void Enemy::OnAttack()
 
 }
 
-void Enemy::OnDamage()
+void Enemy::OnDamage(int damage)
 {
 }
 
@@ -47,10 +47,21 @@ void Enemy::SearchTarget()
 	float distToCompanion = VSize(VSub(m_pCompanion->GetPos(), m_pos));
 
 	// 近い方をターゲットに設定する
-	if (distToPlayer < distToCompanion) {
+	if (distToPlayer < distToCompanion) 
+	{
 		m_targetPos = m_pPlayer->GetPos();
 	}
-	else {
+	else 
+	{
 		m_targetPos = m_pCompanion->GetPos();
+	}
+
+	if (m_pPlayer->IsDead())
+	{
+		m_targetPos = m_pCompanion->GetPos();
+	}
+	if (m_pCompanion->IsDead())
+	{
+		m_targetPos = m_pPlayer->GetPos();
 	}
 }

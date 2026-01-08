@@ -12,7 +12,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_  HINSTANCE hPrevInstance, 
 	// windowモード設定
 	ChangeWindowMode(Game::kWindowMode);
 	// ウインドウ名設定
-	//SetMainWindowText("");
+	SetMainWindowText(L"BraveBuddyQuest");
 	// 画面サイズの設定
 	SetGraphMode(Game::kScreenWidth, Game::kScreenHeight, Game::kColorDepth);
 
