@@ -14,8 +14,8 @@ public:
 	virtual void OnDamage(int damage)override;
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
-	int GetStrongEnemyAttackPower();
 	AttackSphere GetAttackInfo() { return m_enemyAttack; }
+	int GetAttackPower() { return m_attackPower; }
 	int GetAttackPos();
 private:
 	enum StrongEnemyState

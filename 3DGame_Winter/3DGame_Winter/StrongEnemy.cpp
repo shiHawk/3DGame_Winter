@@ -61,6 +61,7 @@ void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 	MV1SetScale(m_modelHandle,VGet(1.3f,1.3f,1.3f));
 	m_pos = pos;
 	m_hp = kMaxHp;
+	m_attackPower = kAttackPower;
 	MV1SetPosition(m_modelHandle,m_pos);
 }
 
@@ -244,11 +245,6 @@ float StrongEnemy::GetColRadius()
 VECTOR StrongEnemy::GetDir()
 {
 	return VECTOR();
-}
-
-int StrongEnemy::GetStrongEnemyAttackPower()
-{
-	return m_attackPower;
 }
 
 int StrongEnemy::GetAttackPos()

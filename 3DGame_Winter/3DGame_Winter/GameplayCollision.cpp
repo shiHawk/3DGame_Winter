@@ -184,11 +184,6 @@ void GameplayCollision::CheckNormalEnemyAttack()
 		{
 			continue; // normalEnemy‚ªUŒ‚’†‚Å‚È‚¯‚ê‚Îˆ—‚ðI‚í‚é
 		}
-		// 1. “G‚ªUŒ‚’†‚Å‚È‚¯‚ê‚ÎA‚±‚Ì“G‚Ì”»’è‚Ís‚í‚¸‚ÉŽŸ‚Ì“G‚Ö
-		if (!enemy->GetAttackInfo().active)
-		{
-			continue;
-		}
 
 		// ‹¤’Ê‚ÌUŒ‚î•ñ‚ðŽæ“¾
 		float enemyAttackRadius = enemy->GetAttackInfo().radius;
@@ -245,17 +240,35 @@ void GameplayCollision::CheckStrongEnemyRangeAttack()
 {
 	for (auto& enemy : m_pStrongEnemies)
 	{
-		if (enemy->GetAttackInfo().active)
+		if (!enemy->GetAttackInfo().active)
 		{
-			// UŒ‚‚Ì’†S‚ÆƒvƒŒƒCƒ„[‚ÌˆÊ’u‚Ì·•ªƒxƒNƒgƒ‹‚ðŽæ“¾
-			VECTOR deltaVector = VSub(m_pPlayer->GetPos(), enemy->GetAttackInfo().pos);
-			// ‹——£‚ðŒvŽZ
-			float distance = VSize(deltaVector);
-			float totalRadius = enemy->GetAttackInfo().radius + m_pPlayer->GetColRadius();
-			if (distance < totalRadius && !m_pPlayer->IsHitFlag())
+			continue; // normalEnemy‚ªUŒ‚’†‚Å‚È‚¯‚ê‚Îˆ—‚ðI‚í‚é
+		}
+		// ‹¤’Ê‚ÌUŒ‚î•ñ‚ðŽæ“¾
+		float enemyAttackRadius = enemy->GetAttackInfo().radius;
+		VECTOR enemyAttackPos = enemy->GetAttackInfo().pos;
+		int attackPower = enemy->GetAttackPower();
+		HitDetectionInfo hitInfo;
+
+		if (!m_pPlayer->IsHitFlag() && m_pPlayer->GetInvincibilityTimer() <= 0.0f)
+		{
+			hitInfo.m_deltaVector = VSub(m_pPlayer->GetPos(), enemyAttackPos);
+			hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+
+			if (hitInfo.m_distance < enemyAttackRadius + m_pPlayer->GetColRadius())
 			{
-				m_pPlayer->OnDamage(enemy->GetAttackPos());
-				//printfDx(L"Hit\n");
+				m_pPlayer->OnDamage(attackPower);
+			}
+		}
+
+		if (!m_pCompanion->IsHitFlag() && m_pCompanion->GetInvincibilityTimer() <= 0.0f)
+		{
+			hitInfo.m_deltaVector = VSub(m_pCompanion->GetPos(), enemyAttackPos);
+			hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
+
+			if (hitInfo.m_distance < enemyAttackRadius + m_pCompanion->GetColRadius())
+			{
+				m_pCompanion->OnDamage(attackPower);
 			}
 		}
 	}

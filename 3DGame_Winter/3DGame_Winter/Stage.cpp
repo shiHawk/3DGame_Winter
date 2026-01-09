@@ -225,12 +225,6 @@ void Stage::Init()
 		finalMatrix.m[3][2] = scaledPos.z;
 		MV1SetMatrix(handle, finalMatrix);
 
-		/*VECTOR rotationRad;
-		rotationRad.x = data.rotation.x * kRadConvert;
-		rotationRad.y = data.rotation.y * kRadConvert;
-		rotationRad.z = data.rotation.z * kRadConvert;
-		MV1SetRotationXYZ(handle, rotationRad);*/
-
 		if (data.typeId == 13 || data.typeId == 14 || data.typeId == 15)
 		{
 			MV1SetupCollInfo(handle, -1);

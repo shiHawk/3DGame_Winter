@@ -13,6 +13,7 @@ public:
 
 	void Update();
 	void Draw();
+	SceneID GetCurrentSceneID()const;
 private:
 	SceneBase* m_pScene;
 };

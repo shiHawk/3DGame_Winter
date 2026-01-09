@@ -118,10 +118,6 @@ void NormalEnemy::Update()
 			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 		}
 	}
-	else if (m_knockbackTimer > 0.0f)
-	{
-		
-	}
 	else
 	{
 		if (m_AttackCoolTime > 0.0f)
@@ -208,6 +204,7 @@ void NormalEnemy::OnDamage(int damage)
 	m_enemyAttack.timer = 0.0f;
 	if (m_hp <= 0)
 	{
+		m_hp = 0;
 		m_isDead = true;
 	}
 	if (m_invincibilityTimer > 0.0f) return;

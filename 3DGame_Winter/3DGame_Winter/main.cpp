@@ -1,6 +1,7 @@
 #include "DxLib.h"
 #include "game.h"
 #include "SceneManager.h"
+#include "SoundManager.h"
 #include <EffekseerForDXLib.h>
 namespace
 {

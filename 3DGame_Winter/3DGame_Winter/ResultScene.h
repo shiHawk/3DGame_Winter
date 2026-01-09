@@ -9,6 +9,7 @@ public:
 	virtual void End() override;
 	virtual SceneBase* Update() override;
 	virtual void Draw() override;
+	virtual SceneID GetSceneID() const override;
 private:
 	bool m_isNextScene;
 	VECTOR m_playerPos;

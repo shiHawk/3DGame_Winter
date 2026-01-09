@@ -155,6 +155,8 @@
     <ClCompile Include="ResultScene.cpp" />
     <ClCompile Include="SceneBase.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="ScoreManager.cpp" />
+    <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StrongEnemy.cpp" />
     <ClCompile Include="TitleScene.cpp" />
@@ -183,6 +185,8 @@
     <ClInclude Include="ResultScene.h" />
     <ClInclude Include="SceneBase.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="ScoreManager.h" />
+    <ClInclude Include="SoundManager.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="StrongEnemy.h" />
     <ClInclude Include="TitleScene.h" />

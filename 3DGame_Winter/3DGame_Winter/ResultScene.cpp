@@ -18,7 +18,7 @@ namespace
 	// フォントのサイズ、太さ
 	constexpr int kFontSize = 60;
 	constexpr int kFontThick = 5;
-	constexpr int kScorePosX = 430; // 合計スコア
+	constexpr int kScorePosX = 430; 
 	constexpr int kScorePosY = 280;
 }
 
@@ -86,4 +86,9 @@ void ResultScene::Draw()
 	DrawBox(0, 0, Game::kScreenWidth, Game::kScreenHeight, 0xffffff, true);
 	DrawFormatStringToHandle(kScorePosX,kScorePosY,0xff8c00,m_fontHandle,L"GameClear!");
 	DrawFade();
+}
+
+SceneID ResultScene::GetSceneID() const
+{
+	return SceneID::ResultScene;
 }

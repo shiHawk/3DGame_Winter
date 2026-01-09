@@ -1,7 +1,7 @@
 #include "BossEnemy.h"
 namespace
 {
-    constexpr float kAttackRadius = 30.0f;
+    constexpr float kAttackRadius = 50.0f;
     constexpr float kColRadius = 50.0f;
     constexpr VECTOR kDefaultPos = { -5405.0f,741.0f,9199.0f };
     constexpr VECTOR kDefaultDir = { 0.0,270.0f,0.0f };
@@ -236,7 +236,7 @@ void BossEnemy::Draw()
         DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.1f, 0.0f)), drawPos, currentRadius, kDivNum, kAreaColor, kAreaColor, true);
 
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
-        DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.2f, 0.0f)), drawPos, kRangeAttackRadius, kDivNum, kOutLineColor, kOutLineColor, true);
+        DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.2f, 0.0f)), drawPos, kStrongAttackRadius, kDivNum, kOutLineColor, kOutLineColor, true);
         SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
     }
     if (m_enemyAttack.active)

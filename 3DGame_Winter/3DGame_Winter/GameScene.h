@@ -15,6 +15,7 @@
 #include "EnemyDataManager.h"
 #include "BattleAreaManager.h"
 #include "UIManager.h"
+#include "ScoreManager.h"
 #include "DxLib.h"
 #include "Pad.h"
 #include "CharacterBase.h"
@@ -28,6 +29,7 @@ public:
 	virtual void End() override;
 	virtual SceneBase* Update() override;
 	virtual void Draw() override;
+	virtual SceneID GetSceneID() const override;
 private:
 	void DrawGrid();
 	VECTOR GetNearestEnemyPos(VECTOR basePos);
@@ -49,6 +51,7 @@ private:
 	std::unique_ptr<EnemyDataManager> m_pEnemyDataManager;
 	std::unique_ptr<BattleAreaManager> m_pBattleAreaManager;
 	std::unique_ptr<UIManager> m_pUIManager;
+	std::shared_ptr<ScoreManager> m_pScoreManager;
 	bool m_isNextScene;
 };
 

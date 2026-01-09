@@ -41,6 +41,7 @@ void GameScene::Init()
 	m_pEnemyDataManager = std::make_unique<EnemyDataManager>();
 	m_pBattleAreaManager = std::make_unique<BattleAreaManager>();
 	m_pUIManager = std::make_unique<UIManager>();
+	m_pScoreManager = std::make_shared<ScoreManager>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
 	m_pStage->Init();
@@ -57,6 +58,7 @@ void GameScene::Init()
 	m_pBattleAreaManager->Init(m_pPlayer, m_pCompanion);
 	m_pBattleAreaManager->SetEnemy(m_pNormalEnemies, m_pStrongEnemies);
 	m_pUIManager->Init(m_pPlayer, m_pCompanion);
+	m_pScoreManager->Init();
 }
 
 void GameScene::End()
@@ -80,6 +82,7 @@ void GameScene::End()
 	//m_pStrongEnemy->End();
 	m_pStage->End();
 	m_pUIManager->End();
+	m_pScoreManager->End();
 }
 
 SceneBase* GameScene::Update()
@@ -179,6 +182,7 @@ SceneBase* GameScene::Update()
 	// activeCharacter を渡すことで、操作中のキャラの位置を基準にエリア判定が行われます
 	m_pBattleAreaManager->Update(activeCharacter, m_pNormalEnemies, m_pStrongEnemies);
 	m_pUIManager->Updata();
+	m_pScoreManager->Updata();
 	m_pCamera->Update();
 	DeathProcessing();
 
@@ -219,6 +223,11 @@ void GameScene::Draw()
 	m_pUIManager->Draw();
 	DrawFade();
 	//DrawGrid();
+}
+
+SceneID GameScene::GetSceneID() const
+{
+	return SceneID::GameScene;
 }
 
 void GameScene::DrawGrid()

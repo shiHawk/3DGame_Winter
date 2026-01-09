@@ -1,5 +1,11 @@
 #pragma once
 #include "DxLib.h"
+enum class SceneID
+{
+	TitleScene,
+	GameScene,
+	ResultScene
+};
 class SceneBase
 {
 public:
@@ -20,8 +26,10 @@ public:
 
 	void StartFadeOut();	// フェードアウト開始
 	bool IsFadeComplete()const;
+	
+	virtual SceneID GetSceneID() const = 0;
 protected:
-	// フェード関連処理
+	// フェード関係
 	int m_fadeColor;
 	int m_fadeBright;
 	int m_fadeSpeed;

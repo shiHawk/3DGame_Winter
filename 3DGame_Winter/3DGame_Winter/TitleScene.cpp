@@ -112,3 +112,8 @@ void TitleScene::Draw()
 	DrawGraph(kTitlePosX,kTitlePosY,m_titleLogoHandle,true);
 	DrawFade();
 }
+
+SceneID TitleScene::GetSceneID() const
+{
+	return SceneID::TitleScene;
+}

@@ -2,7 +2,7 @@
 namespace
 {
 	constexpr int kDivNum = 16;
-	constexpr float kBattleAreaRadiusSize = 400.0f;
+	constexpr float kBattleAreaRadiusSize = 500.0f;
 	constexpr float kBattleTriggerDistance = 300.0f;
 	constexpr int kSegmentCount = 64;    // 円周を分割する数
 	constexpr float kLineWidth = 10.0f; // ラインの太さ
@@ -14,8 +14,8 @@ namespace
 
 	// 水色の固定ベースカラー
 	constexpr int kBaseRed = 50;                 // 基本赤成分
-	constexpr int kBaseGreen = 200;                // 基本緑成分
-	constexpr int kBaseBlue = 200;                // 基本青成分（明滅でここから加算）
+	constexpr int kBaseGreen = 200;              // 基本緑成分
+	constexpr int kBaseBlue = 200;               // 基本青成分（明滅でここから加算）
 
 	// 円形分割用
 	constexpr float kTwoPi = DX_PI_F * 2.0f; // 2π
