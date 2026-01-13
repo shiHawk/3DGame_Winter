@@ -1,9 +1,11 @@
 #pragma once
 #include "SceneBase.h"
+#include "ScoreManager.h"
+#include <memory>
 class ResultScene :public SceneBase
 {
 public:
-	ResultScene();
+	ResultScene(std::shared_ptr<ScoreManager> pScoreManager);
 	~ResultScene() {};
 	virtual void Init() override;
 	virtual void End() override;
@@ -11,6 +13,7 @@ public:
 	virtual void Draw() override;
 	virtual SceneID GetSceneID() const override;
 private:
+	std::shared_ptr<ScoreManager> m_pScoreManager;
 	bool m_isNextScene;
 	VECTOR m_playerPos;
 	// ƒJƒƒ‰‚ÌˆÊ’u
@@ -20,5 +23,6 @@ private:
 	// ƒJƒƒ‰‚Ì‹–ìŠp
 	float m_viewAngle;
 	int m_fontHandle;
+	int m_bgHandle;
 };
 

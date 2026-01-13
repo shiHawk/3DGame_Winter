@@ -24,7 +24,8 @@ private:
 		NORMALATTACK,
 		RANGEATTACK_CHARGE,
 		RANGEATTACK,
-		COOLDOWN
+		COOLDOWN,
+		DEAD
 	};
 	StrongEnemyState m_state;
 	AttackSphere m_enemyAttack;

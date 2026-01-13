@@ -224,8 +224,7 @@ void BattleAreaManager::ConstraintCharacterMovement(std::shared_ptr<CharacterBas
 		// バトルエリアの縁の座標を計算
 		VECTOR correctPos = VAdd(m_battleAreaCenterPos, VScale(dirXZ, m_battleAreaRadius));
 
-		// 【重要】高さを現在のキャラクターの状態に合わせる
-		// これにより、ジャンプ中や坂道でも不自然に高さが変わりません
+		// 高さを現在のキャラクターの状態に合わせる
 		correctPos.y = charaPos.y;
 
 		character->SetPos(correctPos);

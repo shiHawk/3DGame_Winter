@@ -57,7 +57,7 @@ void GameScene::Init()
 	m_pEffectManager->Init(m_pPlayer,m_pCompanion);
 	m_pBattleAreaManager->Init(m_pPlayer, m_pCompanion);
 	m_pBattleAreaManager->SetEnemy(m_pNormalEnemies, m_pStrongEnemies);
-	m_pUIManager->Init(m_pPlayer, m_pCompanion);
+	m_pUIManager->Init(m_pPlayer, m_pCompanion,m_pBossEnemy);
 	m_pScoreManager->Init();
 }
 
@@ -82,7 +82,7 @@ void GameScene::End()
 	//m_pStrongEnemy->End();
 	m_pStage->End();
 	m_pUIManager->End();
-	m_pScoreManager->End();
+	//m_pScoreManager->End();
 }
 
 SceneBase* GameScene::Update()
@@ -100,7 +100,7 @@ SceneBase* GameScene::Update()
 	//m_pNormalEnemy->Update();
 	m_pCompanion->Update();
 	m_pStage->Update();
-	if (Pad::isTrigger(PAD_INPUT_6)) // RBボタンでプレイヤーとコンパニオンの切り替え
+	if (Pad::isTrigger(PAD_INPUT_6) && !m_pPlayer->IsDead() && !m_pCompanion->IsDead()) // RBボタンでプレイヤーとコンパニオンの切り替え
 	{
 		CharacterBase::ControlMode currentMode = m_pPlayer->GetControlMode(); // 現在のモード
 		CharacterBase::ControlMode playerNewMode; // 次のプレイヤーのモード
@@ -194,7 +194,7 @@ SceneBase* GameScene::Update()
 	// フェードが終了したら遷移する
 	if (m_isNextScene && IsFadeComplete())
 	{
-		return new ResultScene();
+		return new ResultScene(m_pScoreManager);
 	}
 	
 	return this;

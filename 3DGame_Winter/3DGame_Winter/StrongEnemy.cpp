@@ -34,7 +34,7 @@ namespace
 	constexpr unsigned int kAreaColor = 0xff4500;
 	constexpr unsigned int kOutLineColor = 0xff0000;
 	constexpr int kDivNum = 32;
-	constexpr float kInvincibilityTime = 30.0f;
+	constexpr float kInvincibilityTime = 60.0f;
 	constexpr int kMaxHp = 300;
 	constexpr int kAttackPower = 75;
 }
@@ -166,15 +166,24 @@ void StrongEnemy::Update()
 			m_state = StrongEnemyState::DEFAULT;
 		}
 		break;
+	case StrongEnemy::DEAD:
+		m_vec = { 0.0f,0.0f,0.0f };
+		if (GetIsAnimEnd())
+		{
+			End();
+			m_isDead = true;
+			return;
+		}
+		break;
 	}
-	if (m_isDead)
-	{
-		//m_alpha -= 0.01f;
-		m_enemyAttack.active = false;
-		End();
-		return;
-	}
-	UpdateAnim();
+	//if (m_isDead)
+	//{
+	//	//m_alpha -= 0.01f;
+	//	m_enemyAttack.active = false;
+	//	End();
+	//	return;
+	//}
+	UpdateAnim(m_modelHandle);
 	MV1SetPosition(m_modelHandle, m_pos);
 }
 
@@ -230,7 +239,11 @@ void StrongEnemy::OnDamage(int damage)
 	if (m_invincibilityTimer > 0.0f) return;
 	if (m_hp <= 0)
 	{
-		m_isDead = true;
+		m_enemyAttack.active = false;
+		m_hp = 0;
+		m_state = StrongEnemyState::DEAD;
+		ChangeAnim(m_modelHandle, kDamageAnimNo,false,kDamageAnimIncrement);
+		//m_isDead = true;
 	}
 	m_isHitFlag = true;
 	m_hp -= damage;

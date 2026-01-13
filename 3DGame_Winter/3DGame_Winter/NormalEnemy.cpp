@@ -24,11 +24,12 @@ namespace
 	constexpr int kAttackAnimNo = 5;
 	constexpr int kDamageAnimNo = 40;
 	constexpr int kKnockbackAnimNo = 25;
-	constexpr int kDeathAnimNo = 26;
+	constexpr int kDeathAnimNo = 25;
 	constexpr float kWalkAnimIncrement = 0.6f; // 歩行アニメーションの再生速度
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
 	constexpr float kAttackAnimIncrement = 0.5f; // 攻撃アニメーションの再生速度
 	constexpr float kDamageAnimIncrement = 0.6f; // 被弾アニメーションの再生速度
+	constexpr float kDeathAnimIncrement = 0.4f; // 死亡アニメーションの再生速度
 	constexpr float kKnockbackAnimIncrement = 0.7f;
 
 	constexpr float kInvincibilityTime = 30.0f;
@@ -80,6 +81,25 @@ void NormalEnemy::End()
 
 void NormalEnemy::Update()
 {
+	if (m_hp <= 0)
+	{
+		m_enemyAttack.active = false;
+		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDeathAnimIncrement);
+		// アニメーションを更新する
+		UpdateAnim(m_modelHandle);
+		//m_alpha -= 0.02f;
+		if (GetIsAnimEnd())
+		{
+			m_isDead = true; 
+		}
+
+		if (m_isDead)
+		{
+			End();
+			return;
+		}
+		return;
+	}
 	SearchTarget();
 	if (m_knockbackTimer > 0.0f)
 	{
@@ -166,15 +186,8 @@ void NormalEnemy::Update()
 		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 	}
 	
-	if (m_isDead)
-	{
-		//m_alpha -= 0.01f;
-		m_enemyAttack.active = false;
-		End();
-		return;
-	}
 	MV1SetPosition(m_modelHandle,m_pos);
-	UpdateAnim();
+	UpdateAnim(m_modelHandle);
 }
 
 void NormalEnemy::Draw()
@@ -202,14 +215,15 @@ void NormalEnemy::OnDamage(int damage)
 {
 	m_enemyAttack.active = false;
 	m_enemyAttack.timer = 0.0f;
+	m_isHitFlag = true;
+	m_hp -= damage;
 	if (m_hp <= 0)
 	{
 		m_hp = 0;
-		m_isDead = true;
+		ChangeAnim(m_modelHandle,kDeathAnimNo,false, kDeathAnimIncrement);
 	}
 	if (m_invincibilityTimer > 0.0f) return;
-	m_isHitFlag = true;
-	m_hp -= damage;
+	
 	if (m_isKnockbackFlag)
 	{
 

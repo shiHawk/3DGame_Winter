@@ -6,7 +6,7 @@ public:
 	~Animation();
 	void Init();
 	void AttachAnim(int modelHandle, int animNo);
-	void UpdateAnim();
+	void UpdateAnim(int modelHandle);
 	void ChangeAnim(int modelHandle, int animNo, bool isLoop, float increment);
 	bool isNowPlaying() { return m_isNowPlaying; }
 	bool GetIsAnimEnd();

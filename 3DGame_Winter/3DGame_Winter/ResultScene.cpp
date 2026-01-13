@@ -1,5 +1,6 @@
 #include "ResultScene.h"
 #include "TitleScene.h"
+#include "SoundManager.h"
 #include "game.h"
 #include "Pad.h"
 namespace
@@ -18,17 +19,27 @@ namespace
 	// フォントのサイズ、太さ
 	constexpr int kFontSize = 60;
 	constexpr int kFontThick = 5;
+
 	constexpr int kScorePosX = 430; 
-	constexpr int kScorePosY = 280;
+	constexpr int kScorePosY = 200;
+
+	constexpr int kTimeScorePosX = 430;
+	constexpr int kTimeScorePosY = 320;
+
+	// 背景の位置
+	constexpr int kBGPosX = -350;
+	constexpr int kBGPosY = -150;
 }
 
-ResultScene::ResultScene():
+ResultScene::ResultScene(std::shared_ptr<ScoreManager> pScoreManager):
+	m_pScoreManager(pScoreManager),
 	m_isNextScene(false),
 	m_playerPos({ 0.0f,0.0f,0.0f }),
 	m_cameraPos({ 0.0f,0.0f,0.0f }),
 	m_cameraTarget({ 0.0f,0.0f,0.0f }),
 	m_viewAngle(0.0f),
-	m_fontHandle(-1)
+	m_fontHandle(-1),
+	m_bgHandle(-1)
 {
 }
 
@@ -56,22 +67,31 @@ void ResultScene::Init()
 
 	// カメラのnear,farを設定する
 	SetCameraNearFar(kCameraNearClip, kCameraFarClip);
+	SoundManager::GetInstance()->PlayBGM();
 
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
+	m_bgHandle = LoadGraph(L"Data/UI/result_seat.png");
 }
 
 void ResultScene::End()
 {
 	DeleteFontToHandle(m_fontHandle);
+	DeleteGraph(m_bgHandle);
+	m_pScoreManager->End();
 }
 
 SceneBase* ResultScene::Update()
 {
 	UpdateFade();
+	SoundManager::GetInstance()->Update();
 	if (!m_isNextScene && !IsFadingOut() && Pad::isTrigger(PAD_INPUT_2))
 	{
 		StartFadeOut();
 		m_isNextScene = true;
+	}
+	if (IsFadingOut())
+	{
+		SoundManager::GetInstance()->FadeBGMVol();
 	}
 	// フェードが終了したら遷移する
 	if (m_isNextScene && IsFadeComplete())
@@ -83,8 +103,10 @@ SceneBase* ResultScene::Update()
 
 void ResultScene::Draw()
 {
-	DrawBox(0, 0, Game::kScreenWidth, Game::kScreenHeight, 0xffffff, true);
+	//DrawBox(0, 0, Game::kScreenWidth, Game::kScreenHeight, 0xffffff, true);
+	DrawGraph(kBGPosX,kBGPosY,m_bgHandle,true);
 	DrawFormatStringToHandle(kScorePosX,kScorePosY,0xff8c00,m_fontHandle,L"GameClear!");
+	DrawFormatStringToHandle(kTimeScorePosX,kTimeScorePosY,0x87cefa,m_fontHandle,L"TimeScore:%d",m_pScoreManager->GetTimeBonus());
 	DrawFade();
 }
 

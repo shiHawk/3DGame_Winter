@@ -214,7 +214,7 @@ void Player::Update()
     //m_pos = nextPos;
    
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
-    UpdateAnim();
+    UpdateAnim(m_modelHandle);
     //printfDx(L"Pos.y:%f\n",m_pos.y);
     /*if (m_isHitFlag)
     {

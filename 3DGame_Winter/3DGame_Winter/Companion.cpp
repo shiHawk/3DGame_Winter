@@ -267,7 +267,7 @@ void Companion::Update()
 	//m_pos = nextPos;
 	MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY+DX_PI_F, 0.0f));
 	MV1SetPosition(m_modelHandle,m_pos);
-	UpdateAnim();
+	UpdateAnim(m_modelHandle);
 }
 
 void Companion::Draw()

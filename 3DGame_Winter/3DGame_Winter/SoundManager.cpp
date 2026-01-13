@@ -4,13 +4,32 @@
 namespace
 {
 	constexpr int kMaxVol = 255;
-	constexpr int kFadeStepVolume = 8;        // フェードアウト時に1フレームで下げる音量
+	constexpr int kFadeStepVolume = 4;        // フェードアウト時に1フレームで下げる音量
 }
 
+SoundManager::SoundManager() :
+	m_pSceneManager(nullptr),
+	m_volumeReduction(0),
+	m_currentBgmHandle(-1),
+	m_titleBgmHandle(-1),
+	m_gameSceneBgmHandle(-1),
+	m_resultBgmHandle(-1),
+	m_playerFirstAttackSoundHandle(-1),
+	m_playerSecondAttackSoundHandle(-1),
+	m_playerThirdAttackSoundHandle(-1),
+	m_playerSpecialSkilSoundHandle(-1),
+	m_companionNormalAttackSoundHandle(-1),
+	m_companionStrongAttackSoundHandle(-1),
+	m_companionSpecialSkilSoundHandle(-1),
+	m_enemyAttackSoundHandle(-1)
+{
+}
 
 void SoundManager::Init(SceneManager* pSceneManager)
 {
 	m_pSceneManager = pSceneManager;
+	m_titleBgmHandle = LoadSoundMem(L"Data/sound/titlebgm.mp3");
+	m_resultBgmHandle = LoadSoundMem(L"Data/sound/resultbgm.mp3");
 }
 
 void SoundManager::End()
@@ -22,6 +41,7 @@ void SoundManager::End()
 	DeleteSoundMem(m_playerSecondAttackSoundHandle);
 	DeleteSoundMem(m_playerThirdAttackSoundHandle);
 	DeleteSoundMem(m_enemyAttackSoundHandle);
+	SoundManager::GetInstance()->StopBGM();
 }
 
 void SoundManager::Update()

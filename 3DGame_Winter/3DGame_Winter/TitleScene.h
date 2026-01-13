@@ -1,5 +1,6 @@
 #pragma once
 #include "SceneBase.h"
+#include "Animation.h"
 #include <vector>
 #include <memory>
 class TitleScene : public SceneBase
@@ -13,8 +14,12 @@ public:
 	virtual void Draw() override;
 	virtual SceneID GetSceneID() const override;
 private:
+	void SetStage();
+	std::shared_ptr<Animation> m_pWarriorAnim;
+	std::shared_ptr<Animation> m_pWizardAnim;
 	bool m_isNextScene;
-	VECTOR m_playerPos;
+	VECTOR m_warriorPos;
+	VECTOR m_wizardPos;
 	// カメラの位置
 	VECTOR m_cameraPos;
 	// カメラの注視点(見ている場所)
@@ -36,7 +41,13 @@ private:
 	float m_tileSize; // タイルのサイズ
 	VECTOR m_tilePos;
 	VECTOR m_tileStartPos;
+	VECTOR m_wallPos;
 	int m_tileModelBase;
+	int m_wallModelBase;
+	int m_stoolHandle;
+	int m_coinHandle;
+	int m_lightHandle;
 	std::vector<int> m_tileModelHandles;
+	std::vector<int> m_wallModelHandles;
 };
 

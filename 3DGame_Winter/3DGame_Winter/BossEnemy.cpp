@@ -191,7 +191,7 @@ void BossEnemy::Update()
         End();
         return;
     }*/
-    UpdateAnim();
+    UpdateAnim(m_modelHandle);
     MV1SetPosition(m_modelHandle, m_pos);
     if (m_hp > 0)
     {

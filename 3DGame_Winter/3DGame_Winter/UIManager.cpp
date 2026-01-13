@@ -35,11 +35,13 @@ namespace
 UIManager::UIManager():
 	m_playerHpGaugeRate(0.0f),
 	m_companionHpGaugeRate(0.0f),
+	m_bossHpGaugeRate(0.0f),
 	m_playerSpecialGaugeRate(0.0f),
 	m_companionSpecialGaugeRate(0.0f),
 	m_hpGaugeFrameHandle(-1),
 	m_hpGaugeHandle(-1),
-	m_sgGaugeHandle(-1)
+	m_sgGaugeHandle(-1),
+	m_bossHpGaugeHandle(-1)
 {
 }
 
@@ -47,11 +49,13 @@ UIManager::~UIManager()
 {
 }
 
-void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
+void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<BossEnemy> pBoss)
 {
 	m_pPlayer = pPlayer;
 	m_pCompanion = pCompanion;
+	m_pBossEnemy = pBoss;
 	m_hpGaugeFrameHandle = LoadGraph(L"Data/UI/HPGaugeFrame.png");
+	m_bossHpGaugeHandle = LoadGraph(L"Data/UI/Boss_Hp.png");
 	m_hpGaugeHandle = LoadGraph(L"Data/UI/HP.png");
 	m_sgGaugeHandle = LoadGraph(L"Data/UI/SG.png");
 }
@@ -61,6 +65,7 @@ void UIManager::End()
 	DeleteGraph(m_hpGaugeFrameHandle);
 	DeleteGraph(m_hpGaugeHandle);
 	DeleteGraph(m_sgGaugeHandle);
+	DeleteGraph(m_bossHpGaugeHandle);
 }
 
 void UIManager::Updata()
@@ -68,6 +73,7 @@ void UIManager::Updata()
 	// écÇËHPÇÃäÑçáÇçXêV
 	m_playerHpGaugeRate = static_cast<float>(m_pPlayer->GetHp()) / m_pPlayer->GetMaxHp();
 	m_companionHpGaugeRate = static_cast<float>(m_pCompanion->GetHp()) / m_pCompanion->GetMaxHp();
+	m_bossHpGaugeRate = static_cast<float>(m_pBossEnemy->GetHp()) / 500;
 
 	m_playerSpecialGaugeRate = static_cast<float>(m_pPlayer->GetSpecialGauge()) / 100.0f;
 	m_companionSpecialGaugeRate = static_cast<float>(m_pCompanion->GetSpecialGauge()) / 100.0f;
@@ -77,6 +83,7 @@ void UIManager::Draw()
 {
 	DrawHp();
 	DrawSg();
+	//DrawBossHp();
 }
 
 void UIManager::DrawHp()
@@ -103,4 +110,10 @@ void UIManager::DrawSg()
 	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSgSrcX, kSgSrcY, static_cast<int>(kHpGaugeWidth * m_companionSpecialGaugeRate),
 				  kHpTextPosY, m_sgGaugeHandle, true);
+}
+
+void UIManager::DrawBossHp()
+{
+	DrawRectGraph(500,100, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
+	DrawRectGraph(500,100, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth*m_bossHpGaugeRate), kHpTextPosY, m_bossHpGaugeHandle, true);
 }
