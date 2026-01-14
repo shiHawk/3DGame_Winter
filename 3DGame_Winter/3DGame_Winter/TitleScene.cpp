@@ -25,12 +25,20 @@ namespace
 
 	constexpr int kTitlePosX = 352;
 	constexpr int kTitlePosY = 40;
+	constexpr int kButtonPosX = 440;
+	constexpr int kButtonPosY = 610;
+
+	// フォントのサイズ、太さ
+	constexpr int kFontSize = 50;
+	constexpr int kFontThick = 5;
 
 	constexpr float kModelScale = 60.0f; // モデルのスケール
 	constexpr VECTOR kDefaultWarriorPos = { 100.0f,-1.0f,0.0f };
 	constexpr VECTOR kDefaultWizardPos = { -100.0f,-1.0f,0.0f };
 	constexpr VECTOR kStoolPos = { 0.0f,-9.0f,0.0f };
 	constexpr VECTOR kCoinPos = { 0.0f,41.0f,0.0f };
+	constexpr VECTOR kBoxPos = { 300.0f,41.0f,500.0f };
+	constexpr float kDifColor = 0.7f;
 
 	constexpr int kSitAnim = 73;
 	constexpr int kStandUpAnim = 75;
@@ -70,6 +78,7 @@ TitleScene::TitleScene():
 	m_wallModelBase(-1),
 	m_stoolHandle(-1),
 	m_coinHandle(-1),
+	m_boxHandle(-1),
 	m_lightHandle(-1),
 	m_tilePos({ 0.0f,0.0f,0.0f }),
 	m_tileStartPos({ 0.0f,0.0f,0.0f }),
@@ -118,6 +127,8 @@ void TitleScene::Init()
 	m_wallModelBase = MV1LoadModel(L"Data/model/wall.mv1");
 	m_stoolHandle = MV1LoadModel(L"Data/model/stool.mv1");
 	m_coinHandle = MV1LoadModel(L"Data/model/coin_stack_small.mv1");
+	m_boxHandle = MV1LoadModel(L"Data/model/box_stacked.mv1");
+	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	MV1SetScale(m_warriorModelHandle,VGet(kModelScale, kModelScale, kModelScale));
 	MV1SetScale(m_wizardModelHandle,VGet(kModelScale, kModelScale, kModelScale));
 	SetStage();
@@ -128,9 +139,11 @@ void TitleScene::Init()
 	m_wizardPos = kDefaultWizardPos;
 	MV1SetRotationXYZ(m_warriorModelHandle, VGet(0.0f, 90.0f * DX_PI_F / 180.0f, 0.0f));
 	MV1SetRotationXYZ(m_wizardModelHandle, VGet(0.0f, -90.0f * DX_PI_F / 180.0f, 0.0f));
+	MV1SetScale(m_boxHandle,VGet(0.4f,0.4f,0.4f));
 
 	MV1SetPosition(m_stoolHandle,kStoolPos);
 	MV1SetPosition(m_coinHandle,kCoinPos);
+	MV1SetPosition(m_boxHandle,kBoxPos);
 }
 
 void TitleScene::End()
@@ -140,7 +153,9 @@ void TitleScene::End()
 	MV1DeleteModel(m_wizardModelHandle);
 	MV1DeleteModel(m_stoolHandle);
 	MV1DeleteModel(m_coinHandle);
+	MV1DeleteModel(m_boxHandle);
 	DeleteLightHandle(m_lightHandle);
+	DeleteFontToHandle(m_fontHandle);
 
 	for (int tileModelHandle : m_tileModelHandles)
 	{
@@ -216,6 +231,9 @@ void TitleScene::Draw()
 	MV1DrawModel(m_wizardModelHandle);
 	MV1DrawModel(m_stoolHandle);
 	MV1DrawModel(m_coinHandle);
+	MV1SetDifColorScale(m_boxHandle, GetColorF(kDifColor, kDifColor, kDifColor,1.0f));
+	MV1DrawModel(m_boxHandle);
+	DrawFormatStringToHandle(kButtonPosX,kButtonPosY,0xffffff,m_fontHandle,L"Press B button");
 	DrawFade();
 }
 

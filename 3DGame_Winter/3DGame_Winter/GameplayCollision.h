@@ -24,6 +24,7 @@ public:
 	void CheckStrongEnemyRangeAttack();
 	void CheckBossEnemyAttack();
 	void PushBackCharacter(VECTOR pos1,float pos1Radius, VECTOR pos2, float pos2Radius,CharacterBase* pTargetCharacter);
+	const std::vector<VECTOR>& GetHitPositions() const { return m_hitPositions; }
 private:
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;
@@ -48,5 +49,7 @@ private:
 		VECTOR m_hitPos; // 攻撃が当たった位置のワールド座標
 	};
 	CollisionOverlapData m_overLapData;
+	std::vector<VECTOR> m_hitPositions;
+	void ClearHitPositions() { m_hitPositions.clear(); }
 };
 

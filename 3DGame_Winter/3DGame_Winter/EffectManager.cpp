@@ -3,16 +3,19 @@
 #include <EffekseerForDXLib.h>
 #include "Player.h"
 #include "Companion.h"
+#include "GameplayCollision.h"
 namespace
 {
 	constexpr int kParticleMax = 8000;
 	constexpr float kSpecialSkilEffectSize = 100.0f;
 	constexpr float kSpecialSkilSpped = 10.0f;
+	constexpr float kPlayerHitEffectSize = 30.0f;
 }
 
 EffectManager::EffectManager() :
 	m_meleeSpecialEffectHandle(-1),
 	m_playerEffectHandle(-1),
+	m_hitEffectHandle(-1),
 	m_isMeleeSpecialEffect(false),
 	m_rangedSpecialEffectHandle(-1),
 	m_isRangedSpecialEffect(false)
@@ -23,12 +26,14 @@ EffectManager::~EffectManager()
 {
 }
 
-void EffectManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
+void EffectManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<GameplayCollision> pGameplayCollision)
 {
 	m_pPlayer = pPlayer;
 	m_pCompanion = pCompanion;
+	m_pGameplayCollision = pGameplayCollision;
 	m_meleeSpecialEffectHandle = LoadEffekseerEffect(L"Data/effect/Aura01.efkefc");
 	m_rangedSpecialEffectHandle = LoadEffekseerEffect(L"Data/effect/MagicMeteo.efkefc");
+	m_hitEffectHandle = LoadEffekseerEffect(L"Data/effect/AttackHit.efkefc");
 	m_playerEffectHandle = -1;
 }
 
@@ -36,10 +41,20 @@ void EffectManager::End()
 {
 	DeleteEffekseerEffect(m_meleeSpecialEffectHandle);
 	DeleteEffekseerEffect(m_rangedSpecialEffectHandle);
+	DeleteEffekseerEffect(m_hitEffectHandle);
 }
 
 void EffectManager::Update()
 {
+	const auto& hitPosList = m_pGameplayCollision->GetHitPositions();
+	for (const auto& pos : hitPosList)
+	{
+		// 1‰ñŒÀ‚è‚ÌÄ¶iPlayEffekseer3DEffectj
+		int handle = PlayEffekseer3DEffect(m_hitEffectHandle);
+		SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y, pos.z);
+		SetScalePlayingEffekseer3DEffect(handle, kPlayerHitEffectSize, kPlayerHitEffectSize, kPlayerHitEffectSize);
+	}
+
 	if (m_pPlayer->IsSpecialSkilFlag() && !m_isMeleeSpecialEffect)
 	{
 		m_playerEffectHandle = PlayEffekseer3DEffect(m_meleeSpecialEffectHandle);

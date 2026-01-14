@@ -5,12 +5,13 @@
 #include "CharacterBase.h"
 class Player;
 class Companion;
+class GameplayCollision;
 class EffectManager
 {
 public:
 	EffectManager();
 	~EffectManager();
-	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion);
+	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion,std::shared_ptr<GameplayCollision> pGameplayCollision);
 	void End();
 	void Update();
 	void Draw();
@@ -18,9 +19,11 @@ public:
 private:
 	int m_meleeSpecialEffectHandle; // 近接キャラの必殺技エフェクト
 	int m_rangedSpecialEffectHandle; // 遠距離キャラの必殺技エフェクト
+	int m_hitEffectHandle;
 	int m_playerEffectHandle;
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;
+	std::shared_ptr<GameplayCollision> m_pGameplayCollision;
 	bool m_isMeleeSpecialEffect;
 	bool m_isRangedSpecialEffect;
 };

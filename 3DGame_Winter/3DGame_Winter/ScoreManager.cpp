@@ -29,12 +29,12 @@ void ScoreManager::End()
 void ScoreManager::Updata()
 {
 	m_elapsedTimeSeconds = static_cast<int>((GetNowCount() - m_startTime) / kMillisecondsPerSecond);
+	m_timeBonus = (kMaxTimeBonus - m_elapsedTimeSeconds) * kTimeBonusMultiplier;
 	//printfDx(L"m_elapsedTimeSeconds:%d\n",m_elapsedTimeSeconds);
 }
 
 int ScoreManager::GetTimeBonus()
 {
-	m_timeBonus = (kMaxTimeBonus - m_elapsedTimeSeconds) * kTimeBonusMultiplier;
 	if (m_timeBonus <= 0)
 	{
 		m_timeBonus = 0;

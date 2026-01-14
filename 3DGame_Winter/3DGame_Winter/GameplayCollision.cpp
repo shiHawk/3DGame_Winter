@@ -30,6 +30,8 @@ void GameplayCollision::End()
 
 void GameplayCollision::Update()
 {
+	// 毎フレーム、前フレームのヒット情報をクリアする
+	ClearHitPositions();
 	CheckPlayerAttack();
 	CheckCompanionAttack();
 	CheckNormalEnemyAttack();
@@ -62,6 +64,10 @@ void GameplayCollision::CheckPlayerAttack()
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
 		if (hitInfo.m_distance < playerAttackRadius + enemyColRadius )
 		{
+			VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+			VECTOR hitPos = VAdd(m_pPlayer->GetAttackPos(), VScale(normVec, playerAttackRadius));
+			m_hitPositions.push_back(hitPos); // リストに保存
+
 			enemy->OnDamage(m_pPlayer->GetAttackPower());
 			m_pPlayer->AddSpecialGauge(5);
 			if (m_pPlayer->IsComboFinish())
@@ -82,6 +88,9 @@ void GameplayCollision::CheckPlayerAttack()
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
 		if (hitInfo.m_distance < playerAttackRadius + enemyColRadius)
 		{
+			VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+			VECTOR hitPos = VAdd(m_pPlayer->GetAttackPos(), VScale(normVec, playerAttackRadius));
+			m_hitPositions.push_back(hitPos); // リストに保存
 			enemy->OnDamage(m_pPlayer->GetAttackPower());
 			m_pPlayer->AddSpecialGauge(5);
 		}
@@ -135,6 +144,9 @@ void GameplayCollision::CheckCompanionAttack()
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
 		if (hitInfo.m_distance < companionAttackRadius + enemyColRadius)
 		{
+			VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+			VECTOR hitPos = VAdd(m_pCompanion->GetAttackPos(), VScale(normVec, companionAttackRadius));
+			m_hitPositions.push_back(hitPos); // リストに保存
 			enemy->OnDamage(m_pCompanion->GetAttackPower());
 			m_pCompanion->AddSpecialGauge(5);
 		}
@@ -148,6 +160,9 @@ void GameplayCollision::CheckCompanionAttack()
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
 		if (hitInfo.m_distance < companionAttackRadius + enemyColRadius)
 		{
+			VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+			VECTOR hitPos = VAdd(m_pCompanion->GetAttackPos(), VScale(normVec, companionAttackRadius));
+			m_hitPositions.push_back(hitPos); // リストに保存
 			enemy->OnDamage(m_pCompanion->GetAttackPower());
 			m_pCompanion->AddSpecialGauge(5);
 		}
@@ -200,6 +215,9 @@ void GameplayCollision::CheckNormalEnemyAttack()
 
 			if (hitInfo.m_distance < enemyAttackRadius + m_pPlayer->GetColRadius())
 			{
+				VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+				VECTOR hitPos = VAdd(enemyAttackPos, VScale(normVec, enemyAttackRadius));
+				m_hitPositions.push_back(hitPos); // リストに保存
 				m_pPlayer->OnDamage(attackPower);
 			}
 		}
@@ -213,6 +231,9 @@ void GameplayCollision::CheckNormalEnemyAttack()
 
 			if (hitInfo.m_distance < enemyAttackRadius + m_pCompanion->GetColRadius())
 			{
+				VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+				VECTOR hitPos = VAdd(enemyAttackPos, VScale(normVec, enemyAttackRadius));
+				m_hitPositions.push_back(hitPos); // リストに保存
 				m_pCompanion->OnDamage(attackPower);
 			}
 		}
@@ -257,6 +278,9 @@ void GameplayCollision::CheckStrongEnemyRangeAttack()
 
 			if (hitInfo.m_distance < enemyAttackRadius + m_pPlayer->GetColRadius())
 			{
+				VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+				VECTOR hitPos = VAdd(enemyAttackPos, VScale(normVec, enemyAttackRadius));
+				m_hitPositions.push_back(hitPos); // リストに保存
 				m_pPlayer->OnDamage(attackPower);
 			}
 		}
@@ -268,6 +292,9 @@ void GameplayCollision::CheckStrongEnemyRangeAttack()
 
 			if (hitInfo.m_distance < enemyAttackRadius + m_pCompanion->GetColRadius())
 			{
+				VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+				VECTOR hitPos = VAdd(enemyAttackPos, VScale(normVec, enemyAttackRadius));
+				m_hitPositions.push_back(hitPos); // リストに保存
 				m_pCompanion->OnDamage(attackPower);
 			}
 		}
@@ -305,6 +332,9 @@ void GameplayCollision::CheckBossEnemyAttack()
 
 			if (hitInfo.m_distance < enemyAttackRadius + m_pPlayer->GetColRadius())
 			{
+				VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+				VECTOR hitPos = VAdd(enemyAttackPos, VScale(normVec, enemyAttackRadius));
+				m_hitPositions.push_back(hitPos); // リストに保存
 				m_pPlayer->OnDamage(attackPower);
 			}
 		}
@@ -316,6 +346,9 @@ void GameplayCollision::CheckBossEnemyAttack()
 
 			if (hitInfo.m_distance < enemyAttackRadius + m_pCompanion->GetColRadius())
 			{
+				VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+				VECTOR hitPos = VAdd(enemyAttackPos, VScale(normVec, enemyAttackRadius));
+				m_hitPositions.push_back(hitPos); // リストに保存
 				m_pCompanion->OnDamage(attackPower);
 			}
 		}

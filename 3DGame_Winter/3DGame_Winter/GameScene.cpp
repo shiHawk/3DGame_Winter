@@ -54,7 +54,7 @@ void GameScene::Init()
 	m_pFlyingEnemy->Init(m_pPlayer, m_pCompanion);
 	m_pBossEnemy->Init(m_pPlayer, m_pCompanion);
 	//m_pStrongEnemy->Init(m_pPlayer, m_pCompanion);
-	m_pEffectManager->Init(m_pPlayer,m_pCompanion);
+	m_pEffectManager->Init(m_pPlayer,m_pCompanion,m_pGameplayCollision);
 	m_pBattleAreaManager->Init(m_pPlayer, m_pCompanion);
 	m_pBattleAreaManager->SetEnemy(m_pNormalEnemies, m_pStrongEnemies);
 	m_pUIManager->Init(m_pPlayer, m_pCompanion,m_pBossEnemy);

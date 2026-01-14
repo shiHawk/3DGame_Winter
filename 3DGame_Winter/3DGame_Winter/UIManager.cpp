@@ -114,6 +114,8 @@ void UIManager::DrawSg()
 
 void UIManager::DrawBossHp()
 {
-	DrawRectGraph(500,100, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
-	DrawRectGraph(500,100, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth*m_bossHpGaugeRate), kHpTextPosY, m_bossHpGaugeHandle, true);
+	DrawRectExtendGraph(100,100,600,150, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, 150, true);
+	DrawRectExtendGraph(100,100,600,150, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_bossHpGaugeRate), 150, m_bossHpGaugeHandle, true);
+	/*DrawRectGraph(500,100, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
+	DrawRectGraph(500,100, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth*m_bossHpGaugeRate), kHpTextPosY, m_bossHpGaugeHandle, true);*/
 }
