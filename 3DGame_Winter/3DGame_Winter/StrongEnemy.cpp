@@ -189,7 +189,6 @@ void StrongEnemy::Update()
 
 void StrongEnemy::Draw()
 {
-	//DrawSphere3D(m_pos,kColRadius,kDivNum,0x000000,0xffffff,true);
 	MV1DrawModel(m_modelHandle);
 	if (m_enemyAttack.active)
 	{

@@ -322,7 +322,7 @@ void Companion::OnStrongAttack()
 	}
 	VECTOR forwardVec = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
 	m_attack.pos = VAdd(m_pos,VScale(forwardVec,kSphereRadius*2.0f));
-	m_attack.pos.y = m_pos.y + kOffSetStrongAttackPosY;
+	m_attack.pos.y = m_pos.y;
 }
 
 void Companion::OnSpecialSkil()
@@ -396,30 +396,38 @@ void Companion::UpdateAIState()
 			m_forwardDir.z = cosf(m_angleY);
 			m_vec = VScale(m_forwardDir, kMoveSpeed);
 		}
-		else if (m_distanceToEnemy > kCloseRangeAttackDistance) // 近距離攻撃の範囲に近づくまで遠距離攻撃
+		else if (m_distanceToEnemy < kCloseRangeAttackDistance)
 		{
-			m_vec = { 0.0f,0.0f,0.0f }; // 移動を停止
-			if (m_attackCoolTimer <= 0.0f) // クールタイムが終わっているかチェック
+			// 近距離範囲に入った時の処理
+			if (m_attackCoolTimer <= 0.0f)
+			{
+				// 0～100の乱数を取得して、行動を決定する
+				int decision = GetRand(100);
+
+				if (decision < 60) // 60%の確率で近接攻撃
+				{
+					m_vec = { 0.0f, 0.0f, 0.0f };
+					OnAttack();
+					m_companionState = CompanionState::NORMAL_ATTACK;
+				}
+				else // 40%の確率で距離を取って遠距離攻撃（仕切り直し）
+				{
+					// 敵と反対方向にベクトルを向ける
+					VECTOR retreatDir = VScale(m_dirToEnemy, -1.0f);
+					m_vec = VScale(retreatDir, kMoveSpeed); // 下がりながら
+
+					OnStrongAttack(); // 遠距離攻撃を行う
+					m_companionState = CompanionState::STRONG_ATTACK;
+				}
+			}
+		}
+		else // 中距離（遠距離攻撃レンジ）
+		{
+			m_vec = { 0.0f, 0.0f, 0.0f };
+			if (m_attackCoolTimer <= 0.0f)
 			{
 				OnStrongAttack();
 				m_companionState = CompanionState::STRONG_ATTACK;
-			}
-			else
-			{
-				m_companionState = CompanionState::NORMAL;
-			}
-		}
-		else // 近距離攻撃の範囲に入ったら近距離攻撃
-		{
-			m_vec = { 0.0f,0.0f,0.0f }; // 移動を停止
-			if (m_attackCoolTimer <= 0.0f) // クールタイムが終わっているかチェック
-			{
-				OnAttack();
-				m_companionState = CompanionState::NORMAL_ATTACK;
-			}
-			else
-			{
-				m_companionState = CompanionState::NORMAL;
 			}
 		}
 		break;

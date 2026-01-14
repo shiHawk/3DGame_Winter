@@ -41,5 +41,6 @@ private:
 	int m_companionStrongAttackSoundHandle;
 	int m_companionSpecialSkilSoundHandle;
 	int m_enemyAttackSoundHandle;
+	int m_enterSEHandle;
 };
 

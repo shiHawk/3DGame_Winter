@@ -48,6 +48,7 @@ private:
 	int m_coinHandle;
 	int m_boxHandle;
 	int m_lightHandle;
+	int m_startHandle;
 	std::vector<int> m_tileModelHandles;
 	std::vector<int> m_wallModelHandles;
 };

@@ -25,8 +25,8 @@ namespace
 
 	constexpr int kTitlePosX = 352;
 	constexpr int kTitlePosY = 40;
-	constexpr int kButtonPosX = 440;
-	constexpr int kButtonPosY = 610;
+	constexpr int kButtonPosX = 490;
+	constexpr int kButtonPosY = 630;
 
 	// フォントのサイズ、太さ
 	constexpr int kFontSize = 50;
@@ -80,6 +80,7 @@ TitleScene::TitleScene():
 	m_coinHandle(-1),
 	m_boxHandle(-1),
 	m_lightHandle(-1),
+	m_startHandle(-1),
 	m_tilePos({ 0.0f,0.0f,0.0f }),
 	m_tileStartPos({ 0.0f,0.0f,0.0f }),
 	m_wallPos({ 0.0f,0.0f,0.0f })
@@ -120,6 +121,7 @@ void TitleScene::Init()
 	m_lightHandle = CreateDirLightHandle(kSecondLight);
 
 	SoundManager::GetInstance()->PlayBGM();
+	m_startHandle = LoadGraph(L"Data/title/button.png");
 	m_titleLogoHandle = LoadGraph(L"Data/title/titleLogo.png");
 	m_warriorModelHandle = MV1LoadModel(L"Data/model/Barbarian.mv1");
 	m_wizardModelHandle = MV1LoadModel(L"Data/model/Mage.mv1");
@@ -149,6 +151,7 @@ void TitleScene::Init()
 void TitleScene::End()
 {
 	DeleteGraph(m_titleLogoHandle);
+	DeleteGraph(m_startHandle);
 	MV1DeleteModel(m_warriorModelHandle);
 	MV1DeleteModel(m_wizardModelHandle);
 	MV1DeleteModel(m_stoolHandle);
@@ -227,13 +230,15 @@ void TitleScene::Draw()
 		MV1DrawModel(wallModelHandle);
 	}
 	DrawGraph(kTitlePosX, kTitlePosY, m_titleLogoHandle, true);
+	//DrawGraph(kButtonPosX, kButtonPosY, m_startHandle, true);
+	DrawRectGraph(kButtonPosX, kButtonPosY,35,104,309,35, m_startHandle,true);
 	MV1DrawModel(m_warriorModelHandle);
 	MV1DrawModel(m_wizardModelHandle);
 	MV1DrawModel(m_stoolHandle);
 	MV1DrawModel(m_coinHandle);
 	MV1SetDifColorScale(m_boxHandle, GetColorF(kDifColor, kDifColor, kDifColor,1.0f));
 	MV1DrawModel(m_boxHandle);
-	DrawFormatStringToHandle(kButtonPosX,kButtonPosY,0xffffff,m_fontHandle,L"Press B button");
+	//DrawFormatStringToHandle(kButtonPosX,kButtonPosY,0xffffff,m_fontHandle,L"Press B button");
 	DrawFade();
 }
 

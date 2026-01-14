@@ -104,6 +104,9 @@ void GameplayCollision::CheckPlayerAttack()
 
 		if (hitInfo.m_distance < playerAttackRadius + bossEnemyColRadius)
 		{
+			VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+			VECTOR hitPos = VAdd(m_pPlayer->GetAttackPos(), VScale(normVec, playerAttackRadius));
+			m_hitPositions.push_back(hitPos); // リストに保存
 			m_pBossEnemy->OnDamage(m_pPlayer->GetAttackPower());
 			m_pPlayer->AddSpecialGauge(5);
 		}
@@ -177,6 +180,9 @@ void GameplayCollision::CheckCompanionAttack()
 
 		if (hitInfo.m_distance < companionAttackRadius + bossEnemyColRadius)
 		{
+			VECTOR normVec = VNorm(hitInfo.m_deltaVector);
+			VECTOR hitPos = VAdd(m_pCompanion->GetAttackPos(), VScale(normVec, companionAttackRadius));
+			m_hitPositions.push_back(hitPos); // リストに保存
 			m_pBossEnemy->OnDamage(m_pCompanion->GetAttackPower());
 			m_pCompanion->AddSpecialGauge(5);
 		}

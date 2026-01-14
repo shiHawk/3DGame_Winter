@@ -88,7 +88,14 @@ void GameScene::End()
 SceneBase* GameScene::Update()
 {
 	UpdateFade();
-	m_pPlayer->Update();
+	if (!m_pPlayer->IsDead())
+	{
+		m_pPlayer->Update();
+	}
+	if (!m_pCompanion->IsDead())
+	{
+		m_pCompanion->Update();
+	}
 	for (auto& enemy : m_pNormalEnemies)
 	{
 		enemy->Update();
@@ -97,10 +104,8 @@ SceneBase* GameScene::Update()
 	{
 		enemy->Update();
 	}
-	//m_pNormalEnemy->Update();
-	m_pCompanion->Update();
 	m_pStage->Update();
-	if (Pad::isTrigger(PAD_INPUT_6) && !m_pPlayer->IsDead() && !m_pCompanion->IsDead()) // RBボタンでプレイヤーとコンパニオンの切り替え
+	if (Pad::isTrigger(PAD_INPUT_6)) // RBボタンでプレイヤーとコンパニオンの切り替え
 	{
 		CharacterBase::ControlMode currentMode = m_pPlayer->GetControlMode(); // 現在のモード
 		CharacterBase::ControlMode playerNewMode; // 次のプレイヤーのモード

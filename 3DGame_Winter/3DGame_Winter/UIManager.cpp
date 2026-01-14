@@ -15,8 +15,13 @@ namespace
 	constexpr int kHpTextPosY = 14;
 	constexpr int kSrcX = 462; // 切り出し位置(X)
 	constexpr int kSrcY = 293; // 切り出し位置(Y)
+	constexpr int kSrcWidth = 150;
 	constexpr int kSgSrcX = 333; // Secialゲージ切り出し位置(X)
 	constexpr int kSgSrcY = 207; // Secialゲージ切り出し位置(Y)
+	constexpr int kDistX1 = 300;
+	constexpr int kDistY1 = 50;
+	constexpr int kDistX2 = 980;
+	constexpr int kDistY2 = 120;
 	constexpr int kHpGaugeFrameWidth = 370; // ゲージの横幅
 	// スコアの位置
 	constexpr int kScorePosX = 650;
@@ -83,7 +88,10 @@ void UIManager::Draw()
 {
 	DrawHp();
 	DrawSg();
-	//DrawBossHp();
+	if (VSize(VSub(m_pPlayer->GetPos(), m_pBossEnemy->GetPos())) <= 1000.0f)
+	{
+		DrawBossHp();
+	}
 }
 
 void UIManager::DrawHp()
@@ -114,8 +122,8 @@ void UIManager::DrawSg()
 
 void UIManager::DrawBossHp()
 {
-	DrawRectExtendGraph(100,100,600,150, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, 150, true);
-	DrawRectExtendGraph(100,100,600,150, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_bossHpGaugeRate), 150, m_bossHpGaugeHandle, true);
+	DrawRectExtendGraph(kDistX1,kDistX2,kDistY1,kDistY2, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, kSrcWidth, true);
+	DrawRectExtendGraph(kDistX1, kDistX2, kDistY1, kDistY2, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_bossHpGaugeRate), kSrcWidth, m_bossHpGaugeHandle, true);
 	/*DrawRectGraph(500,100, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(500,100, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth*m_bossHpGaugeRate), kHpTextPosY, m_bossHpGaugeHandle, true);*/
 }

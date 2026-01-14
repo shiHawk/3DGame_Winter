@@ -21,7 +21,8 @@ SoundManager::SoundManager() :
 	m_companionNormalAttackSoundHandle(-1),
 	m_companionStrongAttackSoundHandle(-1),
 	m_companionSpecialSkilSoundHandle(-1),
-	m_enemyAttackSoundHandle(-1)
+	m_enemyAttackSoundHandle(-1),
+	m_enterSEHandle(-1)
 {
 }
 
