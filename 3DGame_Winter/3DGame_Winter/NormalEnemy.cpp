@@ -87,7 +87,6 @@ void NormalEnemy::Update()
 		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDeathAnimIncrement);
 		// アニメーションを更新する
 		UpdateAnim(m_modelHandle);
-		//m_alpha -= 0.02f;
 		if (GetIsAnimEnd())
 		{
 			m_isDead = true; 

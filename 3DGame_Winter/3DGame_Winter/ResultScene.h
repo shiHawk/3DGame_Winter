@@ -24,5 +24,6 @@ private:
 	float m_viewAngle;
 	int m_fontHandle;
 	int m_bgHandle;
+	int m_retrurnTitleHandle;
 };
 

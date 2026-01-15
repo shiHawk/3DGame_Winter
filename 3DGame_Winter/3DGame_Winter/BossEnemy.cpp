@@ -185,12 +185,6 @@ void BossEnemy::Update()
         break;
     }
 
-    // 4 共通処理（死亡チェック、アニメーション更新、座標反映）
-    /*if (m_isDead)
-    {
-        End();
-        return;
-    }*/
     UpdateAnim(m_modelHandle);
     MV1SetPosition(m_modelHandle, m_pos);
     if (m_hp > 0)
@@ -274,19 +268,16 @@ void BossEnemy::OnRangeAttack()
 
 void BossEnemy::OnDamage(int damage)
 {
-    if (m_invincibilityTimer > 0.0f) return;
+    if (m_invincibilityTimer > 0.0f || m_state == BossEnemyState::DEAD) return;
+    m_isHitFlag = true;
+    m_hp -= damage;
+    m_invincibilityTimer = kInvincibilityTime;
     if (m_hp <= 0)
     {
         m_enemyAttack.active = false;
         m_hp = 0;
         m_state = BossEnemyState::DEAD;
         ChangeAnim(m_modelHandle,kDeathAnimNo,false,0.4f);
-    }
-    else
-    {
-        m_isHitFlag = true;
-        m_hp -= damage;
-        m_invincibilityTimer = kInvincibilityTime;
     }
 }
 

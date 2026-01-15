@@ -171,7 +171,7 @@ void Player::Update()
     {
         m_distanceToFollowTarget = VSize(VSub(m_followTargetPos, m_pos));
         //printfDx(L"m_distanceToFollowTarget:%f\n", m_distanceToFollowTarget);
-        if (m_distanceToFollowTarget > kWarpDistance)
+        if (m_distanceToFollowTarget > kWarpDistance && VSize(VSub(m_enemyPos, m_pos)) > 500.0f)
         {
             m_pos = VGet(m_followTargetPos.x, m_followTargetPos.y, m_followTargetPos.z - kPostWarpPosZ);
         }
@@ -186,7 +186,6 @@ void Player::Update()
         m_vec = { 0.0f,0.0f,0.0f };
         m_vec.y += kGravity * kAttackGravityMultiplier; // çUåÇéûÇÕÇ©Ç©ÇÈèdóÕÇè¨Ç≥Ç≠Ç∑ÇÈ
     }
-    
     if (m_isAvoidanceFlag)
     {
         OnAvoidance();

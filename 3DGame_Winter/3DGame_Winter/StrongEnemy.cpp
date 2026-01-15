@@ -20,8 +20,8 @@ namespace
 	constexpr int kWalkAnimNo = 15;
 	constexpr int kAttackAnimNo = 13;
 	constexpr int kRangeAttackAnimNo = 0;
-	constexpr int kDamageAnimNo = 8;
-	constexpr int kDeathAnimNo = 25;
+	constexpr int kDamageAnimNo = 7;
+	constexpr int kDeathAnimNo = 8;
 	// アニメーション速度
 	constexpr float kWalkAnimIncrement = 0.15f; // 歩行アニメーションの再生速度
 	constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
@@ -45,7 +45,8 @@ StrongEnemy::StrongEnemy():
 	m_targetAngle(0.0f),
 	m_state(DEFAULT),
 	m_attackTimer(0.0f),
-	m_actionCheckTimer(0.0f)
+	m_actionCheckTimer(0.0f),
+	m_deathTimer(0.0f)
 {
 }
 
@@ -80,20 +81,24 @@ void StrongEnemy::Update()
 	{
 		m_actionCheckTimer -= 1.0f / kFramesPerSecond;
 	}
-	if (m_invincibilityTimer > 0.0f)
+	if (m_state != StrongEnemyState::DEAD)
 	{
-		m_invincibilityTimer--;
-		if (kMaxHp * 0.5f >= m_hp)
+		if (m_invincibilityTimer > 0.0f)
 		{
-			// HPが半分以下なら怯む(ダメージリアクションをとる)
-			ChangeAnim(m_modelHandle, kDamageAnimNo, true, kDamageAnimIncrement);
-		}
-		if (m_invincibilityTimer < 0.0f)
-		{
-			m_invincibilityTimer = 0.0f;
-			m_isHitFlag = false;
+			m_invincibilityTimer--;
+			if (kMaxHp * 0.5f >= m_hp)
+			{
+				// HPが半分以下なら怯む(ダメージリアクションをとる)
+				//ChangeAnim(m_modelHandle, kDamageAnimNo, true, kDamageAnimIncrement);
+			}
+			if (m_invincibilityTimer < 0.0f)
+			{
+				m_invincibilityTimer = 0.0f;
+				m_isHitFlag = false;
+			}
 		}
 	}
+	
 	switch (m_state)
 	{
 	case StrongEnemy::DEFAULT:
@@ -106,7 +111,7 @@ void StrongEnemy::Update()
 			{
 				m_state = StrongEnemyState::RANGEATTACK_CHARGE;
 				m_attackTimer = kChageTime;
-				m_enemyAttack.active = true;
+				//m_enemyAttack.active = true;
 				break;
 			}
 		}
@@ -168,7 +173,8 @@ void StrongEnemy::Update()
 		break;
 	case StrongEnemy::DEAD:
 		m_vec = { 0.0f,0.0f,0.0f };
-		if (GetIsAnimEnd())
+		m_deathTimer += 1.0f / kFramesPerSecond;
+		if (GetIsAnimEnd() || m_deathTimer > 3.0f)
 		{
 			End();
 			m_isDead = true;
@@ -183,26 +189,30 @@ void StrongEnemy::Update()
 	//	End();
 	//	return;
 	//}
-	UpdateAnim(m_modelHandle);
-	MV1SetPosition(m_modelHandle, m_pos);
+	
+	if (!m_isDead)
+	{
+		UpdateAnim(m_modelHandle);
+		MV1SetPosition(m_modelHandle, m_pos);
+	}
 }
 
 void StrongEnemy::Draw()
 {
 	MV1DrawModel(m_modelHandle);
-	if (m_enemyAttack.active)
+	if (m_state == StrongEnemyState::RANGEATTACK_CHARGE)
 	{
-		if (m_state == StrongEnemyState::RANGEATTACK_CHARGE)
-		{
-			float progress = 1.0f - (m_attackTimer / kChageTime);
-			float currentRadius = kRangeAttackRadius * progress; // 現在の半径を計算(最大半径*進行率)
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-			VECTOR drawPos = VAdd(m_pos, VGet(0.0f, 1.0f, 0.0f));
-			DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.1f, 0.0f)), drawPos, currentRadius, kDivNum, kAreaColor, kAreaColor, true);
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
-			DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.2f, 0.0f)), drawPos, kRangeAttackRadius, kDivNum, kOutLineColor, kOutLineColor, true);
-			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-		}
+		float progress = 1.0f - (m_attackTimer / kChageTime);
+		float currentRadius = kRangeAttackRadius * progress; // 現在の半径を計算(最大半径*進行率)
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+		VECTOR drawPos = VAdd(m_pos, VGet(0.0f, 1.0f, 0.0f));
+		DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.1f, 0.0f)), drawPos, currentRadius, kDivNum, kAreaColor, kAreaColor, true);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+		DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.2f, 0.0f)), drawPos, kRangeAttackRadius, kDivNum, kOutLineColor, kOutLineColor, true);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
+	/*if (m_enemyAttack.active)
+	{
 		if (m_state == StrongEnemyState::NORMALATTACK)
 		{
 			DrawSphere3D(m_enemyAttack.pos, kColRadius, kDivNum, 0xffffff, 0xffffff, false);
@@ -211,7 +221,7 @@ void StrongEnemy::Draw()
 		{
 			DrawSphere3D(m_enemyAttack.pos, m_enemyAttack.radius, kDivNum, 0xffffff, 0xffffff, false);
 		}
-	}
+	}*/
 }
 
 void StrongEnemy::OnAttack()
@@ -235,18 +245,28 @@ void StrongEnemy::OnRangeAttack()
 
 void StrongEnemy::OnDamage(int damage)
 {
-	if (m_invincibilityTimer > 0.0f) return;
+	// すでに死んでいる、または無敵なら無視
+	if (m_state == StrongEnemyState::DEAD || m_invincibilityTimer > 0.0f) return;
+
+	// 1. 先にダメージ計算を行う
+	m_hp -= damage;
+	m_isHitFlag = true;
+
+	// 2. 計算後のHPで死亡判定を行う
 	if (m_hp <= 0)
 	{
-		m_enemyAttack.active = false;
 		m_hp = 0;
 		m_state = StrongEnemyState::DEAD;
-		ChangeAnim(m_modelHandle, kDamageAnimNo,false,kDamageAnimIncrement);
-		//m_isDead = true;
+		m_enemyAttack.active = false; // 攻撃判定を消す
+		m_invincibilityTimer = 0.0f;
+
+		// ループ再生は false にする
+		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDamageAnimIncrement);
 	}
-	m_isHitFlag = true;
-	m_hp -= damage;
-	m_invincibilityTimer = kInvincibilityTime;
+	else
+	{
+		m_invincibilityTimer = kInvincibilityTime;
+	}
 }
 
 float StrongEnemy::GetColRadius()

@@ -20,11 +20,14 @@ namespace
 	constexpr int kFontSize = 60;
 	constexpr int kFontThick = 5;
 
-	constexpr int kScorePosX = 430; 
+	constexpr int kScorePosX = 430;
 	constexpr int kScorePosY = 200;
 
 	constexpr int kTimeScorePosX = 430;
 	constexpr int kTimeScorePosY = 320;
+
+	constexpr int kButtonPosX = 500;
+	constexpr int kButtonPosY = 600;
 
 	// ”wŒi‚ÌˆÊ’u
 	constexpr int kBGPosX = -350;
@@ -39,7 +42,8 @@ ResultScene::ResultScene(std::shared_ptr<ScoreManager> pScoreManager):
 	m_cameraTarget({ 0.0f,0.0f,0.0f }),
 	m_viewAngle(0.0f),
 	m_fontHandle(-1),
-	m_bgHandle(-1)
+	m_bgHandle(-1),
+	m_retrurnTitleHandle(-1)
 {
 }
 
@@ -71,12 +75,14 @@ void ResultScene::Init()
 
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_bgHandle = LoadGraph(L"Data/UI/result_seat.png");
+	m_retrurnTitleHandle = LoadGraph(L"Data/title/button.png");
 }
 
 void ResultScene::End()
 {
 	DeleteFontToHandle(m_fontHandle);
 	DeleteGraph(m_bgHandle);
+	DeleteGraph(m_retrurnTitleHandle);
 	m_pScoreManager->End();
 }
 
@@ -105,6 +111,7 @@ void ResultScene::Draw()
 {
 	//DrawBox(0, 0, Game::kScreenWidth, Game::kScreenHeight, 0xffffff, true);
 	DrawGraph(kBGPosX,kBGPosY,m_bgHandle,true);
+	DrawRectGraph(kButtonPosX,kButtonPosY,35,104,309,35,m_retrurnTitleHandle,true);
 	DrawFormatStringToHandle(kScorePosX,kScorePosY,0xff8c00,m_fontHandle,L"GameClear!");
 	DrawFormatStringToHandle(kTimeScorePosX,kTimeScorePosY,0x87cefa,m_fontHandle,L"TimeScore:%d",m_pScoreManager->GetTimeBonus());
 	DrawFade();

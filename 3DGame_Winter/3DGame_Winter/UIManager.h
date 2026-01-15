@@ -30,6 +30,8 @@ private:
 	int m_hpGaugeHandle;
 	int m_sgGaugeHandle;
 	int m_bossHpGaugeHandle;
+	int m_warriorIconHandle;
+	int m_wizardIconHandle;
 	std::shared_ptr<Player> m_pPlayer;
 	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;
 	std::vector<std::shared_ptr<StrongEnemy>> m_pStrongEnemies;

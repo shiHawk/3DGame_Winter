@@ -226,6 +226,7 @@ void GameScene::Draw()
 	m_pBattleAreaManager->DrawBattleAreaBodary();
 	//m_pBattleAreaManager->DebugDraw();
 	m_pUIManager->Draw();
+	m_pCamera->Draw();
 	DrawFade();
 	//DrawGrid();
 }

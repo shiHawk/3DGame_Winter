@@ -8,8 +8,9 @@ public:
 	void Init();
 	void End();
 	void Update();
+	void Draw();
 	void SetControlledCharacterPosition(const VECTOR& pos) { m_playerPos = pos; };
-	void SetLockOnPosition(VECTOR lockOnPos) { m_lockOnCameraPos = lockOnPos; }
+	void SetLockOnPosition(VECTOR lockOnPos);
 	void SetPlayerDir(const VECTOR& dir) { m_playerDir = VNorm(dir); }
 	float GetHorizonrtalAngle() { return m_cameraAngleHorizontal; }
 	bool IsLockOn() { return m_isLockOn; }

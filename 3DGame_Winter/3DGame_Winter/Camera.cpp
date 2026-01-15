@@ -9,8 +9,8 @@ namespace
 	constexpr float kRightLimitCamera = 4807.0f;
 	constexpr float kLeftLimitCamera = -2355.0f;
 	// カメラの位置と注視点
-	constexpr VECTOR kDefaultCameraPos = { 0.0f,160.0f,-540.0f };
-	constexpr VECTOR kCameraTarget = { 0.0f,200.0f,0.0f };
+	constexpr VECTOR kDefaultCameraPos = { 0.0f,300.0f,-540.0f };
+	constexpr VECTOR kCameraTarget = { 0.0f,250.0f,0.0f };
 	constexpr float kMinTargetToPlayerDistance = 500.0f;
 	// カメラの視野角
 	constexpr float kDegreesPerCircle = 180.0f; // 一周当たりの度数
@@ -25,7 +25,7 @@ namespace
 	// カメラの旋回
 	constexpr float kCameraAngleSpeed = 0.03f;
 	//constexpr float kCameraToPlayerLength = 540.0f;
-	constexpr float kCameraToPlayerLength = 360.0f;
+	constexpr float kCameraToPlayerLength = 450.0f;
 	constexpr float kAngleLimitVertical = 0.6f;
 	constexpr float kCameraPitchDownLimit = -0.3f;
 	constexpr float kCameraPitchUpLimit = 0.97f;
@@ -36,7 +36,7 @@ namespace
 	constexpr float kStageMaxZ = 1000.0f;
 	constexpr float kCameraRadius = 2000.0f; // カメラの当たり判定用半径
 
-	constexpr float kMaxLockonRange = 100.0f;
+	constexpr float kMaxLockonRange = 800.0f;
 }
 Camera::Camera():
 	m_cameraPos({0.0f,0.0f,0.0f}),
@@ -102,6 +102,22 @@ void Camera::Update()
 {
 	// 入力状態を取得
 	GetJoypadDirectInputState(DX_INPUT_PAD1, &m_input);
+	if (Pad::isTrigger(PAD_INPUT_10) && VSize(VSub(m_lockOnCameraPos, m_playerPos)) <= kMaxLockonRange)
+	{
+		if (!m_isLockOn)
+		{
+			m_isLockOn = true;
+		}
+		else
+		{
+			m_isLockOn = false;
+		}
+	}
+	else if (VSize(VSub(m_lockOnCameraPos, m_playerPos)) >= kMaxLockonRange)
+	{
+		m_isLockOn = false;
+	}
+
 	if (!m_isLockOn)
 	{
 		m_cameraTarget = VAdd(m_playerPos, VGet(0.0f, kCameraTarget.y, 0.0f));
@@ -147,17 +163,7 @@ void Camera::Update()
 	// 注視点の座標を足したものがカメラの座標
 	m_cameraPos = VAdd(VTransform(VTransform(VGet(0.0f, 0.0f, -kCameraToPlayerLength), rotX), rotY), VGet(m_playerPos.x,m_playerPos.y + kDefaultCameraPos.y,m_playerPos.z));
 	//ResolveCollisionWithStage();
-	if (Pad::isTrigger(PAD_INPUT_10))
-	{
-		if (!m_isLockOn)
-		{
-			m_isLockOn = true;
-		}
-		else
-		{
-			m_isLockOn = false;
-		}
-	}
+	
 	if (m_isLockOn)
 	{
 		// 本来注視したい位置（プレイヤーとロックオン対象の中間点）
@@ -167,6 +173,18 @@ void Camera::Update()
 	
 	//DrawFormatString(0,0,0xffffff,L"m_cameraTarget.x:%f,m_cameraTarget.y:%f,m_cameraTarget.z:%f", m_cameraTarget.x, m_cameraTarget.y, m_cameraTarget.z);
 	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget); // カメラを計算した位置に設定する
+	//printfDx(L"targetPos.x;%f, targetPos.y;%f, targetPos.z;%f\n",m_cameraTarget.x, m_cameraTarget.y, m_cameraTarget.z);
+}
+
+void Camera::Draw()
+{
+	//DrawSphere3D(m_cameraTarget,30.0f,8,0xff0000,0xffffff,true);
+}
+
+void Camera::SetLockOnPosition(VECTOR lockOnPos)
+{
+	m_lockOnCameraPos = lockOnPos;
+	m_lockOnCameraPos.y = m_lockOnCameraPos.y + 100.0f;
 }
 
 void Camera::RadianTranslation()

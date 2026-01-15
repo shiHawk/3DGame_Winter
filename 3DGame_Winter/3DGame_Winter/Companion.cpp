@@ -187,7 +187,7 @@ void Companion::Update()
 	else
 	{
 		UpdateAIState();
-		if (m_distanceToPlayer > kWarpDistance) // プレイヤーと離れすぎたらプレイヤーの近くにワープする
+		if (m_distanceToPlayer > kWarpDistance && VSize(VSub(m_enemyPos, m_pos)) > 500.0f) // プレイヤーと離れすぎたらプレイヤーの近くにワープする
 		{
 			m_pos = VGet(m_playerPos.x, m_playerPos.y, m_playerPos.z - kPostWarpPosZ);
 			m_attack.active = false;
@@ -342,6 +342,7 @@ void Companion::UpdateAIState()
 	{
 		m_attackCoolTimer--;
 	}
+
 	switch (m_companionState)
 	{
 	case Companion::CompanionState::NORMAL:
@@ -534,7 +535,7 @@ void Companion::UpdatePlayerControlState()
 					m_attackCoolTimer = kAttackCoolTime;
 				}
 			}
-			else if (Pad::isTrigger(PAD_INPUT_5))
+			else if (Pad::isTrigger(PAD_INPUT_5) && m_specialGauge <= 100)
 			{
 				if (m_distanceToEnemy > 0.0f) // 敵がいる場合のみ回転
 				{
@@ -542,6 +543,7 @@ void Companion::UpdatePlayerControlState()
 				}
 				else
 				{
+					m_specialGauge -= 100;
 					OnSpecialSkil();
 					m_companionState = CompanionState::SPECIALSKIL;
 					m_attackCoolTimer = kAttackCoolTime;
@@ -620,7 +622,7 @@ void Companion::UpdatePlayerControlState()
 		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
 
 		// 角度の差が閾値以下になったら攻撃開始
-		if (std::abs(diff) < kAngleThreshold) // kAngleThreshold は既に 0.1f で定義されています
+		if (std::abs(diff) < kAngleThreshold) 
 		{
 			OnStrongAttack();
 			m_companionState = CompanionState::STRONG_ATTACK;
@@ -819,7 +821,6 @@ void Companion::RotatingToAttack()
 	}
 
 	// 敵の方向への目標角度を計算
-	// m_dirToEnemy は Update 関数で既に正規化されているはずです。
 	float targetAngle = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
 
 	// 現在の角度と目標角度の差分を計算

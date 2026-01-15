@@ -230,7 +230,6 @@ void TitleScene::Draw()
 		MV1DrawModel(wallModelHandle);
 	}
 	DrawGraph(kTitlePosX, kTitlePosY, m_titleLogoHandle, true);
-	//DrawGraph(kButtonPosX, kButtonPosY, m_startHandle, true);
 	DrawRectGraph(kButtonPosX, kButtonPosY,35,104,309,35, m_startHandle,true);
 	MV1DrawModel(m_warriorModelHandle);
 	MV1DrawModel(m_wizardModelHandle);

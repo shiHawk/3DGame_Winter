@@ -22,6 +22,8 @@ namespace
 	constexpr int kDistY1 = 50;
 	constexpr int kDistX2 = 980;
 	constexpr int kDistY2 = 120;
+	constexpr int kWarriorIconPosX = 70;
+	constexpr int kWarriorIconPosY = 630;
 	constexpr int kHpGaugeFrameWidth = 370; // ゲージの横幅
 	// スコアの位置
 	constexpr int kScorePosX = 650;
@@ -46,7 +48,9 @@ UIManager::UIManager():
 	m_hpGaugeFrameHandle(-1),
 	m_hpGaugeHandle(-1),
 	m_sgGaugeHandle(-1),
-	m_bossHpGaugeHandle(-1)
+	m_bossHpGaugeHandle(-1),
+	m_warriorIconHandle(-1),
+	m_wizardIconHandle(-1)
 {
 }
 
@@ -63,6 +67,7 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_bossHpGaugeHandle = LoadGraph(L"Data/UI/Boss_Hp.png");
 	m_hpGaugeHandle = LoadGraph(L"Data/UI/HP.png");
 	m_sgGaugeHandle = LoadGraph(L"Data/UI/SG.png");
+	m_warriorIconHandle = LoadGraph(L"Data/UI/Player_Icon.png");
 }
 
 void UIManager::End()
@@ -71,6 +76,7 @@ void UIManager::End()
 	DeleteGraph(m_hpGaugeHandle);
 	DeleteGraph(m_sgGaugeHandle);
 	DeleteGraph(m_bossHpGaugeHandle);
+	DeleteGraph(m_warriorIconHandle);
 }
 
 void UIManager::Updata()
@@ -100,6 +106,7 @@ void UIManager::DrawHp()
 	DrawRectGraph(kPlayerHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(kPlayerHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_playerHpGaugeRate),
 				  kHpTextPosY, m_hpGaugeHandle, true); 
+	DrawGraph(kWarriorIconPosX,kWarriorIconPosY,m_warriorIconHandle,true);
 
 	// コンパニオンのHPバーの描画
 	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
@@ -122,8 +129,12 @@ void UIManager::DrawSg()
 
 void UIManager::DrawBossHp()
 {
-	DrawRectExtendGraph(kDistX1,kDistX2,kDistY1,kDistY2, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, kSrcWidth, true);
-	DrawRectExtendGraph(kDistX1, kDistX2, kDistY1, kDistY2, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_bossHpGaugeRate), kSrcWidth, m_bossHpGaugeHandle, true);
+	// 画面上の最大描画幅を計算 (980 - 300 = 680)
+	int maxDestWidth = kDistX2 - kDistX1;
+	// 現在のHP割合に応じた画面上の幅を計算
+	int currentDestWidth = static_cast<int>(maxDestWidth * m_bossHpGaugeRate);
+	DrawRectExtendGraph(kDistX1, kDistY1,kDistX2,kDistY2, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, kSrcWidth, true);
+	DrawRectExtendGraph(kDistX1, kDistY1, kDistX1+ currentDestWidth, kDistY2, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_bossHpGaugeRate), kSrcWidth, m_bossHpGaugeHandle, true);
 	/*DrawRectGraph(500,100, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(500,100, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth*m_bossHpGaugeRate), kHpTextPosY, m_bossHpGaugeHandle, true);*/
 }

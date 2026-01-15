@@ -33,5 +33,6 @@ private:
 	float m_targetAngle;
 	float m_attackTimer;
 	float m_actionCheckTimer; // 行動抽選のクールダウンタイマー
+	float m_deathTimer;
 };
 
