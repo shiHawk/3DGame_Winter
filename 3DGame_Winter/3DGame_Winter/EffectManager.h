@@ -5,6 +5,7 @@
 #include "CharacterBase.h"
 class Player;
 class Companion;
+class BossEnemy;
 class GameplayCollision;
 class EffectManager
 {

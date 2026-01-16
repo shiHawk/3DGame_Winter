@@ -108,7 +108,8 @@ Player::Player():
     m_comboStep(0),
     m_comboWindowTimer(0.0f),
     m_comboCoolTimer(0.0f),
-    m_aiWillDo3HitCombo(false)
+    m_aiWillDo3HitCombo(false),
+    m_isEnemyAttackSensing(false)
 {
 }
 
@@ -175,6 +176,10 @@ void Player::Update()
         {
             m_pos = VGet(m_followTargetPos.x, m_followTargetPos.y, m_followTargetPos.z - kPostWarpPosZ);
         }
+       /* if (m_isEnemyAttackSensing && m_playerState != PlayerState::AUTO_EVADE)
+        {
+            m_playerState = PlayerState::AUTO_EVADE;
+        }*/
     }
     
     if (!m_isInAttackSequence)
@@ -386,11 +391,6 @@ void Player::OnDamage(int enemyPower)
         m_invincibilityTimer = kInvincibilityTime;
         m_playerState = PlayerState::DAMAGE;
     }
-}
-
-void Player::OnDeath()
-{
-
 }
 
 int Player::GetMaxHp()
@@ -608,6 +608,9 @@ void Player::UpdatePlayerState()
     case Player::PlayerState::SPECIALSKIL:
         HandleStateSpecialSkil();
         break;
+    case Player::PlayerState::AUTO_EVADE:
+        HandleStateAutoEvade();
+        break;
     case PlayerState::DAMAGE:
         HandleStateDamage();
         break;
@@ -728,6 +731,10 @@ void Player::HandleStateDeath()
     {
         m_isDead = true;
     }
+}
+
+void Player::HandleStateAutoEvade()
+{
 }
 
 void Player::HandleAIComboWindow()

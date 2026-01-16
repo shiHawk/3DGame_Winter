@@ -3,6 +3,7 @@
 #include "Pad.h"
 #include "game.h"
 #include "GameScene.h"
+#include "SkyDome.h"
 
 namespace
 {
@@ -14,7 +15,7 @@ namespace
 	constexpr float kViewAngle = 0.447f;
 	// nearとfarの位置
 	constexpr float kCameraNearClip = 10.0f;
-	constexpr float kCameraFarClip = 3000.0f;
+	constexpr float kCameraFarClip = 4000.0f;
 	// 点滅周期
 	constexpr int kBlinkCycleMs = 500;
 	constexpr VECTOR kSecondLight = { -0.5f, -0.5f, 0.8f };
@@ -91,13 +92,15 @@ void TitleScene::Init()
 {
 	m_pWarriorAnim = std::make_shared<Animation>();
 	m_pWizardAnim = std::make_shared<Animation>();
+	m_pSkyDome = std::make_shared<SkyDome>();
 	m_pWarriorAnim->Init();
 	m_pWizardAnim->Init();
+	m_pSkyDome->Init();
 	// 3D表示の設定
 	SetUseZBuffer3D(true);	  // Zバッファを指定する
 	SetWriteZBuffer3D(true);  // Zバッファへの書き込みを行う
 
-	SetUseBackCulling(true);  // ポリゴンの裏面を表示しない
+	SetUseBackCulling(false);  
 
 	// カメラの位置の初期化を行う
 
@@ -180,10 +183,13 @@ void TitleScene::End()
 	m_wallModelHandles.clear();
 	MV1DeleteModel(m_wallModelBase);
 	SoundManager::GetInstance()->StopBGM();
+	m_pSkyDome->End();
 }
 
 SceneBase* TitleScene::Update()
 {
+	//m_pSkyDome->RotationSkyDome();
+	m_pSkyDome->Update();
 	UpdateFade();
 	SoundManager::GetInstance()->Update();
 	if (!m_isNextScene)
@@ -220,7 +226,7 @@ SceneBase* TitleScene::Update()
 
 void TitleScene::Draw()
 {
-	//DrawBox(0,0,Game::kScreenWidth,Game::kScreenHeight,0xffffff,true);
+	m_pSkyDome->Draw();
 	for (int i = 0; i < m_tileTotal;i++)
 	{
 		MV1DrawModel(m_tileModelHandles[i]);

@@ -235,7 +235,7 @@ void BossEnemy::Draw()
     }
     if (m_enemyAttack.active)
     {
-        DrawSphere3D(m_enemyAttack.pos, m_enemyAttack.radius, kDivNum, 0xffff00, 0xffffff, false);
+        //DrawSphere3D(m_enemyAttack.pos, m_enemyAttack.radius, kDivNum, 0xffff00, 0xffffff, false);
     }
 }
 

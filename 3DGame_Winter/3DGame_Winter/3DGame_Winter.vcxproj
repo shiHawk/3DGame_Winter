@@ -160,6 +160,7 @@
     <ClCompile Include="SceneBase.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="ScoreManager.cpp" />
+    <ClCompile Include="SkyDome.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StrongEnemy.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="SceneBase.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="ScoreManager.h" />
+    <ClInclude Include="SkyDome.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="StrongEnemy.h" />

@@ -18,6 +18,8 @@ namespace
 	constexpr int kGridColor = 0xffffff;    // グリッドの色
 	constexpr float kEnemySearchRange = 800.0f; // 敵を探す最大範囲
 	constexpr VECTOR kInvalidPos = { 1000000.0f, 1000000.0f, 1000000.0f }; // 無効な座標（超遠方）
+	constexpr float kSkyDomeScale = 120.0f;
+	constexpr float kSensingRange = 600.0f;
 }
 GameScene::GameScene():
 	m_isNextScene(false)
@@ -42,6 +44,7 @@ void GameScene::Init()
 	m_pBattleAreaManager = std::make_unique<BattleAreaManager>();
 	m_pUIManager = std::make_unique<UIManager>();
 	m_pScoreManager = std::make_shared<ScoreManager>();
+	m_pSkyDome = std::make_shared<SkyDome>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera);
 	m_pStage->Init();
@@ -59,6 +62,8 @@ void GameScene::Init()
 	m_pBattleAreaManager->SetEnemy(m_pNormalEnemies, m_pStrongEnemies);
 	m_pUIManager->Init(m_pPlayer, m_pCompanion,m_pBossEnemy);
 	m_pScoreManager->Init();
+	m_pSkyDome->Init();
+	m_pSkyDome->SetScale(kSkyDomeScale);
 }
 
 void GameScene::End()
@@ -82,12 +87,13 @@ void GameScene::End()
 	//m_pStrongEnemy->End();
 	m_pStage->End();
 	m_pUIManager->End();
-	//m_pScoreManager->End();
+	m_pSkyDome->End();
 }
 
 SceneBase* GameScene::Update()
 {
 	UpdateFade();
+	m_pSkyDome->SetPos(m_pCamera->GetCameraPos());
 	if (!m_pPlayer->IsDead())
 	{
 		m_pPlayer->Update();
@@ -157,6 +163,7 @@ SceneBase* GameScene::Update()
 							 : m_pCompanion->GetPos();
 
 	VECTOR targetEnemyPos = GetNearestEnemyPos(currentBasePos);
+	m_pPlayer->SetEnemyAttackSensingFlag(IsEnemyAttacking(m_pPlayer->GetPos()));
 	//printfDx(L"targetPosX:%f,targetPosY:%f,targetPosZ:%f\n",targetEnemyPos.x,targetEnemyPos.y,targetEnemyPos.z);
 
 	// 取得した「一番近い敵の座標」を各クラスに渡す
@@ -168,9 +175,11 @@ SceneBase* GameScene::Update()
 	m_pWorldCollision->Update();
 	m_pFlyingEnemy->Update();
 	m_pBossEnemy->Update();
+	m_pSkyDome->Update();
 	//m_pStrongEnemy->Update();
 	
 	m_pEffectManager->Update();
+	
 
 	// 操作中のキャラクターを決定
 	std::shared_ptr<CharacterBase> activeCharacter = nullptr;
@@ -207,6 +216,7 @@ SceneBase* GameScene::Update()
 
 void GameScene::Draw()
 {
+	m_pSkyDome->Draw();
 	m_pStage->Draw();
 	m_pPlayer->Draw();
 	m_pCompanion->Draw();
@@ -315,4 +325,48 @@ void GameScene::DeathProcessing()
 	{
 		m_pCompanion->End();
 	}
+}
+
+bool GameScene::IsEnemyAttacking(VECTOR targetPos)
+{
+	// 感知する範囲（これ以上離れている敵の攻撃は無視する）
+	float rangeSq = kSensingRange * kSensingRange;
+	for (const auto& enemy : m_pNormalEnemies)
+	{
+		if (enemy->IsDead()) continue;
+
+		// 攻撃中 かつ 距離が近い場合
+		if (enemy->GetAttackInfo().active)
+		{
+			if (VSquareSize(VSub(enemy->GetPos(), targetPos)) < rangeSq)
+			{
+				return true;
+			}
+		}
+	}
+
+	for (const auto& enemy : m_pStrongEnemies)
+	{
+		if (enemy->IsDead()) continue;
+
+		if (enemy->GetAttackInfo().active)
+		{
+			if (VSquareSize(VSub(enemy->GetPos(), targetPos)) < rangeSq)
+			{
+				return true;
+			}
+		}
+	}
+
+	if (m_pBossEnemy && !m_pBossEnemy->IsDead())
+	{
+		if (m_pBossEnemy->GetAttackInfo().active)
+		{
+			if (VSquareSize(VSub(m_pBossEnemy->GetPos(), targetPos)) < rangeSq)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }

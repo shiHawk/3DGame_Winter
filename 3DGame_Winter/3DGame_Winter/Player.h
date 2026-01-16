@@ -39,6 +39,7 @@ public:
 	bool IsDamageFlag() { return m_isHitFlag; }
 	int GetMaxHp();
 	void AddSpecialGauge(int increment);
+	void SetEnemyAttackSensingFlag(bool isEnemyAttack) { m_isEnemyAttackSensing = isEnemyAttack; }
 	enum class PlayerState
 	{
 		NORMAL,
@@ -50,6 +51,7 @@ public:
 		ATTACKING_COMBOFINISH,
 		COMBO_WINDOW,
 		SPECIALSKIL,
+		AUTO_EVADE,
 		DAMAGE,
 		DEATH
 	};
@@ -78,6 +80,7 @@ private:
 	float m_comboWindowTimer; // コンボの受付時間
 	float m_comboCoolTimer; // AIのコンボ用クールタイム
 	bool m_aiWillDo3HitCombo; // AIが3コンボ攻撃をするかどうかのフラグ
+	bool m_isEnemyAttackSensing;
 
 	// ステートごとのハンドラ関数
 	void HandleStateNormal(bool aiWantsToAttack);
@@ -87,7 +90,7 @@ private:
 	void HandleStateSpecialSkil();
 	void HandleStateDamage();
 	void HandleStateDeath();
-
+	void HandleStateAutoEvade();
 	// AI / プレイヤーの分岐を持つハンドラ
 	void HandleAIComboWindow();
 	void HandlePlayerComboWindow();
@@ -95,7 +98,5 @@ private:
 	// 攻撃開始の共通処理（ヘルパー関数）
 	void TryStartAttack(void(Player::* onAttackFunc)(), PlayerState rotationState, PlayerState attackState);
 	void UpdateAttackState(AttackSphere& attackData, int animNo, float animInc, PlayerState nextState);
-
-	void OnDeath();
 };
 

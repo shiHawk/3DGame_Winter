@@ -14,6 +14,7 @@ public:
 	void SetPlayerDir(const VECTOR& dir) { m_playerDir = VNorm(dir); }
 	float GetHorizonrtalAngle() { return m_cameraAngleHorizontal; }
 	bool IsLockOn() { return m_isLockOn; }
+	VECTOR GetCameraPos() { return m_cameraPos; }
 private:
 	// “x”‚ğƒ‰ƒWƒAƒ“‚É•ÏŠ·‚·‚é
 	void RadianTranslation(); 
@@ -38,5 +39,7 @@ private:
 	VECTOR m_targetToPlayer;
 	float m_targetToPlayerDistance;
 	VECTOR m_lockOnCameraPos;
+	int m_lockonHandle;
+	float m_lockonRotateAngle;
 };
 

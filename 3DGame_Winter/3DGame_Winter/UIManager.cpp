@@ -18,10 +18,10 @@ namespace
 	constexpr int kSrcWidth = 150;
 	constexpr int kSgSrcX = 333; // Secialゲージ切り出し位置(X)
 	constexpr int kSgSrcY = 207; // Secialゲージ切り出し位置(Y)
-	constexpr int kDistX1 = 300;
-	constexpr int kDistY1 = 50;
+	constexpr int kDistX1 = 413;
+	constexpr int kDistY1 = 104;
 	constexpr int kDistX2 = 980;
-	constexpr int kDistY2 = 120;
+	constexpr int kDistY2 = 150;
 	constexpr int kWarriorIconPosX = 70;
 	constexpr int kWarriorIconPosY = 630;
 	constexpr int kHpGaugeFrameWidth = 370; // ゲージの横幅
@@ -49,6 +49,7 @@ UIManager::UIManager():
 	m_hpGaugeHandle(-1),
 	m_sgGaugeHandle(-1),
 	m_bossHpGaugeHandle(-1),
+	m_bossHPGaugeFlameHandle(-1),
 	m_warriorIconHandle(-1),
 	m_wizardIconHandle(-1)
 {
@@ -68,6 +69,7 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_hpGaugeHandle = LoadGraph(L"Data/UI/HP.png");
 	m_sgGaugeHandle = LoadGraph(L"Data/UI/SG.png");
 	m_warriorIconHandle = LoadGraph(L"Data/UI/Player_Icon.png");
+	m_bossHPGaugeFlameHandle = LoadGraph(L"Data/UI/BossHPFrame.png");
 }
 
 void UIManager::End()
@@ -77,6 +79,7 @@ void UIManager::End()
 	DeleteGraph(m_sgGaugeHandle);
 	DeleteGraph(m_bossHpGaugeHandle);
 	DeleteGraph(m_warriorIconHandle);
+	DeleteGraph(m_bossHPGaugeFlameHandle);
 }
 
 void UIManager::Updata()
@@ -129,12 +132,11 @@ void UIManager::DrawSg()
 
 void UIManager::DrawBossHp()
 {
-	// 画面上の最大描画幅を計算 (980 - 300 = 680)
-	int maxDestWidth = kDistX2 - kDistX1;
+	int maxDestWidth = 400;
 	// 現在のHP割合に応じた画面上の幅を計算
 	int currentDestWidth = static_cast<int>(maxDestWidth * m_bossHpGaugeRate);
-	DrawRectExtendGraph(kDistX1, kDistY1,kDistX2,kDistY2, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, kSrcWidth, true);
+	//DrawRectExtendGraph(kDistX1, kDistY1,kDistX2,kDistY2, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, kSrcWidth, true);
+	DrawRectExtendGraph(248, 50,kDistX2,247, 63, 153, 636, 187, m_bossHPGaugeFlameHandle,true);
 	DrawRectExtendGraph(kDistX1, kDistY1, kDistX1+ currentDestWidth, kDistY2, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_bossHpGaugeRate), kSrcWidth, m_bossHpGaugeHandle, true);
-	/*DrawRectGraph(500,100, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
-	DrawRectGraph(500,100, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth*m_bossHpGaugeRate), kHpTextPosY, m_bossHpGaugeHandle, true);*/
+	
 }

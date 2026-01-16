@@ -46,6 +46,7 @@ private:
 		SPECIALSKIL,
 		TURN_FOR_STRONG_ATTACK, // ‹­UŒ‚‘O‚Ì‰ñ“]
 		TURN_FOR_SPECIALSKIL,   // •KŽE‹Z‘O‚Ì‰ñ“]
+		PREPARE_STRONG_ATTACK,  // ‰“‹——£UŒ‚€”õ
 		DAMAGE,
 		DEATH
 	};

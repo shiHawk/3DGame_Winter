@@ -30,6 +30,7 @@ private:
 	int m_hpGaugeHandle;
 	int m_sgGaugeHandle;
 	int m_bossHpGaugeHandle;
+	int m_bossHPGaugeFlameHandle;
 	int m_warriorIconHandle;
 	int m_wizardIconHandle;
 	std::shared_ptr<Player> m_pPlayer;

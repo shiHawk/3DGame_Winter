@@ -37,6 +37,7 @@ namespace
 	constexpr float kCameraRadius = 2000.0f; // カメラの当たり判定用半径
 
 	constexpr float kMaxLockonRange = 800.0f;
+	constexpr float kLockonRotateSpeed = 0.01f;
 }
 Camera::Camera():
 	m_cameraPos({0.0f,0.0f,0.0f}),
@@ -54,7 +55,9 @@ Camera::Camera():
 	m_targetToPlayer({ 0.0f,0.0f,0.0f }),
 	m_targetToPlayerDistance(0.0f),
 	m_lockOnCameraPos({ 0.0f,0.0f,0.0f }),
-	m_playerDir({ 0.0f,0.0f,0.0f })
+	m_playerDir({ 0.0f,0.0f,0.0f }),
+	m_lockonHandle(-1),
+	m_lockonRotateAngle(0.0f)
 {
 }
 
@@ -68,6 +71,7 @@ void Camera::Init()
 
 	// ライトの色を変更する
 	SetLightSpcColor(GetColorF(kRed, kGreen, kBlue, 0.0f));
+	SetLightDifColor(GetColorF(kRed, kGreen, kBlue, 0.0f));
 	m_lightHandle = CreateDirLightHandle(kSecondLight);
 
 	// カメラの位置の初期化を行う
@@ -88,6 +92,7 @@ void Camera::Init()
 	// farはあまり大きすぎる数字を設定しないように気を付ける(表示バグに繋がる)
 	SetCameraNearFar(kCameraNearClip, kCameraFarClip);
 	m_isLockOn = false;
+	m_lockonHandle = LoadGraph(L"Data/UI/Lockon.png");
 }
 
 void Camera::End()
@@ -96,6 +101,7 @@ void Camera::End()
 	m_cameraPos = kDefaultCameraPos;
 	m_cameraTarget = kCameraTarget;
 	DeleteLightHandle(m_lightHandle);
+	DeleteGraph(m_lockonHandle);
 }
 
 void Camera::Update()
@@ -169,6 +175,11 @@ void Camera::Update()
 		// 本来注視したい位置（プレイヤーとロックオン対象の中間点）
 		VECTOR desiredTarget = VAdd(m_playerPos, VScale(VSub(m_lockOnCameraPos, m_playerPos), 0.5f));
 		m_cameraTarget = VAdd(VScale(m_cameraTarget, 1.0f - kLerpSpeed), VScale(desiredTarget, kLerpSpeed));
+		m_lockonRotateAngle += kLockonRotateSpeed;
+		if (m_lockonRotateAngle > DX_TWO_PI_F)
+		{
+			m_lockonRotateAngle -= DX_TWO_PI_F;
+		}
 	}
 	
 	//DrawFormatString(0,0,0xffffff,L"m_cameraTarget.x:%f,m_cameraTarget.y:%f,m_cameraTarget.z:%f", m_cameraTarget.x, m_cameraTarget.y, m_cameraTarget.z);
@@ -179,6 +190,10 @@ void Camera::Update()
 void Camera::Draw()
 {
 	//DrawSphere3D(m_cameraTarget,30.0f,8,0xff0000,0xffffff,true);
+	if (m_isLockOn)
+	{
+		DrawBillboard3D(m_lockOnCameraPos, 0.5f, 0.5f, 384, m_lockonRotateAngle, m_lockonHandle, true);
+	}
 }
 
 void Camera::SetLockOnPosition(VECTOR lockOnPos)

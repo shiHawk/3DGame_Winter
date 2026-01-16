@@ -2,7 +2,7 @@
 #include <cmath>
 namespace
 {
-	constexpr VECTOR kDefaultPos = { 100.0f,0.0f,-60.0f };
+	constexpr VECTOR kDefaultPos = { -946.0f,-59.0f,-400.0f };
 	constexpr VECTOR kDefaultVec = { 0.0f,0.0f,0.0f };
 	constexpr VECTOR kDefaultDir = { 0.0f,270.0f * DX_PI_F / 180.0f,0.0f };
 	constexpr float kSphereRadius = 20.0f;
@@ -49,7 +49,7 @@ namespace
 	constexpr int kStrongAttackPower = 30;
 	constexpr int kSpecialAttackPower = 150;
 	constexpr float kAttackDuration = 30.0f;
-	constexpr float kStrongAttackDuration = 100.0f;
+	constexpr float kStrongAttackDuration = 50.0f;
 	constexpr float kSpecialSkilDuration = 110.0f;
 
 	constexpr float kAttackRadius = 30.0f;
@@ -75,6 +75,7 @@ namespace
 
 	constexpr float kAvoidanceFrame = 15.0f;
 	constexpr float kAvoidanceMoveSpeed = 0.2f;
+	constexpr float kRetreatMoveSpeed = 8.0f; // 後退時の速度
 	constexpr float kColRadius = 40.0f;
 
 	constexpr float kDamageDuration = 30.0f;      // ダメージ硬直（動けない時間）
@@ -196,7 +197,7 @@ void Companion::Update()
 	}
 
 	m_isInAttackSequence = m_companionState != CompanionState::NORMAL && m_companionState != CompanionState::FOLLOW_PLAYER
-						 && m_companionState != CompanionState::TRACK_ENEMY;
+						 && m_companionState != CompanionState::TRACK_ENEMY && m_companionState != CompanionState::PREPARE_STRONG_ATTACK;
 	if (m_isInAttackSequence)
 	{
 		m_vec.x = 0.0f;
@@ -290,7 +291,7 @@ void Companion::Draw()
 		DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
 	}
 	MV1DrawModel(m_modelHandle);
-	//printfDx(L"hp:%d\n", m_hp);
+	//printfDx(L"m_avoidanceTimer:%f\n", m_avoidanceTimer);
 }
 
 void Companion::OnAttack()
@@ -327,6 +328,7 @@ void Companion::OnStrongAttack()
 
 void Companion::OnSpecialSkil()
 {
+	m_specialGauge -= 100;
 	m_attackPower = kStrongAttackPower;
 	m_attack.radius = kSpecialSkilRadius;
 	m_attack.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
@@ -405,20 +407,16 @@ void Companion::UpdateAIState()
 				// 0～100の乱数を取得して、行動を決定する
 				int decision = GetRand(100);
 
-				if (decision < 60) // 60%の確率で近接攻撃
+				if (decision < 50) // 50%の確率で近接攻撃
 				{
 					m_vec = { 0.0f, 0.0f, 0.0f };
 					OnAttack();
 					m_companionState = CompanionState::NORMAL_ATTACK;
 				}
-				else // 40%の確率で距離を取って遠距離攻撃（仕切り直し）
+				else // 50%の確率で距離を取って遠距離攻撃（仕切り直し）
 				{
-					// 敵と反対方向にベクトルを向ける
-					VECTOR retreatDir = VScale(m_dirToEnemy, -1.0f);
-					m_vec = VScale(retreatDir, kMoveSpeed); // 下がりながら
-
-					OnStrongAttack(); // 遠距離攻撃を行う
-					m_companionState = CompanionState::STRONG_ATTACK;
+					m_avoidanceTimer = 20.0f;
+					m_companionState = CompanionState::PREPARE_STRONG_ATTACK;
 				}
 			}
 		}
@@ -472,6 +470,33 @@ void Companion::UpdateAIState()
 			}
 		}
 		break;
+	case Companion::CompanionState::PREPARE_STRONG_ATTACK:
+	{
+		m_avoidanceTimer--;
+		// 敵と反対方向に移動
+		m_dirToEnemy = VNorm(VSub(m_enemyPos, m_pos));
+		VECTOR retreatDir = VScale(m_dirToEnemy, -1.0f);
+		// 進行方向を向く
+		float targetAngle = atan2f(retreatDir.x, retreatDir.z);
+		float diff = targetAngle - m_angleY;
+		if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
+		else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+		m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
+		// 角度の正規化
+		if (m_angleY > DX_PI_F)      m_angleY -= 2.0f * DX_PI_F;
+		else if (m_angleY < -DX_PI_F) m_angleY += 2.0f * DX_PI_F;
+
+		m_vec.x = retreatDir.x * kRetreatMoveSpeed;
+		m_vec.z = retreatDir.z * kRetreatMoveSpeed;
+		ChangeAnim(m_modelHandle,kAvoidanceAnimNo,false,kAvoidanceAnimIncrement);
+		if (m_avoidanceTimer <= 0.0f)
+		{
+			m_angleY = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+			OnStrongAttack();
+			m_companionState = CompanionState::STRONG_ATTACK;
+		}
+		break;
+	}
 	case Companion::CompanionState::DAMAGE:
 	{
 		// アニメーション再生
@@ -543,7 +568,6 @@ void Companion::UpdatePlayerControlState()
 				}
 				else
 				{
-					m_specialGauge -= 100;
 					OnSpecialSkil();
 					m_companionState = CompanionState::SPECIALSKIL;
 					m_attackCoolTimer = kAttackCoolTime;
@@ -603,6 +627,7 @@ void Companion::UpdatePlayerControlState()
 			{
 				m_isSpecialSkilFlag = false;
 				m_attack.active = false;
+				m_specialGauge = 0;
 				m_companionState = CompanionState::NORMAL;
 			}
 		}

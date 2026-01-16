@@ -5,7 +5,7 @@ namespace
 	constexpr float kAttackRadius = 30.0f;
 	constexpr float kColRadius = 25.0f;
 	constexpr VECTOR kDefaultPos = { 500.0f,-59.0f,500.0f };
-	constexpr float kModelScale = 70.0f; // モデルのスケール
+	constexpr float kModelScale = 1.3f;
 	constexpr float kChageTime = 1.5f;
 	constexpr float kCoolDownTime = 1.5f;
 	constexpr float kRangeAttackRadius = 150.0f;
@@ -35,7 +35,7 @@ namespace
 	constexpr unsigned int kOutLineColor = 0xff0000;
 	constexpr int kDivNum = 32;
 	constexpr float kInvincibilityTime = 60.0f;
-	constexpr int kMaxHp = 300;
+	constexpr int kMaxHp = 200;
 	constexpr int kAttackPower = 75;
 }
 
@@ -59,7 +59,7 @@ void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 	Enemy::Init(pPlayer, pCompanion);
 	m_modelHandle = MV1LoadModel(L"Data/model/StrongEnemy.mv1");
 	AttachAnim(m_modelHandle, kIdleAnimNo);
-	MV1SetScale(m_modelHandle,VGet(1.3f,1.3f,1.3f));
+	MV1SetScale(m_modelHandle,VGet(kModelScale, kModelScale, kModelScale));
 	m_pos = pos;
 	m_hp = kMaxHp;
 	m_attackPower = kAttackPower;
@@ -250,6 +250,7 @@ void StrongEnemy::OnDamage(int damage)
 
 	// 1. 先にダメージ計算を行う
 	m_hp -= damage;
+	m_enemyAttack.timer = 0.0f;
 	m_isHitFlag = true;
 
 	// 2. 計算後のHPで死亡判定を行う

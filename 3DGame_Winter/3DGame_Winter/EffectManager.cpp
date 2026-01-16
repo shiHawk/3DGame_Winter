@@ -3,6 +3,7 @@
 #include <EffekseerForDXLib.h>
 #include "Player.h"
 #include "Companion.h"
+#include "BossEnemy.h"
 #include "GameplayCollision.h"
 namespace
 {

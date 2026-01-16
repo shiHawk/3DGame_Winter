@@ -3,6 +3,7 @@
 #include "Animation.h"
 #include <vector>
 #include <memory>
+class SkyDome;
 class TitleScene : public SceneBase
 {
 public:
@@ -17,6 +18,7 @@ private:
 	void SetStage();
 	std::shared_ptr<Animation> m_pWarriorAnim;
 	std::shared_ptr<Animation> m_pWizardAnim;
+	std::shared_ptr<SkyDome> m_pSkyDome;
 	bool m_isNextScene;
 	VECTOR m_warriorPos;
 	VECTOR m_wizardPos;

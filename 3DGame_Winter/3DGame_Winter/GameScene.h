@@ -19,6 +19,7 @@
 #include "DxLib.h"
 #include "Pad.h"
 #include "CharacterBase.h"
+#include "SkyDome.h"
 #include <memory>
 class GameScene :public SceneBase
 {
@@ -34,6 +35,7 @@ private:
 	void DrawGrid();
 	VECTOR GetNearestEnemyPos(VECTOR basePos);
 	void DeathProcessing();
+	bool IsEnemyAttacking(VECTOR targetPos);
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Enemy> m_pEnemy;
@@ -52,6 +54,7 @@ private:
 	std::unique_ptr<BattleAreaManager> m_pBattleAreaManager;
 	std::unique_ptr<UIManager> m_pUIManager;
 	std::shared_ptr<ScoreManager> m_pScoreManager;
+	std::shared_ptr<SkyDome> m_pSkyDome;
 	bool m_isNextScene;
 };
 
