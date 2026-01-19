@@ -109,7 +109,8 @@ Player::Player():
     m_comboWindowTimer(0.0f),
     m_comboCoolTimer(0.0f),
     m_aiWillDo3HitCombo(false),
-    m_isEnemyAttackSensing(false)
+    m_isEnemyAttackSensing(false),
+    m_retreatDir({0.0f,0.0f,0.0f})
 {
 }
 
@@ -176,10 +177,10 @@ void Player::Update()
         {
             m_pos = VGet(m_followTargetPos.x, m_followTargetPos.y, m_followTargetPos.z - kPostWarpPosZ);
         }
-       /* if (m_isEnemyAttackSensing && m_playerState != PlayerState::AUTO_EVADE)
+        if (m_isEnemyAttackSensing && m_playerState != PlayerState::AUTO_EVADE)
         {
             m_playerState = PlayerState::AUTO_EVADE;
-        }*/
+        }
     }
     
     if (!m_isInAttackSequence)
@@ -735,6 +736,32 @@ void Player::HandleStateDeath()
 
 void Player::HandleStateAutoEvade()
 {
+    m_avoidanceTimer -= 1.0f;
+
+    // A. 退避方向（retreatDir）を向く
+    float targetAngle = atan2f(m_retreatDir.x, m_retreatDir.z);
+    float diff = targetAngle - m_angleY;
+    if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
+    else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
+    m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
+
+    // B. 移動ベクトルをセット（kPlayerMoveSpeed または回避用速度）
+    m_vec.x = m_retreatDir.x * kMoveSpeed * 1.5f; // 少し速めに設定
+    m_vec.z = m_retreatDir.z * kMoveSpeed * 1.5f;
+
+    // C. アニメーション設定
+    ChangeAnim(m_modelHandle, kAvoidanceAnimNo, false, kAnimIncrement);
+
+    // D. 終了判定
+    if (m_avoidanceTimer <= 0.0f)
+    {
+        // 敵の方向をパッと向き直す
+        m_angleY = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+
+        m_vec = VGet(0, 0, 0);
+        m_playerState = PlayerState::NORMAL;
+        m_isEnemyAttackSensing = false; // 感知フラグをリセット
+    }
 }
 
 void Player::HandleAIComboWindow()

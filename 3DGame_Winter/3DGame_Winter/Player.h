@@ -81,6 +81,7 @@ private:
 	float m_comboCoolTimer; // AIのコンボ用クールタイム
 	bool m_aiWillDo3HitCombo; // AIが3コンボ攻撃をするかどうかのフラグ
 	bool m_isEnemyAttackSensing;
+	VECTOR m_retreatDir;
 
 	// ステートごとのハンドラ関数
 	void HandleStateNormal(bool aiWantsToAttack);

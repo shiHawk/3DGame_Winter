@@ -200,7 +200,7 @@ SceneBase* GameScene::Update()
 	m_pCamera->Update();
 	DeathProcessing();
 
-	if (!m_isNextScene && !IsFadingOut() && m_pBossEnemy->IsDead())
+	if (!m_isNextScene && !IsFadingOut() && (m_pBossEnemy->IsDead() || (m_pPlayer->IsDead() && m_pCompanion->IsDead())))
 	{
 		StartFadeOut();
 		m_isNextScene = true;
