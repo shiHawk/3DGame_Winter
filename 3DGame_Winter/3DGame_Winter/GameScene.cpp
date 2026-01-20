@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "ResultScene.h"
+#include "SoundManager.h"
 #include "DxLib.h"
 namespace
 {
@@ -46,16 +47,16 @@ void GameScene::Init()
 	m_pScoreManager = std::make_shared<ScoreManager>();
 	m_pSkyDome = std::make_shared<SkyDome>();
 	m_pCamera->Init();
-	m_pPlayer->Init(m_pCamera);
+	m_pPlayer->Init(m_pCamera,m_pEffectManager);
 	m_pStage->Init();
 	m_pEnemyDataManager->LoadEnemyData("Data/enemyData/enemyData.csv",m_pNormalEnemies,m_pStrongEnemies,
-									   m_pPlayer,m_pCompanion);
+									   m_pPlayer,m_pCompanion,m_pEffectManager);
 	//m_pNormalEnemy->Init(m_pPlayer,m_pCompanion);
 	m_pCompanion->Init(m_pCamera);
 	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemies, m_pStrongEnemies,m_pBossEnemy);
 	m_pWorldCollision->Init(m_pPlayer, m_pStage, m_pCompanion);
 	m_pFlyingEnemy->Init(m_pPlayer, m_pCompanion);
-	m_pBossEnemy->Init(m_pPlayer, m_pCompanion);
+	m_pBossEnemy->Init(m_pPlayer, m_pCompanion,m_pEffectManager);
 	//m_pStrongEnemy->Init(m_pPlayer, m_pCompanion);
 	m_pEffectManager->Init(m_pPlayer,m_pCompanion,m_pGameplayCollision);
 	m_pBattleAreaManager->Init(m_pPlayer, m_pCompanion);
@@ -64,6 +65,7 @@ void GameScene::Init()
 	m_pScoreManager->Init();
 	m_pSkyDome->Init();
 	m_pSkyDome->SetScale(kSkyDomeScale);
+	SoundManager::GetInstance()->PlayBGM();
 }
 
 void GameScene::End()
@@ -88,12 +90,14 @@ void GameScene::End()
 	m_pStage->End();
 	m_pUIManager->End();
 	m_pSkyDome->End();
+	SoundManager::GetInstance()->StopBGM();
 }
 
 SceneBase* GameScene::Update()
 {
 	UpdateFade();
 	m_pSkyDome->SetPos(m_pCamera->GetCameraPos());
+	SoundManager::GetInstance()->Update();
 	if (!m_pPlayer->IsDead())
 	{
 		m_pPlayer->Update();
@@ -134,6 +138,18 @@ SceneBase* GameScene::Update()
 			companionNewMode = CharacterBase::ControlMode::PLAYER;
 		}
 		m_pCompanion->SetControlMode(companionNewMode);
+
+		// 切り替え時のエフェクト設定
+		VECTOR effectPos;
+		if (playerNewMode == CharacterBase::ControlMode::PLAYER)
+		{
+			effectPos = m_pPlayer->GetPos();
+		}
+		else
+		{
+			effectPos = m_pCompanion->GetPos();
+		}
+		m_pEffectManager->PlayChangeEffect(effectPos);
 	}
 	// 現在のコントロールモードを取得
 	CharacterBase::ControlMode currentControlMode = m_pPlayer->GetControlMode();
@@ -200,10 +216,24 @@ SceneBase* GameScene::Update()
 	m_pCamera->Update();
 	DeathProcessing();
 
+	if (m_pBattleAreaManager->IsBattleAreaActive())
+	{
+		m_pEffectManager->BattleAreaEffect(m_pBattleAreaManager->GetCenterPos());
+	}
+	else
+	{
+		// エリアが無効ならエフェクトを停止
+		m_pEffectManager->StopBattleAreaEffect();
+	}
+
 	if (!m_isNextScene && !IsFadingOut() && (m_pBossEnemy->IsDead() || (m_pPlayer->IsDead() && m_pCompanion->IsDead())))
 	{
 		StartFadeOut();
 		m_isNextScene = true;
+	}
+	if (IsFadingOut())
+	{
+		SoundManager::GetInstance()->FadeBGMVol();
 	}
 	// フェードが終了したら遷移する
 	if (m_isNextScene && IsFadeComplete())
@@ -233,7 +263,7 @@ void GameScene::Draw()
 		enemy->Draw();
 	}
 	m_pBossEnemy->Draw();
-	m_pBattleAreaManager->DrawBattleAreaBodary();
+	//m_pBattleAreaManager->DrawBattleAreaBodary();
 	//m_pBattleAreaManager->DebugDraw();
 	m_pUIManager->Draw();
 	m_pCamera->Draw();

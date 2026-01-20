@@ -1,4 +1,5 @@
 #include "StrongEnemy.h"
+#include "EffectManager.h"
 #include "DxLib.h"
 namespace
 {
@@ -54,9 +55,10 @@ StrongEnemy::~StrongEnemy()
 {
 }
 
-void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, VECTOR pos)
+void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager, VECTOR pos)
 {
 	Enemy::Init(pPlayer, pCompanion);
+	m_pEffectManager = pEffectManager;
 	m_modelHandle = MV1LoadModel(L"Data/model/StrongEnemy.mv1");
 	AttachAnim(m_modelHandle, kIdleAnimNo);
 	MV1SetScale(m_modelHandle,VGet(kModelScale, kModelScale, kModelScale));
@@ -241,6 +243,7 @@ void StrongEnemy::OnRangeAttack()
 	m_enemyAttack.radius = kRangeAttackRadius;
 	VECTOR playerPos = m_pPlayer->GetPos();
 	float distance = VSize(VSub(playerPos,m_enemyAttack.pos));
+	m_pEffectManager->StrongEnemyRangeAttackEffect(m_enemyAttack.pos);
 }
 
 void StrongEnemy::OnDamage(int damage)

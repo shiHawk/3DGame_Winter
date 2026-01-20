@@ -1,4 +1,5 @@
 #include "BossEnemy.h"
+#include "EffectManager.h"
 namespace
 {
     constexpr float kAttackRadius = 50.0f;
@@ -11,7 +12,7 @@ namespace
     constexpr float kRangeAttackRadius = 250.0f;
     constexpr float kStrongAttackRadius = 150.0f;
     constexpr float kRangeAttackDuration = 60.0f;
-    constexpr float kStrongAttackDuration = 120.0f;
+    constexpr float kStrongAttackDuration = 100.0f;
     constexpr float kTrackingRange = 1000.0f;
     constexpr float kActionCheckInterval = 0.5f; // íäëIïpìx
     constexpr float kNormalAttackDuration = 40.0f;
@@ -57,9 +58,10 @@ BossEnemy::~BossEnemy()
 {
 }
 
-void BossEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
+void BossEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager)
 {
     Enemy::Init(pPlayer, pCompanion);
+    m_pEffectManager = pEffectManager;
     m_pos = kDefaultPos;
     m_hp = kMaxHp;
     m_attackPower = kAttackPower;
@@ -144,7 +146,7 @@ void BossEnemy::Update()
     {
         // çUåÇââèoíÜ
         m_enemyAttack.timer--;
-        ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, 0.8f);
+        ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, 1.0f);
         if (m_enemyAttack.timer <= 0)
         {
             m_enemyAttack.active = false;
@@ -255,6 +257,7 @@ void BossEnemy::OnStrongAttack()
     m_enemyAttack.dir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
     m_enemyAttack.timer = kStrongAttackDuration;
     m_enemyAttack.radius = kStrongAttackRadius;
+    m_pEffectManager->EnemyStrongAttackEffect(m_enemyAttack.pos);
 }
 
 void BossEnemy::OnRangeAttack()
@@ -264,6 +267,7 @@ void BossEnemy::OnRangeAttack()
     m_enemyAttack.dir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
     m_enemyAttack.timer = kRangeAttackDuration;
     m_enemyAttack.radius = kRangeAttackRadius;
+    m_pEffectManager->BossEnemyRangeAttackEffect(m_enemyAttack.pos);
 }
 
 void BossEnemy::OnDamage(int damage)
@@ -311,10 +315,11 @@ void BossEnemy::UpdateDefault()
     else if (m_toPlayerDistance < kRangeAttackRadius)
     {
         int rand = GetRand(100);
-        if (rand < 40)
+        if (rand < 50)
         {
             m_state = BossEnemyState::STRONG_ATTACK_CHARGE;
             m_attackTimer = kChageTime; // äÓèÄÇÃó≠Çﬂéûä‘
+            m_pEffectManager->EnemyStrongAttackChargeEffect(m_pos);
             //m_enemyAttack.active = true; // ï`âÊÇäJénÇ∑ÇÈÇΩÇﬂÇ…Ç±Ç±Ç≈ONÇ…Ç∑ÇÈ
         }
         else if (rand < 70)

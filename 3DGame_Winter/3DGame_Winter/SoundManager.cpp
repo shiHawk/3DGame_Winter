@@ -22,7 +22,8 @@ SoundManager::SoundManager() :
 	m_companionStrongAttackSoundHandle(-1),
 	m_companionSpecialSkilSoundHandle(-1),
 	m_enemyAttackSoundHandle(-1),
-	m_enterSEHandle(-1)
+	m_enterSEHandle(-1),
+	m_PlayerChangeSEHandle(-1)
 {
 }
 
@@ -31,6 +32,11 @@ void SoundManager::Init(SceneManager* pSceneManager)
 	m_pSceneManager = pSceneManager;
 	m_titleBgmHandle = LoadSoundMem(L"Data/sound/titlebgm.mp3");
 	m_resultBgmHandle = LoadSoundMem(L"Data/sound/resultbgm.mp3");
+	m_gameSceneBgmHandle = LoadSoundMem(L"Data/sound/gamebgm.mp3");
+	m_playerFirstAttackSoundHandle = LoadSoundMem(L"Data/sound/firstattack.mp3");
+	m_playerSecondAttackSoundHandle = LoadSoundMem(L"Data/sound/secondattack.mp3");
+	m_playerThirdAttackSoundHandle = LoadSoundMem(L"Data/sound/thirdattack.mp3");
+	m_enemyAttackSoundHandle = LoadSoundMem(L"Data/sound/enemyattack.mp3");
 }
 
 void SoundManager::End()

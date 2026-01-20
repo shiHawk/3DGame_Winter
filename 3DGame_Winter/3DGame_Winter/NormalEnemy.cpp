@@ -1,5 +1,6 @@
 #include "NormalEnemy.h"
 #include <cmath>
+#include "SoundManager.h"
 namespace
 {
 	constexpr VECTOR kDefaultPos = { -500.0f,-59.0f,300.0f };

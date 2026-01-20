@@ -18,10 +18,10 @@ namespace
 	constexpr int kSrcWidth = 150;
 	constexpr int kSgSrcX = 333; // Secialゲージ切り出し位置(X)
 	constexpr int kSgSrcY = 207; // Secialゲージ切り出し位置(Y)
-	constexpr int kDistX1 = 413;
-	constexpr int kDistY1 = 104;
-	constexpr int kDistX2 = 980;
-	constexpr int kDistY2 = 150;
+	constexpr int kDistX1 = 435; // 修正：バーの開始位置をさらに右へ（345 + 50）
+	constexpr int kDistY1 = 575;
+	constexpr int kDistX2 = 1006; // 修正：フレームの終端を右へ（980 + 26）
+	constexpr int kDistY2 = 605;
 	constexpr int kWarriorIconPosX = 70;
 	constexpr int kWarriorIconPosY = 630;
 	constexpr int kHpGaugeFrameWidth = 370; // ゲージの横幅
@@ -132,11 +132,15 @@ void UIManager::DrawSg()
 
 void UIManager::DrawBossHp()
 {
-	int maxDestWidth = 400;
-	// 現在のHP割合に応じた画面上の幅を計算
+	// バーの最大幅を少し狭くして、左右の装飾にぶつからないように調整
+	int maxDestWidth = 400; 
 	int currentDestWidth = static_cast<int>(maxDestWidth * m_bossHpGaugeRate);
-	//DrawRectExtendGraph(kDistX1, kDistY1,kDistX2,kDistY2, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, kSrcWidth, true);
-	DrawRectExtendGraph(248, 50,kDistX2,247, 63, 153, 636, 187, m_bossHPGaugeFlameHandle,true);
-	DrawRectExtendGraph(kDistX1, kDistY1, kDistX1+ currentDestWidth, kDistY2, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_bossHpGaugeRate), kSrcWidth, m_bossHpGaugeHandle, true);
+
+	// 1. ボスHPフレーム（背景・装飾）を重ねて描画
+	DrawRectExtendGraph(274, 550, kDistX2, 647, 63, 153, 636, 187, m_bossHPGaugeFlameHandle, true);
+	// 2. HPバーを描画（フレームの後ろ側になるように）
+	DrawRectExtendGraph(kDistX1, kDistY1, kDistX1 + currentDestWidth, kDistY2,
+		kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_bossHpGaugeRate),
+		kSrcWidth, m_bossHpGaugeHandle, true);
 	
 }

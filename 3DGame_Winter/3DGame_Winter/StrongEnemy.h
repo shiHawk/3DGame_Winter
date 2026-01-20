@@ -1,11 +1,12 @@
 #pragma once
 #include "Enemy.h"
+class EffectManager;
 class StrongEnemy :public Enemy
 {
 public:
 	StrongEnemy();
 	~StrongEnemy();
-	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, VECTOR pos);
+	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager,VECTOR pos);
 	void End();
 	void Update() override;
 	void Draw() override;
@@ -27,6 +28,7 @@ private:
 		COOLDOWN,
 		DEAD
 	};
+	std::shared_ptr<EffectManager> m_pEffectManager;
 	StrongEnemyState m_state;
 	AttackSphere m_enemyAttack;
 	float m_alpha;

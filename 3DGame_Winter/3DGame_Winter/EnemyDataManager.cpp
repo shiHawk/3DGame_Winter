@@ -7,7 +7,7 @@ EnemyDataManager::EnemyDataManager()
 void EnemyDataManager::LoadEnemyData(const std::string fileName, 
 									 std::vector<std::shared_ptr<NormalEnemy>>& pNormalEnemies, 
 									 std::vector<std::shared_ptr<StrongEnemy>>& pStrongEnemies,
-									 std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion)
+									 std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager)
 {
 	std::ifstream file(fileName);
 	if (!file.is_open())
@@ -41,7 +41,7 @@ void EnemyDataManager::LoadEnemyData(const std::string fileName,
 		if (type == "strongEnemy")
 		{
 			auto strongEnemy = std::make_shared<StrongEnemy>();
-			strongEnemy->Init(pPlayer, pCompanion,enemyPos);
+			strongEnemy->Init(pPlayer, pCompanion,pEffectManager,enemyPos);
 			pStrongEnemies.push_back(strongEnemy);
 		}
 	}

@@ -28,6 +28,7 @@ public:
 	VECTOR GetAttackPos() { return m_attack.pos; }
 	bool IsAttackActive() { return m_attack.active; }
 	int GetAttackPower() { return m_attackPower; }
+	bool IsStrongAttackFlag() { return m_isStrongAttack; }
 	void AddSpecialGauge(int increment);
 	float GetColRadius();
 	int GetMaxHp();
@@ -69,6 +70,7 @@ private:
 	bool m_isAvoidanceFlag;
 	float m_damageTimer;      // 硬直タイマー
 	bool  m_isHitFlag;    // 無敵フラグ
+	bool m_isStrongAttack;
 	void RotatingToAttack();
 	void OnAvoidance();
 };

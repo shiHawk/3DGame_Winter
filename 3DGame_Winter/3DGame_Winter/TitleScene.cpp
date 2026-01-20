@@ -188,7 +188,6 @@ void TitleScene::End()
 
 SceneBase* TitleScene::Update()
 {
-	//m_pSkyDome->RotationSkyDome();
 	m_pSkyDome->Update();
 	UpdateFade();
 	SoundManager::GetInstance()->Update();

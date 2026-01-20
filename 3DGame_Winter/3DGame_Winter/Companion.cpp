@@ -101,7 +101,8 @@ Companion::Companion():
 	m_avoidanceTimer(0.0f),
 	m_isAvoidanceFlag(false),
 	m_damageTimer(0.0f),
-	m_isHitFlag(false)
+	m_isHitFlag(false),
+	m_isStrongAttack(false)
 {
 }
 
@@ -288,7 +289,7 @@ void Companion::Draw()
 #endif 
 	if (m_companionState == CompanionState::STRONG_ATTACK)
 	{
-		DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
+		//DrawSphere3D(m_attack.pos, m_attack.radius, kDivNum, kSphereDifColor, kSphereSpcColor, true);
 	}
 	MV1DrawModel(m_modelHandle);
 	//printfDx(L"m_avoidanceTimer:%f\n", m_avoidanceTimer);
@@ -310,6 +311,7 @@ void Companion::OnStrongAttack()
 	m_attack.radius = kAttackRadius;
 	m_attack.timer = kStrongAttackDuration;
 	m_attack.active = true;
+	m_isStrongAttack = true;
 	if (m_controlMode == ControlMode::PLAYER)
 	{
 		// プレイヤー操作時: 弾の方向をキャラクターの現在の向き (m_angleY) に基づいて水平に設定
@@ -453,6 +455,7 @@ void Companion::UpdateAIState()
 			if (m_attack.timer <= 0.0f)
 			{
 				m_attack.active = false;
+				m_isStrongAttack = false;
 				m_companionState = CompanionState::NORMAL;
 				m_attackCoolTimer = kAttackCoolTime;
 			}
@@ -610,6 +613,7 @@ void Companion::UpdatePlayerControlState()
 			if (m_attack.timer < 0.0f)
 			{
 				m_attack.active = false;
+				m_isStrongAttack = false;
 				m_companionState = CompanionState::NORMAL;
 			}
 		}

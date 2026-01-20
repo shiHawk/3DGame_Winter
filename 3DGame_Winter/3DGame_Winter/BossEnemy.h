@@ -1,11 +1,12 @@
 #pragma once
 #include "Enemy.h"
+class EffectManager;
 class BossEnemy :public Enemy
 {
 public:
 	BossEnemy();
 	~BossEnemy();
-	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion);
+	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager);
 	void End();
 	void Update() override;
 	void Draw() override;
@@ -41,4 +42,5 @@ private:
 	float m_attackTimer;
 	float m_actionCheckTimer; // 行動抽選のクールダウンタイマー
 	std::shared_ptr<CharacterBase> m_lockedTarget;
+	std::shared_ptr<EffectManager> m_pEffectManager;
 };

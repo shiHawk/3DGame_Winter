@@ -3,6 +3,8 @@
 #include "Camera.h"
 #include "DxLib.h"
 #include <cmath>
+#include "SoundManager.h"
+#include "EffectManager.h"
 namespace
 {
     constexpr VECTOR kDefaultPos = { -946.0f,-59.0f,-415.0f };
@@ -114,9 +116,10 @@ Player::Player():
 {
 }
 
-void Player::Init(std::shared_ptr<Camera> pCamera)
+void Player::Init(std::shared_ptr<Camera> pCamera, std::shared_ptr<EffectManager> pEffectManager)
 {
 	m_pCamera = pCamera;
+    m_pEffectManager = pEffectManager;
 	m_pos = kDefaultPos;
 	m_vec = kDefaultVec;
     m_angleY = 0.0f;
@@ -177,10 +180,10 @@ void Player::Update()
         {
             m_pos = VGet(m_followTargetPos.x, m_followTargetPos.y, m_followTargetPos.z - kPostWarpPosZ);
         }
-        if (m_isEnemyAttackSensing && m_playerState != PlayerState::AUTO_EVADE)
+        /*if (m_isEnemyAttackSensing && m_playerState != PlayerState::AUTO_EVADE)
         {
             m_playerState = PlayerState::AUTO_EVADE;
-        }
+        }*/
     }
     
     if (!m_isInAttackSequence)
@@ -285,6 +288,8 @@ void Player::OnAttack()
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos,VScale(m_attack.dir,kAttackRange));
     m_attack.timer = kAttackDuration;
+
+    m_pEffectManager->PlayPlayerAttack1Effect(m_attack.pos,m_angleY);
     if (m_pos.y > 0.0f)
     {
         m_vec.y = 0.0f; // ‚’¼‘¬“x‚ðƒ[ƒ‚É‚µAã¸E‰º~‚ð’âŽ~
@@ -299,6 +304,8 @@ void Player::OnAttack2()
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos, VScale(m_attack.dir, kAttackRange));
     m_attack.timer = kStrongAttackDuration;
+
+    m_pEffectManager->PlayPlayerAttack2Effect(m_attack.pos, m_angleY);
     if (m_pos.y > 0.0f)
     {
         m_vec.y = 0.0f; // ‚’¼‘¬“x‚ðƒ[ƒ‚É‚µAã¸E‰º~‚ð’âŽ~
@@ -313,6 +320,7 @@ void Player::OnCombFinishAttack()
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos, VScale(m_attack.dir, kAttackRange));
     m_attack.timer = kComboFinishAttackDuration;
+    m_pEffectManager->PlayPlayerCombFinishAttackEffect(m_attack.pos, m_angleY);
 }
 
 void Player::OnSpecialSkil()
@@ -378,7 +386,7 @@ void Player::OnDamage(int enemyPower)
     m_attack.active = false;
     m_attack.timer = 0.0f;
     m_comboStep = 0;
-
+    SoundManager::GetInstance()->PlayEnemyAttackSE();
     m_hp -= enemyPower;
     if (m_hp <= 0)
     {

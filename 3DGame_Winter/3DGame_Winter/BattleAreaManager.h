@@ -20,6 +20,8 @@ public:
 	bool IsInBattle(); // í“¬’†‚©
 	bool IsFinished(); // í“¬‚ªI—¹‚µ‚Ä‚¢‚é‚©
 	void DrawBattleAreaBodary();
+	bool IsBattleAreaActive() { return m_batlleAreaActive; }
+	VECTOR GetCenterPos() { return m_battleAreaCenterPos; }
 private:
 	enum class State
 	{
@@ -53,6 +55,7 @@ private:
 	float m_distToStrong;
 	float m_battleAreaCenterPosToPlayerDistance;
 	VECTOR m_afterCorrectionPos;
+	bool m_batlleAreaActive;
 
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;

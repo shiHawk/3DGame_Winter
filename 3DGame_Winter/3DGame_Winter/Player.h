@@ -3,13 +3,14 @@
 #include <memory>
 #include "CharacterBase.h"
 class Camera;
+class EffectManager;
 
-class Player:public CharacterBase
+class Player :public CharacterBase
 {
 public:
 	Player();
 	~Player() {};
-	void Init(std::shared_ptr<Camera> pCamera);
+	void Init(std::shared_ptr<Camera> pCamera, std::shared_ptr<EffectManager> pEffectManager);
 	void End();
 	virtual void Update()override;
 	void Draw();
@@ -67,6 +68,7 @@ private:
 	void UpdateMovement(const VECTOR& moveDir);
 	void UpdatePlayerState();
 	std::shared_ptr<Camera> m_pCamera;
+	std::shared_ptr<EffectManager> m_pEffectManager;
 	float m_angleY;
 	VECTOR m_enemyPos;
 	VECTOR m_followTargetPos; // AI時に追従する対象（プレイヤー）の座標

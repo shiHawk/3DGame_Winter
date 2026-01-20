@@ -29,7 +29,8 @@ BattleAreaManager::BattleAreaManager():
 	m_distToNormal(0.0f),
 	m_distToStrong(0.0f),
 	m_battleAreaCenterPosToPlayerDistance(0.0f),
-	m_afterCorrectionPos({ 0.0f,0.0f,0.0f })
+	m_afterCorrectionPos({ 0.0f,0.0f,0.0f }),
+	m_batlleAreaActive(false)
 {
 }
 
@@ -65,6 +66,7 @@ void BattleAreaManager::Update(std::shared_ptr<CharacterBase> activeCharacter, s
 		// CheckEncounterが false (=近くに敵がいない) ならリセット
 		if (!CheckEncounter(activeCharacter, normalEnemies, strongEnemies))
 		{
+			m_batlleAreaActive = false;
 			m_battleState = State::None;
 		}
 	}
@@ -75,6 +77,7 @@ void BattleAreaManager::Update(std::shared_ptr<CharacterBase> activeCharacter, s
 		if (CheckEncounter(activeCharacter, normalEnemies, strongEnemies))
 		{
 			// 戦闘開始（現在の操作キャラの位置を中心にする）
+			m_batlleAreaActive = true;
 			EnterBattle(activeCharacter->GetPos(), normalEnemies, strongEnemies);
 		}
 	}
