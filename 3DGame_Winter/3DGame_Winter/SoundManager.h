@@ -19,11 +19,14 @@ public:
 	void End();
 	void Update();
 	void PlayBGM();
-	void PlayPlayerAttackSE(int attackCount); // SEの再生
-	void PlayCompanionAttackSE(int attackCount);
+	void PlayWarriorAttackSE(int attackCount); // SEの再生
 	void PlayEnemyAttackSE();
+	void PlayWizardAttackSE();
+	void PlayWarriorSpecialAttackSE();
+	void PlayWizardSpecialAttackSE();
 	int FadeBGMVol(); // フェードに合わせて音量を小さくする
 	void StopBGM();
+	void SwitchToBossBGM();
 private:
 	SoundManager();
 	~SoundManager() {};
@@ -43,5 +46,8 @@ private:
 	int m_enemyAttackSoundHandle;
 	int m_enterSEHandle;
 	int m_PlayerChangeSEHandle;
+	int m_wizardAttackSound;
+	int m_bossBgmHandle;
+	bool m_isBossBgmRequested; // ボスBGMへの切り替え中フラグ
 };
 

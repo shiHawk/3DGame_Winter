@@ -13,7 +13,8 @@ class UIManager
 public:
 	UIManager();
 	~UIManager();
-	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion,std::shared_ptr<BossEnemy> pBoss);
+	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion,std::shared_ptr<BossEnemy> pBoss,
+		      std::vector<std::shared_ptr<NormalEnemy>> pNormalEnemies, std::vector<std::shared_ptr<StrongEnemy>> pStrongEnemies);
 	void End();
 	void Updata();
 	void Draw();
@@ -21,6 +22,8 @@ private:
 	void DrawHp();
 	void DrawSg();
 	void DrawBossHp();
+	void DrawEnemyHP();
+	void DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, float height, float offsetY);
 	float m_playerHpGaugeRate;
 	float m_companionHpGaugeRate;
 	float m_playerSpecialGaugeRate;
@@ -31,6 +34,8 @@ private:
 	int m_sgGaugeHandle;
 	int m_bossHpGaugeHandle;
 	int m_bossHPGaugeFlameHandle;
+	int m_enemyHPHandle;
+	int m_enemyHPFrameHandle;
 	int m_warriorIconHandle;
 	int m_wizardIconHandle;
 	std::shared_ptr<Player> m_pPlayer;

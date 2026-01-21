@@ -18,6 +18,7 @@ public:
 	AttackSphere GetAttackInfo() { return m_enemyAttack; }
 	int GetAttackPower() { return m_attackPower; }
 	int GetAttackPos();
+	int GetMaxHp();
 private:
 	enum StrongEnemyState
 	{

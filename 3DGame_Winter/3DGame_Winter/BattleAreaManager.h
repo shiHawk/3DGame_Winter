@@ -8,13 +8,14 @@
 #include "Companion.h"
 #include "FlyingEnemy.h"
 #include "StrongEnemy.h"
+#include "BossEnemy.h"
 class BattleAreaManager
 {
 public:
 	BattleAreaManager();
 	~BattleAreaManager();
 	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion);
-	void SetEnemy(std::vector<std::shared_ptr<NormalEnemy>>& normalEnemies, std::vector<std::shared_ptr<StrongEnemy>>& strongEnemies);
+	void SetEnemy(std::vector<std::shared_ptr<NormalEnemy>>& normalEnemies, std::vector<std::shared_ptr<StrongEnemy>>& strongEnemies, std::shared_ptr<BossEnemy> pBossEnemy);
 	void Update(std::shared_ptr<CharacterBase> activeCharacter, std::vector<std::shared_ptr<NormalEnemy>>& normalEnemies, std::vector<std::shared_ptr<StrongEnemy>>& strongEnemies);
 	void DebugDraw();
 	bool IsInBattle(); // 戦闘中か
@@ -36,7 +37,7 @@ private:
 	// 戦闘開始
 	void EnterBattle(const VECTOR& centerPos,
 		const std::vector<std::shared_ptr<NormalEnemy>>& normalEnemies,
-		const std::vector<std::shared_ptr<StrongEnemy>>& strongEnemies);
+		const std::vector<std::shared_ptr<StrongEnemy>>& strongEnemies,float radius);
 
 	// キャラクターの移動制限
 
@@ -59,6 +60,7 @@ private:
 
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;
+	std::shared_ptr<BossEnemy> m_pBossEnemy;
 	std::vector<std::shared_ptr<NormalEnemy>> m_normalenemies;
 	std::vector<std::shared_ptr<StrongEnemy>> m_strongEnemies;
 	// 現在バトルエリア内にいる敵のリスト

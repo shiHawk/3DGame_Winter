@@ -144,6 +144,7 @@
     <ClCompile Include="BossEnemy.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CharacterBase.cpp" />
+    <ClCompile Include="Chest.cpp" />
     <ClCompile Include="Companion.cpp" />
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
@@ -174,6 +175,7 @@
     <ClInclude Include="BossEnemy.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CharacterBase.h" />
+    <ClInclude Include="Chest.h" />
     <ClInclude Include="Companion.h" />
     <ClInclude Include="ControlMode.h" />
     <ClInclude Include="EffectManager.h" />

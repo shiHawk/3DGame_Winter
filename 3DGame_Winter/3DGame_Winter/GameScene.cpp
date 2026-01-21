@@ -21,6 +21,8 @@ namespace
 	constexpr VECTOR kInvalidPos = { 1000000.0f, 1000000.0f, 1000000.0f }; // ñ≥å¯Ç»ç¿ïWÅií¥âìï˚Åj
 	constexpr float kSkyDomeScale = 120.0f;
 	constexpr float kSensingRange = 600.0f;
+	constexpr float kBattleAreaSize = 120.0f;
+	constexpr float kBossBattleAreaSize = 350.0f;
 }
 GameScene::GameScene():
 	m_isNextScene(false)
@@ -46,6 +48,7 @@ void GameScene::Init()
 	m_pUIManager = std::make_unique<UIManager>();
 	m_pScoreManager = std::make_shared<ScoreManager>();
 	m_pSkyDome = std::make_shared<SkyDome>();
+	m_pChest = std::make_shared<Chest>();
 	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera,m_pEffectManager);
 	m_pStage->Init();
@@ -60,11 +63,12 @@ void GameScene::Init()
 	//m_pStrongEnemy->Init(m_pPlayer, m_pCompanion);
 	m_pEffectManager->Init(m_pPlayer,m_pCompanion,m_pGameplayCollision);
 	m_pBattleAreaManager->Init(m_pPlayer, m_pCompanion);
-	m_pBattleAreaManager->SetEnemy(m_pNormalEnemies, m_pStrongEnemies);
-	m_pUIManager->Init(m_pPlayer, m_pCompanion,m_pBossEnemy);
+	m_pBattleAreaManager->SetEnemy(m_pNormalEnemies, m_pStrongEnemies,m_pBossEnemy);
+	m_pUIManager->Init(m_pPlayer, m_pCompanion,m_pBossEnemy, m_pNormalEnemies, m_pStrongEnemies);
 	m_pScoreManager->Init();
 	m_pSkyDome->Init();
 	m_pSkyDome->SetScale(kSkyDomeScale);
+	m_pChest->Init(m_pPlayer, m_pCompanion,m_pEffectManager);
 	SoundManager::GetInstance()->PlayBGM();
 }
 
@@ -90,6 +94,7 @@ void GameScene::End()
 	m_pStage->End();
 	m_pUIManager->End();
 	m_pSkyDome->End();
+	m_pChest->End();
 	SoundManager::GetInstance()->StopBGM();
 }
 
@@ -192,6 +197,7 @@ SceneBase* GameScene::Update()
 	m_pFlyingEnemy->Update();
 	m_pBossEnemy->Update();
 	m_pSkyDome->Update();
+	m_pChest->Update();
 	//m_pStrongEnemy->Update();
 	
 	m_pEffectManager->Update();
@@ -218,7 +224,15 @@ SceneBase* GameScene::Update()
 
 	if (m_pBattleAreaManager->IsBattleAreaActive())
 	{
-		m_pEffectManager->BattleAreaEffect(m_pBattleAreaManager->GetCenterPos());
+		if (VSize(VSub(m_pBossEnemy->GetPos(), m_pPlayer->GetPos())) <= 1445.0f)
+		{
+			m_pEffectManager->BattleAreaEffect(m_pBattleAreaManager->GetCenterPos(), kBossBattleAreaSize);
+			SoundManager::GetInstance()->SwitchToBossBGM();
+		}
+		else
+		{
+			m_pEffectManager->BattleAreaEffect(m_pBattleAreaManager->GetCenterPos(), kBattleAreaSize);
+		}
 	}
 	else
 	{
@@ -263,8 +277,7 @@ void GameScene::Draw()
 		enemy->Draw();
 	}
 	m_pBossEnemy->Draw();
-	//m_pBattleAreaManager->DrawBattleAreaBodary();
-	//m_pBattleAreaManager->DebugDraw();
+	m_pChest->Draw();
 	m_pUIManager->Draw();
 	m_pCamera->Draw();
 	DrawFade();

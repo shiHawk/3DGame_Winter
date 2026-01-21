@@ -18,7 +18,9 @@ CharacterBase::CharacterBase():
 	m_angleY(0.0f),
 	m_isSpecialSkilFlag(false),
 	m_prevPos({ 0.0f,0.0f,0.0f }),
-	m_specialGauge(0)
+	m_specialGauge(0),
+	m_baseAttackPower(0),
+	m_powerUpBonus(0)
 {
 }
 

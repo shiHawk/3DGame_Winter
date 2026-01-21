@@ -247,3 +247,8 @@ void NormalEnemy::ApplyKnockback(VECTOR direction, float power)
 	m_knockbackDir = direction;
 	m_knockbackTimer = kKnockbackDuration;
 }
+
+int NormalEnemy::GetMaxHp()
+{
+	return kMaxHp;
+}

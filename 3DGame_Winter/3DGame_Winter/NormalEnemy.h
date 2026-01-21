@@ -22,6 +22,7 @@ public:
 	float GetAttackRadius() { return m_enemyAttack.radius; }
 	int GetAttackPower() { return m_attackPower; }
 	AttackSphere GetAttackInfo() { return m_enemyAttack; }
+	int GetMaxHp();
 private:
 	AttackSphere m_enemyAttack;
 	float m_alpha;

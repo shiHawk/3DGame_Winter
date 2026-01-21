@@ -3,6 +3,7 @@ namespace
 {
 	constexpr int kDivNum = 16;
 	constexpr float kBattleAreaRadiusSize = 500.0f;
+	constexpr float kBossBattleAreaRadiusSize = 1500.0f;
 	constexpr float kBattleTriggerDistance = 300.0f;
 	constexpr int kSegmentCount = 64;    // 円周を分割する数
 	constexpr float kLineWidth = 10.0f; // ラインの太さ
@@ -51,10 +52,11 @@ void BattleAreaManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Co
 	m_activeStrongEnemies.clear();
 }
 
-void BattleAreaManager::SetEnemy(std::vector<std::shared_ptr<NormalEnemy>>& normalenemies, std::vector<std::shared_ptr<StrongEnemy>>& strongEnemies)
+void BattleAreaManager::SetEnemy(std::vector<std::shared_ptr<NormalEnemy>>& normalenemies, std::vector<std::shared_ptr<StrongEnemy>>& strongEnemies, std::shared_ptr<BossEnemy> pBossEnemy)
 {
 	m_normalenemies = normalenemies;
 	m_strongEnemies = strongEnemies;
+	m_pBossEnemy = pBossEnemy;
 }
 
 void BattleAreaManager::Update(std::shared_ptr<CharacterBase> activeCharacter, std::vector<std::shared_ptr<NormalEnemy>>& normalEnemies, std::vector<std::shared_ptr<StrongEnemy>>& strongEnemies)
@@ -73,12 +75,23 @@ void BattleAreaManager::Update(std::shared_ptr<CharacterBase> activeCharacter, s
 	// 2. 通常探索状態の処理
 	else if (m_battleState == State::None)
 	{
-		// 操作キャラクターが敵に接近したかチェック
 		if (CheckEncounter(activeCharacter, normalEnemies, strongEnemies))
 		{
-			// 戦闘開始（現在の操作キャラの位置を中心にする）
 			m_batlleAreaActive = true;
-			EnterBattle(activeCharacter->GetPos(), normalEnemies, strongEnemies);
+
+			// ボスが近くにいるか確認して、引数を切り替える
+			float distToBoss = VSize(VSub(m_pBossEnemy->GetPos(), activeCharacter->GetPos()));
+
+			if (!m_pBossEnemy->IsDead() && distToBoss <= 1445.0f)
+			{
+				// ボス戦開始：中心はボス、半径は大きく
+				EnterBattle(m_pBossEnemy->GetPos(), normalEnemies, strongEnemies, kBossBattleAreaRadiusSize);
+			}
+			else
+			{
+				// 通常戦開始：中心はプレイヤー、半径はデフォルト
+				EnterBattle(activeCharacter->GetPos(), normalEnemies, strongEnemies,kBattleAreaRadiusSize);
+			}
 		}
 	}
 	// 3. 戦闘中の処理
@@ -172,17 +185,31 @@ bool BattleAreaManager::CheckEncounter(std::shared_ptr<CharacterBase> activeChar
 		}
 	}
 
+	if (m_pBossEnemy && !m_pBossEnemy->IsDead())
+	{
+		// ボス戦の感知範囲（少し広めにとるのがおすすめ）
+		// GameScene側で1445.0fで判定しているので、それに合わせるか、クラス内の定数を使います
+		float distSq = VSize(VSub(m_pBossEnemy->GetPos(), charaPos));
+		if (distSq < 1445.0f) // 数値は調整してください
+		{
+			return true; // ボスに接近した
+		}
+	}
+
 	return false; // 誰も近くにいない
 }
 
-void BattleAreaManager::EnterBattle(const VECTOR& centerPos, const std::vector<std::shared_ptr<NormalEnemy>>& normalEnemies, const std::vector<std::shared_ptr<StrongEnemy>>& strongEnemies)
+void BattleAreaManager::EnterBattle(const VECTOR& centerPos, 
+									const std::vector<std::shared_ptr<NormalEnemy>>& normalEnemies, 
+									const std::vector<std::shared_ptr<StrongEnemy>>& strongEnemies,
+									float radius)
 {
 	m_battleState = State::InBattle;
 
 	// 戦闘エリアの中心を設定（Y軸は0固定あるいはキャラの高さに合わせる）
 	// ここではシンプルにY=0平面でエリアを作る想定にします
 	m_battleAreaCenterPos = centerPos;
-
+	m_battleAreaRadius = radius;
 	// 以前のアクティブリストをクリア
 	m_activeNormalenemies.clear();
 	m_activeStrongEnemies.clear();
@@ -248,6 +275,15 @@ void BattleAreaManager::CheckBattleEnd()
 		if (!enemy->IsDead()) return; // まだ生きている
 	}
 
+	if (m_pBossEnemy && !m_pBossEnemy->IsDead())
+	{
+		// ボスがバトルエリア内にいるなら戦闘続行
+		float dist = VSize(VSub(m_pBossEnemy->GetPos(), m_battleAreaCenterPos));
+		if (dist < m_battleAreaRadius + 100.0f)
+		{
+			return; // ボスがまだ生きている
+		}
+	}
 	// 全滅していたら終了状態へ
 	m_battleState = State::Finish;
 }

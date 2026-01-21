@@ -40,7 +40,7 @@ namespace
     constexpr unsigned int kOutLineColor = 0xff0000;
     constexpr int kDivNum = 32;
     constexpr float kInvincibilityTime = 30.0f;
-    constexpr int kMaxHp = 500;
+    constexpr int kMaxHp = 800;
     constexpr int kAttackPower = 75;
 }
 
@@ -89,7 +89,7 @@ void BossEnemy::Update()
     if (m_invincibilityTimer > 0.0f) 
     {
         m_invincibilityTimer--;
-        if (m_hp < m_hp * 0.3f)
+        if (m_hp < m_hp * 0.3f && m_state != BossEnemyState::DEAD)
         {
             ChangeAnim(m_modelHandle, kDamageAnimNo, true, kDamageAnimIncrement);
         }
@@ -198,7 +198,6 @@ void BossEnemy::Update()
 void BossEnemy::Draw()
 {
     MV1DrawModel(m_modelHandle);
-    //DrawSphere3D(m_pos, kColRadius, kDivNum, 0xff0000, 0xffffff, true);
     if (m_state == BossEnemyState::RANGE_ATTACK_CHARGE)
     {
         // progress‚ð 0.0f ` 1.0f ‚ÌŠÔ‚É‚·‚é
@@ -239,6 +238,7 @@ void BossEnemy::Draw()
     {
         //DrawSphere3D(m_enemyAttack.pos, m_enemyAttack.radius, kDivNum, 0xffff00, 0xffffff, false);
     }
+    //printfDx(L"BossToPlayer:%f\n",VSize(VSub(m_pos,m_pPlayer->GetPos())));
 }
 
 void BossEnemy::OnAttack()

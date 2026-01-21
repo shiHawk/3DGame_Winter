@@ -24,6 +24,9 @@ public:
 	bool IsHitFlag() { return m_isHitFlag; }
 	int GetHp() { return m_hp; }
 	int GetSpecialGauge() { return m_specialGauge; }
+	void AddHp(int recovery) { m_hp += recovery; }
+	void AddSg(int sg) { m_specialGauge += sg; }
+	void PowerUp(int attackPowerValue) { m_powerUpBonus += attackPowerValue; }
 	enum class ControlMode
 	{
 		PLAYER,
@@ -58,5 +61,7 @@ protected:
 	bool m_isSpecialSkilFlag;
 	VECTOR m_prevPos;
 	int m_specialGauge; // •KEƒQ[ƒW
+	int m_baseAttackPower;   // UŒ‚‚Ìí—Ş‚²‚Æ‚ÌŠî‘bUŒ‚—Í
+	int m_powerUpBonus;  // •ó” ‚Å“¾‚½‘‰Á•ªi‰Šú’l0j
 };
 

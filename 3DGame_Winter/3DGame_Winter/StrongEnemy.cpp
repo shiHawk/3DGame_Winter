@@ -287,3 +287,8 @@ int StrongEnemy::GetAttackPos()
 {
 	return kAttackPower;
 }
+
+int StrongEnemy::GetMaxHp()
+{
+	return kMaxHp;
+}

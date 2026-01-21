@@ -20,6 +20,7 @@
 #include "Pad.h"
 #include "CharacterBase.h"
 #include "SkyDome.h"
+#include "Chest.h"
 #include <memory>
 class GameScene :public SceneBase
 {
@@ -55,6 +56,7 @@ private:
 	std::unique_ptr<UIManager> m_pUIManager;
 	std::shared_ptr<ScoreManager> m_pScoreManager;
 	std::shared_ptr<SkyDome> m_pSkyDome;
+	std::shared_ptr<Chest> m_pChest;
 	bool m_isNextScene;
 };
 

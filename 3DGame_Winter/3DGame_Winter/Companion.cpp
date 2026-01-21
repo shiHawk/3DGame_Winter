@@ -1,5 +1,6 @@
 #include "Companion.h"
 #include <cmath>
+#include "SoundManager.h"
 namespace
 {
 	constexpr VECTOR kDefaultPos = { -946.0f,-59.0f,-400.0f };
@@ -267,6 +268,10 @@ void Companion::Update()
 		}
 	}
 	//m_pos = nextPos;
+	if (m_hp >= kMaxHp)
+	{
+		m_hp = kMaxHp;
+	}
 	MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY+DX_PI_F, 0.0f));
 	MV1SetPosition(m_modelHandle,m_pos);
 	UpdateAnim(m_modelHandle);
@@ -312,6 +317,7 @@ void Companion::OnStrongAttack()
 	m_attack.timer = kStrongAttackDuration;
 	m_attack.active = true;
 	m_isStrongAttack = true;
+	SoundManager::GetInstance()->PlayWizardAttackSE();
 	if (m_controlMode == ControlMode::PLAYER)
 	{
 		// プレイヤー操作時: 弾の方向をキャラクターの現在の向き (m_angleY) に基づいて水平に設定
@@ -338,6 +344,7 @@ void Companion::OnSpecialSkil()
 	m_attack.pos = m_enemyPos;
 	m_attack.timer = kSpecialSkilDuration;
 	m_isSpecialSkilFlag = true;
+	SoundManager::GetInstance()->PlayWizardSpecialAttackSE();
 }
 
 void Companion::UpdateAIState()

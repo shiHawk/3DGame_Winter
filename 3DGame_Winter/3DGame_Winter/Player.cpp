@@ -220,7 +220,10 @@ void Player::Update()
     
     m_vec = VSub(nextPos, m_pos);
     //m_pos = nextPos;
-   
+   if(m_hp >= kMaxHp)
+   {
+       m_hp = kMaxHp;
+   }
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim(m_modelHandle);
     //printfDx(L"Pos.y:%f\n",m_pos.y);
@@ -282,13 +285,13 @@ void Player::Draw()
 
 void Player::OnAttack()
 {
-    m_attackPower = kAttackPower;
+    m_attackPower = kAttackPower+m_powerUpBonus;
     m_attack.radius = kAttackRadius;
     m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos,VScale(m_attack.dir,kAttackRange));
     m_attack.timer = kAttackDuration;
-
+    SoundManager::GetInstance()->PlayWarriorAttackSE(0);
     m_pEffectManager->PlayPlayerAttack1Effect(m_attack.pos,m_angleY);
     if (m_pos.y > 0.0f)
     {
@@ -298,13 +301,13 @@ void Player::OnAttack()
 
 void Player::OnAttack2()
 {
-    m_attackPower = kStrongAttackPower;
+    m_attackPower = kStrongAttackPower + m_powerUpBonus;
     m_attack.radius = kStrongAttackRadius;
     m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos, VScale(m_attack.dir, kAttackRange));
     m_attack.timer = kStrongAttackDuration;
-
+    SoundManager::GetInstance()->PlayWarriorAttackSE(1);
     m_pEffectManager->PlayPlayerAttack2Effect(m_attack.pos, m_angleY);
     if (m_pos.y > 0.0f)
     {
@@ -314,22 +317,24 @@ void Player::OnAttack2()
 
 void Player::OnCombFinishAttack()
 {
-    m_attackPower = kComboFinishAttackPower;
+    m_attackPower = kComboFinishAttackPower + m_powerUpBonus;
     m_attack.radius = kComboFinishAttackRadius;
     m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
     m_attack.pos = VAdd(m_pos, VScale(m_attack.dir, kAttackRange));
     m_attack.timer = kComboFinishAttackDuration;
+    SoundManager::GetInstance()->PlayWarriorAttackSE(2);
     m_pEffectManager->PlayPlayerCombFinishAttackEffect(m_attack.pos, m_angleY);
 }
 
 void Player::OnSpecialSkil()
 {
-    m_attackPower = kSpecialSkilPower;
+    m_attackPower = kSpecialSkilPower + m_powerUpBonus;
     m_attack.radius = kSpecialSkilRadius;
     m_attack.active = true;
     m_attack.pos = m_pos;
     m_attack.timer = kSpecialSkilDuration;
+    SoundManager::GetInstance()->PlayWarriorSpecialAttackSE();
     m_playerState = PlayerState::SPECIALSKIL;
     m_isSpecialSkilFlag = true;
 }

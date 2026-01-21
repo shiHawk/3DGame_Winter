@@ -16,14 +16,28 @@ namespace
 	constexpr int kSrcX = 462; // 切り出し位置(X)
 	constexpr int kSrcY = 293; // 切り出し位置(Y)
 	constexpr int kSrcWidth = 150;
+
 	constexpr int kSgSrcX = 333; // Secialゲージ切り出し位置(X)
 	constexpr int kSgSrcY = 207; // Secialゲージ切り出し位置(Y)
+
 	constexpr int kDistX1 = 435; // 修正：バーの開始位置をさらに右へ（345 + 50）
 	constexpr int kDistY1 = 575;
 	constexpr int kDistX2 = 1006; // 修正：フレームの終端を右へ（980 + 26）
 	constexpr int kDistY2 = 605;
+
+	constexpr int kEnemyBarWidth = 100;
+	constexpr int kEnemyBarHeight = 10;
+	constexpr float kNormalEnemyOffsetY = 155.0f;
+	constexpr float kStrongEnemyOffsetY = 250.0f;
+	constexpr int kEnemyBarFrameSrcX = 1350;
+	constexpr int kEnemyBarFrameSrcY = 142;
+	constexpr int kEnemyBarSrcX = 1304;
+	constexpr int kEnemyBarSrcY = 122;
+
 	constexpr int kWarriorIconPosX = 70;
 	constexpr int kWarriorIconPosY = 630;
+	constexpr int kWizardIconPosX = 640;
+	constexpr int kWizardIconPosY = 620;
 	constexpr int kHpGaugeFrameWidth = 370; // ゲージの横幅
 	// スコアの位置
 	constexpr int kScorePosX = 650;
@@ -50,6 +64,8 @@ UIManager::UIManager():
 	m_sgGaugeHandle(-1),
 	m_bossHpGaugeHandle(-1),
 	m_bossHPGaugeFlameHandle(-1),
+	m_enemyHPHandle(-1),
+	m_enemyHPFrameHandle(-1),
 	m_warriorIconHandle(-1),
 	m_wizardIconHandle(-1)
 {
@@ -59,17 +75,23 @@ UIManager::~UIManager()
 {
 }
 
-void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<BossEnemy> pBoss)
+void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<BossEnemy> pBoss,
+				     std::vector<std::shared_ptr<NormalEnemy>> pNormalEnemies, std::vector<std::shared_ptr<StrongEnemy>> pStrongEnemies)
 {
 	m_pPlayer = pPlayer;
 	m_pCompanion = pCompanion;
 	m_pBossEnemy = pBoss;
+	m_pNormalEnemies = pNormalEnemies;
+	m_pStrongEnemies = pStrongEnemies;
 	m_hpGaugeFrameHandle = LoadGraph(L"Data/UI/HPGaugeFrame.png");
 	m_bossHpGaugeHandle = LoadGraph(L"Data/UI/Boss_Hp.png");
 	m_hpGaugeHandle = LoadGraph(L"Data/UI/HP.png");
 	m_sgGaugeHandle = LoadGraph(L"Data/UI/SG.png");
-	m_warriorIconHandle = LoadGraph(L"Data/UI/Player_Icon.png");
+	m_warriorIconHandle = LoadGraph(L"Data/UI/Warrior_Icon.png");
+	m_wizardIconHandle = LoadGraph(L"Data/UI/Wizard_Icon.png");
 	m_bossHPGaugeFlameHandle = LoadGraph(L"Data/UI/BossHPFrame.png");
+	m_enemyHPHandle = LoadGraph(L"Data/UI/EnemyHP.png");
+	m_enemyHPFrameHandle = LoadGraph(L"Data/UI/EnemyHPFrame.png");
 }
 
 void UIManager::End()
@@ -79,7 +101,10 @@ void UIManager::End()
 	DeleteGraph(m_sgGaugeHandle);
 	DeleteGraph(m_bossHpGaugeHandle);
 	DeleteGraph(m_warriorIconHandle);
+	DeleteGraph(m_wizardIconHandle);
 	DeleteGraph(m_bossHPGaugeFlameHandle);
+	DeleteGraph(m_enemyHPHandle);
+	DeleteGraph(m_enemyHPFrameHandle);
 }
 
 void UIManager::Updata()
@@ -87,7 +112,7 @@ void UIManager::Updata()
 	// 残りHPの割合を更新
 	m_playerHpGaugeRate = static_cast<float>(m_pPlayer->GetHp()) / m_pPlayer->GetMaxHp();
 	m_companionHpGaugeRate = static_cast<float>(m_pCompanion->GetHp()) / m_pCompanion->GetMaxHp();
-	m_bossHpGaugeRate = static_cast<float>(m_pBossEnemy->GetHp()) / 500;
+	m_bossHpGaugeRate = static_cast<float>(m_pBossEnemy->GetHp()) / 800;
 
 	m_playerSpecialGaugeRate = static_cast<float>(m_pPlayer->GetSpecialGauge()) / 100.0f;
 	m_companionSpecialGaugeRate = static_cast<float>(m_pCompanion->GetSpecialGauge()) / 100.0f;
@@ -97,6 +122,7 @@ void UIManager::Draw()
 {
 	DrawHp();
 	DrawSg();
+	DrawEnemyHP();
 	if (VSize(VSub(m_pPlayer->GetPos(), m_pBossEnemy->GetPos())) <= 1000.0f)
 	{
 		DrawBossHp();
@@ -115,6 +141,7 @@ void UIManager::DrawHp()
 	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_companionHpGaugeRate),
 				  kHpTextPosY, m_hpGaugeHandle, true);
+	DrawGraph(kWizardIconPosX, kWizardIconPosY, m_wizardIconHandle, true);
 }
 
 void UIManager::DrawSg()
@@ -142,5 +169,68 @@ void UIManager::DrawBossHp()
 	DrawRectExtendGraph(kDistX1, kDistY1, kDistX1 + currentDestWidth, kDistY2,
 		kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_bossHpGaugeRate),
 		kSrcWidth, m_bossHpGaugeHandle, true);
-	
+}
+
+void UIManager::DrawEnemyHP()
+{
+	//DrawBillboard3D(VGet(m_pPlayer->GetPos().x,m_pPlayer->GetPos().y+120.0f, m_pPlayer->GetPos().z), 0.5f, 0.5f, 130.0f, 0.0f, m_enemyHPHandle, true);
+	// NormalEnemyのループ
+	for (const auto& enemy : m_pNormalEnemies)
+	{
+		// 敵が生きていれば描画
+		if (enemy->IsDead()) continue;
+		// 一定距離以下になったら描画
+		if (VSize(VSub(enemy->GetPos(), m_pPlayer->GetPos())) <= 800.0f || VSize(VSub(enemy->GetPos(), m_pCompanion->GetPos())) <= 800.0f)
+		{
+			DrawSingleEnemyBar(enemy->GetPos(), enemy->GetHp(), enemy->GetMaxHp(),
+				kEnemyBarWidth, kEnemyBarHeight, kNormalEnemyOffsetY);
+		}
+	}
+
+	// StrongEnemyのループ
+	for (const auto& enemy : m_pStrongEnemies)
+	{
+		if (enemy->IsDead()) continue;
+		if (VSize(VSub(enemy->GetPos(), m_pPlayer->GetPos())) <= 800.0f || VSize(VSub(enemy->GetPos(), m_pCompanion->GetPos())) <= 800.0f)
+		{
+			DrawSingleEnemyBar(enemy->GetPos(), enemy->GetHp(), enemy->GetMaxHp(),
+				kEnemyBarWidth, kEnemyBarHeight, kStrongEnemyOffsetY);
+		}
+	}
+}
+
+void UIManager::DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, float height, float offsetY)
+{
+	// 1. 敵の頭上の3D座標を計算
+	VECTOR headPos = VGet(pos.x, pos.y + offsetY, pos.z);
+
+	// 2. 3D座標をスクリーン（2D）座標に変換
+	VECTOR screenPos = ConvWorldPosToScreenPos(headPos);
+
+	// 3. 画面外（カメラの後ろ）なら処理しない
+	if (screenPos.z < 0.0f || screenPos.z > 1.0f) return;
+
+	// 割合計算
+	float rate = static_cast<float>(hp) / maxHp;
+	if (rate < 0) rate = 0;
+
+	// 描画開始位置（バーの中央が敵の真上にくるように調整）
+	int x1 = static_cast<int>(screenPos.x - width / 2);
+	int y1 = static_cast<int>(screenPos.y);
+	int x2 = x1 + width;
+	int y2 = y1 + height;
+
+	// 4. 背景（枠）の描画
+	// 元画像(kSrcWidth)を画面上のサイズ(width)に引き伸ばして描画
+	DrawRectExtendGraph(x1, y1, x2, y2, 0, 0, kEnemyBarFrameSrcX, kEnemyBarFrameSrcY, m_enemyHPFrameHandle, TRUE);
+
+	// 5. HPバー（中身）の描画
+	// 現在のHPに合わせて「右端(x2)」と「切り出し範囲」を制限する
+	int currentX2 = x1 + static_cast<int>(width * rate);
+	int currentSrcWidth = static_cast<int>(kEnemyBarSrcX * rate);
+
+	if (currentSrcWidth > 0)
+	{
+		DrawRectExtendGraph(x1, y1, currentX2, y2, 0, 0, currentSrcWidth, kEnemyBarSrcY, m_enemyHPHandle, TRUE);
+	}
 }

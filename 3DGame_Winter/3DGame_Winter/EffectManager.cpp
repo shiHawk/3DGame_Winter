@@ -24,6 +24,7 @@ namespace
 	constexpr float kBossEnemyRangeAttackSize = 200.0f;
 	constexpr float kBossEnemyRangeAttackOffsetY = 40.0f;
 	constexpr float kBattleAreaSize = 120.0f;
+	constexpr float kChestEffectSize = 100.0f;
 }
 
 EffectManager::EffectManager() :
@@ -45,7 +46,10 @@ EffectManager::EffectManager() :
 	m_StrongEnemyRangeAttackHandle(-1),
 	m_BossEnemyRangeAttackHandle(-1),
 	m_BattleAreaHandle(-1),
-	m_playingBattleAreaHandle(-1)
+	m_playingBattleAreaHandle(-1),
+	m_HpChestHandle(-1),
+	m_SgChestHandle(-1),
+	m_BuffChestHandle(-1)
 {
 }
 
@@ -71,6 +75,9 @@ void EffectManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Compan
 	m_StrongEnemyRangeAttackHandle = LoadEffekseerEffect(L"Data/effect/StrongEnemyRangeAttack.efkefc");
 	m_BossEnemyRangeAttackHandle = LoadEffekseerEffect(L"Data/effect/BossEnemyRangeAttack.efkefc");
 	m_BattleAreaHandle = LoadEffekseerEffect(L"Data/effect/BattleArea.efkefc");
+	m_HpChestHandle = LoadEffekseerEffect(L"Data/effect/Heal.efkefc");
+	m_SgChestHandle = LoadEffekseerEffect(L"Data/effect/SpecialGauge.efkefc");
+	m_BuffChestHandle = LoadEffekseerEffect(L"Data/effect/PowerUp.efkefc");
 	m_playerEffectHandle = -1;
 }
 
@@ -90,6 +97,9 @@ void EffectManager::End()
 	DeleteEffekseerEffect(m_StrongEnemyRangeAttackHandle);
 	DeleteEffekseerEffect(m_BossEnemyRangeAttackHandle);
 	DeleteEffekseerEffect(m_BattleAreaHandle);
+	DeleteEffekseerEffect(m_HpChestHandle);
+	DeleteEffekseerEffect(m_SgChestHandle);
+	DeleteEffekseerEffect(m_BuffChestHandle);
 	StopBattleAreaEffect();
 }
 
@@ -251,7 +261,7 @@ void EffectManager::BossEnemyRangeAttackEffect(VECTOR pos)
 	SetScalePlayingEffekseer3DEffect(handle, kBossEnemyRangeAttackSize, kBossEnemyRangeAttackSize, kBossEnemyRangeAttackSize);
 }
 
-void EffectManager::BattleAreaEffect(VECTOR pos)
+void EffectManager::BattleAreaEffect(VECTOR pos, float scale)
 {
 	if (m_playingBattleAreaHandle != -1)
 	{
@@ -262,7 +272,7 @@ void EffectManager::BattleAreaEffect(VECTOR pos)
 	m_playingBattleAreaHandle = PlayEffekseer3DEffect(m_BattleAreaHandle);
 
 	SetPosPlayingEffekseer3DEffect(m_playingBattleAreaHandle, pos.x, pos.y + kBossEnemyRangeAttackOffsetY, pos.z);
-	SetScalePlayingEffekseer3DEffect(m_playingBattleAreaHandle, kBattleAreaSize, kBattleAreaSize, kBattleAreaSize);
+	SetScalePlayingEffekseer3DEffect(m_playingBattleAreaHandle, scale, scale, scale);
 }
 
 void EffectManager::StopBattleAreaEffect()
@@ -273,6 +283,28 @@ void EffectManager::StopBattleAreaEffect()
 		StopEffekseer3DEffect(m_playingBattleAreaHandle);
 		m_playingBattleAreaHandle = -1; // ハンドルを無効値に戻す
 	}
+}
+
+void EffectManager::PlayChestEffect(int no)
+{
+	int effectHandle = -1;
+
+	// 1. 種類に応じて使用するエフェクトを選択
+	if (no == 0)      effectHandle = m_SgChestHandle;
+	else if (no == 1) effectHandle = m_HpChestHandle;
+	else              effectHandle = m_BuffChestHandle;
+
+	if (effectHandle == -1) return;
+
+	// プレイヤーの位置にエフェクトを発生 
+	int handleP = PlayEffekseer3DEffect(effectHandle);
+	SetPosPlayingEffekseer3DEffect(handleP, m_pPlayer->GetPos().x, m_pPlayer->GetPos().y + 40.0f, m_pPlayer->GetPos().z);
+	SetScalePlayingEffekseer3DEffect(handleP, kChestEffectSize, kChestEffectSize, kChestEffectSize);
+
+	// コンパニオンの位置にエフェクトを発生
+	int handleC = PlayEffekseer3DEffect(effectHandle);
+	SetPosPlayingEffekseer3DEffect(handleC, m_pCompanion->GetPos().x, m_pCompanion->GetPos().y + 40.0f, m_pCompanion->GetPos().z);
+	SetScalePlayingEffekseer3DEffect(handleC, kChestEffectSize, kChestEffectSize, kChestEffectSize);
 }
 
 void EffectManager::SetEffectPos(float x, float y, float z)
