@@ -14,7 +14,7 @@ namespace
 	constexpr float kFireEffectSize = 50.0f;
 	constexpr float kChangeEffectSize = 50.0f;
 	constexpr float kChangeEffectOffsetY = 50.0f;
-	constexpr float kPlayerAttack1Size = 50.0f;
+	constexpr float kPlayerAttack1Size = 60.0f;
 	constexpr float kPlayerAttack2Size = 30.0f;
 	constexpr float kPlayerAttack2OffsetY = 30.0f;
 	constexpr float kEnemyStrongAttackSize = 60.0f;

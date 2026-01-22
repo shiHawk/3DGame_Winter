@@ -15,6 +15,9 @@ public:
 	float GetHorizonrtalAngle() { return m_cameraAngleHorizontal; }
 	bool IsLockOn() { return m_isLockOn; }
 	VECTOR GetCameraPos() { return m_cameraPos; }
+	void SetIsBossBattle(bool isBossBattle) { m_isBossBattle = isBossBattle; }
+	void SetIsLockOn(bool lockFlag) { m_isLockOn = lockFlag; }
+	bool IsBossBattle() { return m_isBossBattle; }
 private:
 	// “x”‚ğƒ‰ƒWƒAƒ“‚É•ÏŠ·‚·‚é
 	void RadianTranslation(); 
@@ -41,5 +44,6 @@ private:
 	VECTOR m_lockOnCameraPos;
 	int m_lockonHandle;
 	float m_lockonRotateAngle;
+	bool m_isBossBattle;
 };
 

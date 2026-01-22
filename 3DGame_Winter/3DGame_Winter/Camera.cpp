@@ -57,7 +57,8 @@ Camera::Camera():
 	m_lockOnCameraPos({ 0.0f,0.0f,0.0f }),
 	m_playerDir({ 0.0f,0.0f,0.0f }),
 	m_lockonHandle(-1),
-	m_lockonRotateAngle(0.0f)
+	m_lockonRotateAngle(0.0f),
+	m_isBossBattle(-1)
 {
 }
 
@@ -119,9 +120,50 @@ void Camera::Update()
 			m_isLockOn = false;
 		}
 	}
-	else if (VSize(VSub(m_lockOnCameraPos, m_playerPos)) >= kMaxLockonRange)
+	else if (VSize(VSub(m_lockOnCameraPos, m_playerPos)) >= kMaxLockonRange && !m_isBossBattle)
 	{
 		m_isLockOn = false;
+	}
+
+	if (m_isLockOn)
+	{
+		VECTOR vToTarget = VSub(m_lockOnCameraPos, m_playerPos);
+		// ボスの方角を向くための水平角度を算出 (Atan2を使用)
+		float targetH = atan2f(vToTarget.x, vToTarget.z);
+
+		// 現在の角度を目標の角度へじわじわ近づける(Lerp)
+		m_targetAngleHorizontal = targetH;
+
+		// 垂直角度も必要に応じて固定
+		m_targetAngleVertical = 0.2f;
+	}
+	else
+	{
+		// カメラの角度の計算
+		if (m_input.Rx > 0)
+		{
+			m_targetAngleHorizontal += kCameraAngleSpeed;
+		}
+		if (m_input.Rx < 0)
+		{
+			m_targetAngleHorizontal -= kCameraAngleSpeed;
+		}
+		if (m_input.Ry < 0)
+		{
+			m_targetAngleVertical += kCameraAngleSpeed;
+			if (m_targetAngleVertical > kCameraPitchUpLimit) // カメラが上限を超えないように制限
+			{
+				m_targetAngleVertical = kCameraPitchUpLimit;
+			}
+		}
+		if (m_input.Ry > 0)
+		{
+			m_targetAngleVertical -= kCameraAngleSpeed;
+			if (m_targetAngleVertical < kCameraPitchDownLimit) // カメラが下限を下回らないように制限
+			{
+				m_targetAngleVertical = kCameraPitchDownLimit;
+			}
+		}
 	}
 
 	if (!m_isLockOn)
@@ -129,39 +171,39 @@ void Camera::Update()
 		m_cameraTarget = VAdd(m_playerPos, VGet(0.0f, kCameraTarget.y, 0.0f));
 	}
 
-	// カメラの角度の計算
-	if (m_input.Rx > 0)
-	{
-		m_targetAngleHorizontal += kCameraAngleSpeed;
-	}
-	if(m_input.Rx < 0)
-	{
-		m_targetAngleHorizontal -= kCameraAngleSpeed;
-	}
-	if (m_input.Ry < 0)
-	{
-		m_targetAngleVertical += kCameraAngleSpeed;
-		if (m_targetAngleVertical > kCameraPitchUpLimit) // カメラが上限を超えないように制限
-		{
-			m_targetAngleVertical = kCameraPitchUpLimit;
-		}
-	}
-	if (m_input.Ry > 0)
-	{
-		m_targetAngleVertical -= kCameraAngleSpeed;
-		if (m_targetAngleVertical < kCameraPitchDownLimit) // カメラが下限を下回らないように制限
-		{
-			m_targetAngleVertical = kCameraPitchDownLimit;
-		}
-	}
+	
 	//printfDx(L"m_targetAngleVertical:%f\nm_targetAngleHorizontal:%f\n", m_targetAngleVertical, m_targetAngleHorizontal);
-	m_cameraAngleHorizontal = std::lerp(m_cameraAngleHorizontal,m_targetAngleHorizontal, kLerpSpeed);
-	m_cameraAngleVertical = std::lerp(m_cameraAngleVertical,m_targetAngleVertical, kLerpSpeed);
+	// 水平方向の角度差分を計算
+	float diffH = m_targetAngleHorizontal - m_cameraAngleHorizontal;
+
+	// 角度の差が -PI ～ PI の範囲に収まるように補正する（最短距離で回転させるため）
+	while (diffH >= DX_PI_F)  diffH -= DX_TWO_PI_F;
+	while (diffH < -DX_PI_F) diffH += DX_TWO_PI_F;
+
+	// 補正した差分に対して Lerp（的な処理）を適用
+	m_cameraAngleHorizontal += diffH * kLerpSpeed;
+
+	float diffV = m_targetAngleVertical - m_cameraAngleVertical;
+	m_cameraAngleVertical += diffV * kLerpSpeed;
 	MATRIX rotX,rotY; // カメラの回転行列
-	float cameraToPlayerLength;
 	rotY = MGetRotY(m_cameraAngleHorizontal); // 水平方向の回転はY軸回転
 	rotX = MGetRotX(m_cameraAngleVertical); // 垂直方向の回転はX軸回転
-	cameraToPlayerLength = kCameraToPlayerLength; // カメラからプレイヤーまでの初期の距離をセット
+
+	if (m_isLockOn)
+	{
+		// 前フレームの値を使わず、現在のフレームの各座標から直接「理想の注視点」を出す
+		// プレイヤーとボスの間（0.5f）を注視する
+		VECTOR midPoint = VAdd(m_playerPos, VScale(VSub(m_lockOnCameraPos, m_playerPos), 0.5f));
+		midPoint.y += 100.0f; // 少し高さを上げる
+
+		// 注視点そのものもLerpさせたい場合は、m_cameraTargetを直接使うのではなく
+		// 瞬間的な目標値を算出し、それに対してSetCameraPositionAndTarget内で補間する
+		m_cameraTarget = midPoint;
+	}
+	else
+	{
+		m_cameraTarget = VAdd(m_playerPos, VGet(0.0f, kCameraTarget.y, 0.0f));
+	}
 
 	// カメラの座標を算出
 	// Z軸にカメラとプレイヤーとの距離分だけ伸びたベクトルを
@@ -170,20 +212,8 @@ void Camera::Update()
 	m_cameraPos = VAdd(VTransform(VTransform(VGet(0.0f, 0.0f, -kCameraToPlayerLength), rotX), rotY), VGet(m_playerPos.x,m_playerPos.y + kDefaultCameraPos.y,m_playerPos.z));
 	//ResolveCollisionWithStage();
 	
-	if (m_isLockOn)
-	{
-		// 本来注視したい位置（プレイヤーとロックオン対象の中間点）
-		VECTOR desiredTarget = VAdd(m_playerPos, VScale(VSub(m_lockOnCameraPos, m_playerPos), 0.5f));
-		m_cameraTarget = VAdd(VScale(m_cameraTarget, 1.0f - kLerpSpeed), VScale(desiredTarget, kLerpSpeed));
-		m_lockonRotateAngle += kLockonRotateSpeed;
-		if (m_lockonRotateAngle > DX_TWO_PI_F)
-		{
-			m_lockonRotateAngle -= DX_TWO_PI_F;
-		}
-	}
-	
 	//DrawFormatString(0,0,0xffffff,L"m_cameraTarget.x:%f,m_cameraTarget.y:%f,m_cameraTarget.z:%f", m_cameraTarget.x, m_cameraTarget.y, m_cameraTarget.z);
-	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget); // カメラを計算した位置に設定する
+	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget);
 	//printfDx(L"targetPos.x;%f, targetPos.y;%f, targetPos.z;%f\n",m_cameraTarget.x, m_cameraTarget.y, m_cameraTarget.z);
 }
 
@@ -198,6 +228,7 @@ void Camera::Draw()
 
 void Camera::SetLockOnPosition(VECTOR lockOnPos)
 {
+	if (lockOnPos.x > 100000.0f || lockOnPos.y > 100000.0f) return;
 	m_lockOnCameraPos = lockOnPos;
 	m_lockOnCameraPos.y = m_lockOnCameraPos.y + 100.0f;
 }

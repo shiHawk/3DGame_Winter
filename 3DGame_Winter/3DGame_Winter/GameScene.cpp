@@ -184,6 +184,18 @@ SceneBase* GameScene::Update()
 							 : m_pCompanion->GetPos();
 
 	VECTOR targetEnemyPos = GetNearestEnemyPos(currentBasePos);
+	if (targetEnemyPos.x < 100000.0f)
+	{
+		m_pPlayer->SetEnemyPos(targetEnemyPos);
+		m_pCompanion->SetEnemyPos(targetEnemyPos);
+		m_pCamera->SetLockOnPosition(targetEnemyPos);
+	}
+	else
+	{
+		// 敵がいない（ボスが死んだ）ならロックオンを強制解除
+		m_pCamera->SetIsLockOn(false);
+		m_pCamera->SetIsBossBattle(false); // ボス戦フラグも折る
+	}
 	m_pPlayer->SetEnemyAttackSensingFlag(IsEnemyAttacking(m_pPlayer->GetPos()));
 	//printfDx(L"targetPosX:%f,targetPosY:%f,targetPosZ:%f\n",targetEnemyPos.x,targetEnemyPos.y,targetEnemyPos.z);
 
@@ -224,14 +236,16 @@ SceneBase* GameScene::Update()
 
 	if (m_pBattleAreaManager->IsBattleAreaActive())
 	{
-		if (VSize(VSub(m_pBossEnemy->GetPos(), m_pPlayer->GetPos())) <= 1445.0f)
+		if (VSize(VSub(m_pBossEnemy->GetPos(), m_pPlayer->GetPos())) <= 2000.0f)
 		{
 			m_pEffectManager->BattleAreaEffect(m_pBattleAreaManager->GetCenterPos(), kBossBattleAreaSize);
 			SoundManager::GetInstance()->SwitchToBossBGM();
+			m_pCamera->SetIsBossBattle(true);
 		}
 		else
 		{
 			m_pEffectManager->BattleAreaEffect(m_pBattleAreaManager->GetCenterPos(), kBattleAreaSize);
+			m_pCamera->SetIsBossBattle(false);
 		}
 	}
 	else
@@ -347,9 +361,9 @@ VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos)
 	if (m_pBossEnemy != nullptr && !m_pBossEnemy->IsDead())
 	{
 		float distSq = VSquareSize(VSub(m_pBossEnemy->GetPos(), basePos));
-		if (distSq < minDistanceSq)
+		if (m_pCamera->IsBossBattle() || distSq < minDistanceSq)
 		{
-			minDistanceSq = distSq;
+			// ボスを優先、あるいは一番近ければ更新
 			nearestPos = m_pBossEnemy->GetPos();
 			found = true;
 		}
