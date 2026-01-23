@@ -84,6 +84,7 @@ private:
 	bool m_aiWillDo3HitCombo; // AIが3コンボ攻撃をするかどうかのフラグ
 	bool m_isEnemyAttackSensing;
 	VECTOR m_retreatDir;
+	float m_evadeCooldown;
 
 	// ステートごとのハンドラ関数
 	void HandleStateNormal(bool aiWantsToAttack);

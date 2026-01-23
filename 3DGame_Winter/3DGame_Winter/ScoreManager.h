@@ -10,9 +10,11 @@ public:
 	void Updata();
 	int GetTime() { return m_elapsedTimeSeconds; }
 	int GetTimeBonus();
+	void SetGameoverFlag(bool gameover) { m_gameoverFlag = gameover; }
 private:
 	int m_startTime;
 	int m_elapsedTimeSeconds; // Œo‰ßŽžŠÔ(•b)
 	int m_timeBonus;
+	bool m_gameoverFlag;
 };
 

@@ -2,6 +2,7 @@
 namespace
 {
 	constexpr VECTOR kDefaultPos = { 600.0f,0.0f,500.0f };
+	constexpr VECTOR kInvalidValuePos = {10000.0f,10000.0f,10000.0f};
 	constexpr float kSphereRadius = 30.0f;
 	constexpr int kDivNum = 8;
 	constexpr int kSphereDifColor = 0x000000;
@@ -63,5 +64,10 @@ void Enemy::SearchTarget()
 	if (m_pCompanion->IsDead())
 	{
 		m_targetPos = m_pPlayer->GetPos();
+	}
+
+	if (m_pPlayer->IsDead() && m_pCompanion->IsDead())
+	{
+		m_targetPos = kInvalidValuePos;
 	}
 }

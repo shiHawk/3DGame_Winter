@@ -38,6 +38,17 @@ namespace
 	constexpr int kWarriorIconPosY = 630;
 	constexpr int kWizardIconPosX = 640;
 	constexpr int kWizardIconPosY = 620;
+
+	constexpr int kWarriorHpPosX = 151;
+	constexpr int kWarriorHpPosY = 648;
+	constexpr int kWizardHpPosX = 751;
+	constexpr int kWizardHpPosY = 648;
+
+	constexpr int kWarriorSgPosX = 151;
+	constexpr int kWarriorSgPosY = 678;
+	constexpr int kWizardSgPosX = 751;
+	constexpr int kWizardSgPosY = 678;
+
 	constexpr int kHpGaugeFrameWidth = 370; // ゲージの横幅
 	// スコアの位置
 	constexpr int kScorePosX = 650;
@@ -49,7 +60,7 @@ namespace
 	constexpr unsigned int kTimeColor = 0xff4500;
 	// フォントのサイズ、太さ
 	constexpr int kFontTextSize = 20;
-	constexpr int kFontSize = 30;
+	constexpr int kFontSize = 15;
 	constexpr int kFontThick = 5;
 }
 
@@ -67,7 +78,8 @@ UIManager::UIManager():
 	m_enemyHPHandle(-1),
 	m_enemyHPFrameHandle(-1),
 	m_warriorIconHandle(-1),
-	m_wizardIconHandle(-1)
+	m_wizardIconHandle(-1),
+	m_fontHandle(-1)
 {
 }
 
@@ -92,6 +104,7 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_bossHPGaugeFlameHandle = LoadGraph(L"Data/UI/BossHPFrame.png");
 	m_enemyHPHandle = LoadGraph(L"Data/UI/EnemyHP.png");
 	m_enemyHPFrameHandle = LoadGraph(L"Data/UI/EnemyHPFrame.png");
+	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 }
 
 void UIManager::End()
@@ -105,6 +118,7 @@ void UIManager::End()
 	DeleteGraph(m_bossHPGaugeFlameHandle);
 	DeleteGraph(m_enemyHPHandle);
 	DeleteGraph(m_enemyHPFrameHandle);
+	DeleteFontToHandle(m_fontHandle);
 }
 
 void UIManager::Updata()
@@ -136,12 +150,14 @@ void UIManager::DrawHp()
 	DrawRectGraph(kPlayerHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_playerHpGaugeRate),
 				  kHpTextPosY, m_hpGaugeHandle, true); 
 	DrawGraph(kWarriorIconPosX,kWarriorIconPosY,m_warriorIconHandle,true);
+	DrawFormatStringToHandle(kWarriorHpPosX, kWarriorHpPosY, 0x66cbaa, m_fontHandle, L"HP");
 
 	// コンパニオンのHPバーの描画
 	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_companionHpGaugeRate),
 				  kHpTextPosY, m_hpGaugeHandle, true);
 	DrawGraph(kWizardIconPosX, kWizardIconPosY, m_wizardIconHandle, true);
+	DrawFormatStringToHandle(kWizardHpPosX, kWizardHpPosY, 0x66cbaa, m_fontHandle, L"HP");
 }
 
 void UIManager::DrawSg()
@@ -150,11 +166,13 @@ void UIManager::DrawSg()
 	DrawRectGraph(kPlayerSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(kPlayerSpecialGaugeLeft, kSpecialGaugeTop, kSgSrcX, kSgSrcY, static_cast<int>(kHpGaugeWidth * m_playerSpecialGaugeRate),
 				  kHpTextPosY, m_sgGaugeHandle, true);
+	DrawFormatStringToHandle(kWarriorSgPosX, kWarriorSgPosY, 0xffb770, m_fontHandle, L"SG");
 
 	// コンパニオンのSpecialゲージの描画
 	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSgSrcX, kSgSrcY, static_cast<int>(kHpGaugeWidth * m_companionSpecialGaugeRate),
 				  kHpTextPosY, m_sgGaugeHandle, true);
+	DrawFormatStringToHandle(kWizardSgPosX, kWizardSgPosY, 0xffb770, m_fontHandle, L"SG");
 }
 
 void UIManager::DrawBossHp()

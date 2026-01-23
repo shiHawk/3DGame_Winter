@@ -33,6 +33,11 @@ namespace
 	constexpr int kFontSize = 50;
 	constexpr int kFontThick = 5;
 
+	constexpr int SrcX = 35;
+	constexpr int SrcY = 104;
+	constexpr int kStartWidth = 309;
+	constexpr int kStartHeight = 35;
+
 	constexpr float kModelScale = 60.0f; // モデルのスケール
 	constexpr VECTOR kDefaultWarriorPos = { 100.0f,-1.0f,0.0f };
 	constexpr VECTOR kDefaultWizardPos = { -100.0f,-1.0f,0.0f };
@@ -235,7 +240,7 @@ void TitleScene::Draw()
 		MV1DrawModel(wallModelHandle);
 	}
 	DrawGraph(kTitlePosX, kTitlePosY, m_titleLogoHandle, true);
-	DrawRectGraph(kButtonPosX, kButtonPosY,35,104,309,35, m_startHandle,true);
+	DrawRectGraph(kButtonPosX, kButtonPosY, SrcX, SrcY, kStartWidth, kStartHeight, m_startHandle,true);
 	MV1DrawModel(m_warriorModelHandle);
 	MV1DrawModel(m_wizardModelHandle);
 	MV1DrawModel(m_stoolHandle);

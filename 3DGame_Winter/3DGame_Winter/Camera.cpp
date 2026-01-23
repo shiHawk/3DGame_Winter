@@ -210,9 +210,7 @@ void Camera::Update()
 	// ‚’¼•ûŒü‰ñ“](XŽ²‰ñ“])‚³‚¹‚½‚ ‚Æ…•½•ûŒü‰ñ“](YŽ²‰ñ“])‚µ‚ÄX‚É
 	// ’Ž‹“_‚ÌÀ•W‚ð‘«‚µ‚½‚à‚Ì‚ªƒJƒƒ‰‚ÌÀ•W
 	m_cameraPos = VAdd(VTransform(VTransform(VGet(0.0f, 0.0f, -kCameraToPlayerLength), rotX), rotY), VGet(m_playerPos.x,m_playerPos.y + kDefaultCameraPos.y,m_playerPos.z));
-	//ResolveCollisionWithStage();
 	
-	//DrawFormatString(0,0,0xffffff,L"m_cameraTarget.x:%f,m_cameraTarget.y:%f,m_cameraTarget.z:%f", m_cameraTarget.x, m_cameraTarget.y, m_cameraTarget.z);
 	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget);
 	//printfDx(L"targetPos.x;%f, targetPos.y;%f, targetPos.z;%f\n",m_cameraTarget.x, m_cameraTarget.y, m_cameraTarget.z);
 }
@@ -228,9 +226,12 @@ void Camera::Draw()
 
 void Camera::SetLockOnPosition(VECTOR lockOnPos)
 {
-	if (lockOnPos.x > 100000.0f || lockOnPos.y > 100000.0f) return;
+	//if (lockOnPos.x > 100000.0f || lockOnPos.y > 100000.0f) return;
 	m_lockOnCameraPos = lockOnPos;
-	m_lockOnCameraPos.y = m_lockOnCameraPos.y + 100.0f;
+	if (lockOnPos.x < 100000.0f)
+	{
+		m_lockOnCameraPos.y = m_lockOnCameraPos.y + 100.0f;
+	}
 }
 
 void Camera::RadianTranslation()

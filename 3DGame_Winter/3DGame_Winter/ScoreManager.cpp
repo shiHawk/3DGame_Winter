@@ -10,7 +10,8 @@ namespace
 ScoreManager::ScoreManager():
 	m_startTime(0),
 	m_elapsedTimeSeconds(0),
-	m_timeBonus(0)
+	m_timeBonus(0),
+	m_gameoverFlag(false)
 {
 }
 
@@ -35,7 +36,7 @@ void ScoreManager::Updata()
 
 int ScoreManager::GetTimeBonus()
 {
-	if (m_timeBonus <= 0)
+	if (m_timeBonus <= 0 || m_gameoverFlag)
 	{
 		m_timeBonus = 0;
 	}

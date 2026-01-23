@@ -37,6 +37,7 @@ private:
 	VECTOR GetNearestEnemyPos(VECTOR basePos);
 	void DeathProcessing();
 	bool IsEnemyAttacking(VECTOR targetPos);
+	void ChangeControl();
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Enemy> m_pEnemy;
@@ -58,5 +59,6 @@ private:
 	std::shared_ptr<SkyDome> m_pSkyDome;
 	std::shared_ptr<Chest> m_pChest;
 	bool m_isNextScene;
+	bool m_isGameover;
 };
 

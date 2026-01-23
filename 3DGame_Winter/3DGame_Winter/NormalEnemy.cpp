@@ -148,14 +148,17 @@ void NormalEnemy::Update()
 		m_toPlayerDistance = VSize(VSub(m_targetPos, m_pos));
 		m_toPlayerDir = VNorm(VSub(m_targetPos, m_pos));
 		m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
-		if (m_toPlayerDistance > kSphereRadius && m_toPlayerDistance < kTrackingRange)
+		if (m_toPlayerDistance > kSphereRadius && m_toPlayerDistance < kTrackingRange) // プレイヤーが近すぎず、追跡範囲内なら追跡
 		{
-			m_pos.x += m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
-			m_pos.z += m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
-			if (VSize(VGet(m_toPlayerDir.x, 0.0f, m_toPlayerDir.z)) > kMoveThreshold)
+			if (!m_pPlayer->IsDead() || !m_pCompanion->IsDead())
 			{
-				// 移動中→移動アニメーションへ変更
-				ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
+				m_pos.x += m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
+				m_pos.z += m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
+				if (VSize(VGet(m_toPlayerDir.x, 0.0f, m_toPlayerDir.z)) > kMoveThreshold)
+				{
+					// 移動中→移動アニメーションへ変更
+					ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
+				}
 			}
 		}
 		else if (m_toPlayerDistance >= kTrackingRange) // 追跡範囲外なら待機

@@ -75,10 +75,31 @@ void BossEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 void BossEnemy::End()
 {
     MV1DeleteModel(m_modelHandle);
+    //m_pEffectManager->StopBossDeathEffect();
 }
 
 void BossEnemy::Update()
 {
+    if (m_isDead) return;
+    if (m_hp <= 0 && m_state != BossEnemyState::DEAD)
+    {
+        m_state = BossEnemyState::DEAD;
+        m_enemyAttack.active = false;
+        ChangeAnim(m_modelHandle, kDeathAnimNo, false, 0.4f);
+    }
+    if (m_state == BossEnemyState::DEAD)
+    {
+        m_vec = { 0.0f, 0.0f, 0.0f }; // 移動停止
+        UpdateAnim(m_modelHandle);
+        MV1SetPosition(m_modelHandle, m_pos);
+        
+        if (GetIsAnimEnd())
+        {
+            m_isDead = true;
+            End(); // モデルを削除
+        }
+        return; // 死んでいる時は、これ以降の移動や回転ロジックを通さない
+    }
     SearchTarget();
     // 1 プレイヤーとの距離と方向を計算
     m_toPlayerDistance = VSize(VSub(m_targetPos, m_pos));
@@ -86,13 +107,10 @@ void BossEnemy::Update()
     m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
 
     // 2 無敵時間とダメージ処理
-    if (m_invincibilityTimer > 0.0f) 
+    if (m_invincibilityTimer > 0.0f)
     {
         m_invincibilityTimer--;
-        if (m_hp < m_hp * 0.3f && m_state != BossEnemyState::DEAD)
-        {
-            ChangeAnim(m_modelHandle, kDamageAnimNo, true, kDamageAnimIncrement);
-        }
+        
         if (m_invincibilityTimer <= 0.0f)
         {
             m_isHitFlag = false;
@@ -176,23 +194,11 @@ void BossEnemy::Update()
             m_state = BossEnemyState::DEFAULT;
         }
         break;
-    case BossEnemyState::DEAD:
-        m_vec = { 0.0f,0.0f,0.0f };
-        if (GetIsAnimEnd())
-        {
-            End();
-            m_isDead = true;
-            return;
-        }
-        break;
     }
 
     UpdateAnim(m_modelHandle);
     MV1SetPosition(m_modelHandle, m_pos);
-    if (m_hp > 0)
-    {
-        MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
-    }
+    MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 }
 
 void BossEnemy::Draw()
@@ -282,6 +288,7 @@ void BossEnemy::OnDamage(int damage)
         m_hp = 0;
         m_state = BossEnemyState::DEAD;
         ChangeAnim(m_modelHandle,kDeathAnimNo,false,0.4f);
+        //m_pEffectManager->PlayBossDeathEffect(m_pos);
     }
 }
 

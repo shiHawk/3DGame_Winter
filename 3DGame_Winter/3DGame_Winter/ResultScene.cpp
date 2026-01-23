@@ -34,7 +34,7 @@ namespace
 	constexpr int kBGPosY = -150;
 }
 
-ResultScene::ResultScene(std::shared_ptr<ScoreManager> pScoreManager):
+ResultScene::ResultScene(std::shared_ptr<ScoreManager> pScoreManager, bool isGameover):
 	m_pScoreManager(pScoreManager),
 	m_isNextScene(false),
 	m_playerPos({ 0.0f,0.0f,0.0f }),
@@ -43,7 +43,8 @@ ResultScene::ResultScene(std::shared_ptr<ScoreManager> pScoreManager):
 	m_viewAngle(0.0f),
 	m_fontHandle(-1),
 	m_bgHandle(-1),
-	m_retrurnTitleHandle(-1)
+	m_retrurnTitleHandle(-1),
+	m_gameoverFlag(isGameover)
 {
 }
 
@@ -112,7 +113,10 @@ void ResultScene::Draw()
 	//DrawBox(0, 0, Game::kScreenWidth, Game::kScreenHeight, 0xffffff, true);
 	DrawGraph(kBGPosX,kBGPosY,m_bgHandle,true);
 	DrawRectGraph(kButtonPosX,kButtonPosY,35,104,309,35,m_retrurnTitleHandle,true);
-	DrawFormatStringToHandle(kScorePosX,kScorePosY,0xff8c00,m_fontHandle,L"GameClear!");
+	if (!m_gameoverFlag)
+	{
+		DrawFormatStringToHandle(kScorePosX, kScorePosY, 0xff8c00, m_fontHandle, L"GameClear!");
+	}
 	DrawFormatStringToHandle(kTimeScorePosX,kTimeScorePosY,0x87cefa,m_fontHandle,L"TimeScore:%d",m_pScoreManager->GetTimeBonus());
 	DrawFade();
 }

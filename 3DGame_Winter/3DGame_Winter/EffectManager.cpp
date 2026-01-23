@@ -25,6 +25,7 @@ namespace
 	constexpr float kBossEnemyRangeAttackOffsetY = 40.0f;
 	constexpr float kBattleAreaSize = 120.0f;
 	constexpr float kChestEffectSize = 100.0f;
+	constexpr float kBossDeathEffectSize = 50.0f;
 }
 
 EffectManager::EffectManager() :
@@ -49,7 +50,8 @@ EffectManager::EffectManager() :
 	m_playingBattleAreaHandle(-1),
 	m_HpChestHandle(-1),
 	m_SgChestHandle(-1),
-	m_BuffChestHandle(-1)
+	m_BuffChestHandle(-1),
+	m_bossDeathHandle(-1)
 {
 }
 
@@ -78,6 +80,7 @@ void EffectManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Compan
 	m_HpChestHandle = LoadEffekseerEffect(L"Data/effect/Heal.efkefc");
 	m_SgChestHandle = LoadEffekseerEffect(L"Data/effect/SpecialGauge.efkefc");
 	m_BuffChestHandle = LoadEffekseerEffect(L"Data/effect/PowerUp.efkefc");
+	m_bossDeathHandle = LoadEffekseerEffect(L"Data/effect/MagicWater.efkefc");
 	m_playerEffectHandle = -1;
 }
 
@@ -100,6 +103,7 @@ void EffectManager::End()
 	DeleteEffekseerEffect(m_HpChestHandle);
 	DeleteEffekseerEffect(m_SgChestHandle);
 	DeleteEffekseerEffect(m_BuffChestHandle);
+	DeleteEffekseerEffect(m_bossDeathHandle);
 	StopBattleAreaEffect();
 }
 
@@ -204,7 +208,7 @@ void EffectManager::PlayPlayerAttack2Effect(VECTOR pos, float angleY)
 
 	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y + kPlayerAttack2OffsetY, pos.z);
 
-	SetRotationPlayingEffekseer3DEffect(handle, 0.0f, angleY + DX_PI_F, 0.0f);
+	SetRotationPlayingEffekseer3DEffect(handle, 0.0f, angleY+ DX_PI_F, 0.0f);
 
 	SetScalePlayingEffekseer3DEffect(handle, kPlayerAttack2Size, kPlayerAttack2Size, kPlayerAttack2Size);
 }
@@ -305,6 +309,24 @@ void EffectManager::PlayChestEffect(int no)
 	int handleC = PlayEffekseer3DEffect(effectHandle);
 	SetPosPlayingEffekseer3DEffect(handleC, m_pCompanion->GetPos().x, m_pCompanion->GetPos().y + 40.0f, m_pCompanion->GetPos().z);
 	SetScalePlayingEffekseer3DEffect(handleC, kChestEffectSize, kChestEffectSize, kChestEffectSize);
+}
+
+void EffectManager::PlayBossDeathEffect(VECTOR pos)
+{
+	int handle = PlayEffekseer3DEffect(m_bossDeathHandle);
+	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y, pos.z);
+
+	SetScalePlayingEffekseer3DEffect(handle, kBossDeathEffectSize, kBossDeathEffectSize, kBossDeathEffectSize);
+}
+
+void EffectManager::StopBossDeathEffect()
+{
+	// çƒê∂íÜÇ»ÇÁí‚é~Ç∑ÇÈ
+	if (m_bossDeathHandle != -1)
+	{
+		StopEffekseer3DEffect(m_bossDeathHandle);
+		m_bossDeathHandle = -1; // ÉnÉìÉhÉãÇñ≥å¯ílÇ…ñﬂÇ∑
+	}
 }
 
 void EffectManager::SetEffectPos(float x, float y, float z)

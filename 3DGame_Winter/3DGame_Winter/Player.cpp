@@ -44,7 +44,7 @@ namespace
     constexpr int kComboFinishAttackPower = 50;
     constexpr int kSpecialSkilPower = 150;
 
-    constexpr float kAttackRange = 60.0f;
+    constexpr float kAttackRange = 90.0f;
     constexpr float kAutoTurnDistance = 250.0f;
     // 各攻撃の持続時間
     constexpr float kAttackDuration = 20.0f;
@@ -112,7 +112,8 @@ Player::Player():
     m_comboCoolTimer(0.0f),
     m_aiWillDo3HitCombo(false),
     m_isEnemyAttackSensing(false),
-    m_retreatDir({0.0f,0.0f,0.0f})
+    m_retreatDir({0.0f,0.0f,0.0f}),
+    m_evadeCooldown(0.0f)
 {
 }
 
@@ -180,10 +181,22 @@ void Player::Update()
         {
             m_pos = VGet(m_followTargetPos.x, m_followTargetPos.y, m_followTargetPos.z - kPostWarpPosZ);
         }
-        /*if (m_isEnemyAttackSensing && m_playerState != PlayerState::AUTO_EVADE)
-        {
-            m_playerState = PlayerState::AUTO_EVADE;
-        }*/
+        //if (m_isEnemyAttackSensing && m_playerState != PlayerState::AUTO_EVADE)
+        //{
+        //    VECTOR escapeVec = VSub(m_pos, m_enemyPos);
+        //    escapeVec.y = 0.0f; // 上下方向には逃げないようにYを0にする
+
+        //    // ベクトルの長さが0に近い（敵と完全に重なっている）場合の安全策
+        //    if (VSize(escapeVec) > 0.001f)
+        //    {
+        //        // 正規化して方向単位ベクトルにする
+        //        m_retreatDir = VNorm(escapeVec);
+        //    }
+        //    m_playerState = PlayerState::AUTO_EVADE;
+        //    m_isAvoidanceFlag = true;
+        //    m_avoidanceTimer = kAvoidanceFrame;
+        //    m_isEnemyAttackSensing = false;
+        //}
     }
     
     if (!m_isInAttackSequence)
@@ -392,7 +405,11 @@ void Player::OnDamage(int enemyPower)
     m_attack.timer = 0.0f;
     m_comboStep = 0;
     SoundManager::GetInstance()->PlayEnemyAttackSE();
-    m_hp -= enemyPower;
+    if (!m_isAvoidanceFlag)
+    {
+        m_hp -= enemyPower;
+    }
+    
     if (m_hp <= 0)
     {
         m_hp = 0;
@@ -751,29 +768,33 @@ void Player::HandleStateAutoEvade()
 {
     m_avoidanceTimer -= 1.0f;
 
-    // A. 退避方向（retreatDir）を向く
-    float targetAngle = atan2f(m_retreatDir.x, m_retreatDir.z);
+    // 退避方向（retreatDir）を向く
+    float targetAngle = atan2f(-m_retreatDir.x, -m_retreatDir.z);
     float diff = targetAngle - m_angleY;
     if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
     else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
     m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
 
-    // B. 移動ベクトルをセット（kPlayerMoveSpeed または回避用速度）
-    m_vec.x = m_retreatDir.x * kMoveSpeed * 1.5f; // 少し速めに設定
-    m_vec.z = m_retreatDir.z * kMoveSpeed * 1.5f;
+    // 移動ベクトルをセット（kPlayerMoveSpeed または回避用速度）
+    m_vec.x = m_retreatDir.x * kMoveSpeed;
+    m_vec.z = m_retreatDir.z * kMoveSpeed;
 
-    // C. アニメーション設定
+    // アニメーション設定
     ChangeAnim(m_modelHandle, kAvoidanceAnimNo, false, kAnimIncrement);
 
-    // D. 終了判定
+    //  終了判定
     if (m_avoidanceTimer <= 0.0f)
     {
         // 敵の方向をパッと向き直す
-        m_angleY = atan2f(m_dirToEnemy.x, m_dirToEnemy.z);
+        VECTOR currentDirToEnemy = VSub(m_enemyPos, m_pos);
+        if (VSize(currentDirToEnemy) > 0.001f)
+        {
+            m_angleY = atan2f(-currentDirToEnemy.x, -currentDirToEnemy.z);
+        }
 
         m_vec = VGet(0, 0, 0);
         m_playerState = PlayerState::NORMAL;
-        m_isEnemyAttackSensing = false; // 感知フラグをリセット
+        m_isEnemyAttackSensing = false;
     }
 }
 

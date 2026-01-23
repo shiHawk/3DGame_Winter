@@ -27,6 +27,8 @@ public:
 	void BattleAreaEffect(VECTOR pos, float scale);
 	void StopBattleAreaEffect();
 	void PlayChestEffect(int no);
+	void PlayBossDeathEffect(VECTOR pos);
+	void StopBossDeathEffect();
 private:
 	void SetEffectPos(float x, float y, float z);
 	int m_meleeSpecialEffectHandle; // 近接キャラの必殺技エフェクト
@@ -48,6 +50,7 @@ private:
 	int m_HpChestHandle;
 	int m_SgChestHandle;
 	int m_BuffChestHandle;
+	int m_bossDeathHandle;
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;
 	std::shared_ptr<GameplayCollision> m_pGameplayCollision;

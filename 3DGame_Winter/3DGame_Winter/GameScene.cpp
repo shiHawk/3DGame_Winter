@@ -4,9 +4,6 @@
 #include "DxLib.h"
 namespace
 {
-	constexpr VECTOR kTrianglePos1 = { 200.0f,200.0f,0.0f };
-	constexpr VECTOR kTrianglePos2 = { 400.0f,0.0f,0.0f };
-	constexpr VECTOR kTrianglePos3 = { 0.0f,0.0f,0.0f };
 	constexpr int kTriangleColor = 0xfff0ff;
 	constexpr VECTOR kDefaultPos = { 0.0f,0.0f,0.0f };
 	constexpr VECTOR kSpherePos2 = { 600.0f,0.0f,500.0f };
@@ -21,11 +18,12 @@ namespace
 	constexpr VECTOR kInvalidPos = { 1000000.0f, 1000000.0f, 1000000.0f }; // 無効な座標（超遠方）
 	constexpr float kSkyDomeScale = 120.0f;
 	constexpr float kSensingRange = 600.0f;
-	constexpr float kBattleAreaSize = 120.0f;
+	constexpr float kBattleAreaSize = 100.0f;
 	constexpr float kBossBattleAreaSize = 350.0f;
 }
 GameScene::GameScene():
-	m_isNextScene(false)
+	m_isNextScene(false),
+	m_isGameover(false)
 {
 }
 
@@ -122,42 +120,25 @@ SceneBase* GameScene::Update()
 	m_pStage->Update();
 	if (Pad::isTrigger(PAD_INPUT_6)) // RBボタンでプレイヤーとコンパニオンの切り替え
 	{
-		CharacterBase::ControlMode currentMode = m_pPlayer->GetControlMode(); // 現在のモード
-		CharacterBase::ControlMode playerNewMode; // 次のプレイヤーのモード
-		if (currentMode == CharacterBase::ControlMode::PLAYER)
-		{
-			playerNewMode = CharacterBase::ControlMode::COMPANION;
-		}
-		else
-		{
-			playerNewMode = CharacterBase::ControlMode::PLAYER;
-		}
-		m_pPlayer->SetControlMode(playerNewMode);
-		CharacterBase::ControlMode companionNewMode; // コンパニオンのモード
-		if (playerNewMode == CharacterBase::ControlMode::PLAYER)
-		{
-			companionNewMode = CharacterBase::ControlMode::COMPANION;
-		}
-		else
-		{
-			companionNewMode = CharacterBase::ControlMode::PLAYER;
-		}
-		m_pCompanion->SetControlMode(companionNewMode);
-
-		// 切り替え時のエフェクト設定
-		VECTOR effectPos;
-		if (playerNewMode == CharacterBase::ControlMode::PLAYER)
-		{
-			effectPos = m_pPlayer->GetPos();
-		}
-		else
-		{
-			effectPos = m_pCompanion->GetPos();
-		}
-		m_pEffectManager->PlayChangeEffect(effectPos);
+		ChangeControl();
 	}
+
 	// 現在のコントロールモードを取得
 	CharacterBase::ControlMode currentControlMode = m_pPlayer->GetControlMode();
+	if (currentControlMode == CharacterBase::ControlMode::PLAYER && m_pPlayer->IsDead()) // 近接キャラがプレイヤーモードで死亡した場合
+	{
+		if (!m_pCompanion->IsDead())
+		{
+			ChangeControl();
+		}
+	}
+	else if (currentControlMode == CharacterBase::ControlMode::COMPANION && m_pCompanion->IsDead()) // 遠距離キャラがプレイヤーモードで死亡した場合
+	{
+		if (!m_pPlayer->IsDead())
+		{
+			ChangeControl();
+		}
+	}
 	// モードに応じてカメラに渡す位置を決定
 	if (currentControlMode == CharacterBase::ControlMode::PLAYER)
 	{
@@ -184,11 +165,11 @@ SceneBase* GameScene::Update()
 							 : m_pCompanion->GetPos();
 
 	VECTOR targetEnemyPos = GetNearestEnemyPos(currentBasePos);
+	m_pCamera->SetLockOnPosition(targetEnemyPos);
 	if (targetEnemyPos.x < 100000.0f)
 	{
 		m_pPlayer->SetEnemyPos(targetEnemyPos);
 		m_pCompanion->SetEnemyPos(targetEnemyPos);
-		m_pCamera->SetLockOnPosition(targetEnemyPos);
 	}
 	else
 	{
@@ -214,7 +195,6 @@ SceneBase* GameScene::Update()
 	
 	m_pEffectManager->Update();
 	
-
 	// 操作中のキャラクターを決定
 	std::shared_ptr<CharacterBase> activeCharacter = nullptr;
 	if (currentControlMode == CharacterBase::ControlMode::PLAYER)
@@ -258,6 +238,11 @@ SceneBase* GameScene::Update()
 	{
 		StartFadeOut();
 		m_isNextScene = true;
+		if (m_pPlayer->IsDead() && m_pCompanion->IsDead())
+		{
+			m_isGameover = true;
+			m_pScoreManager->SetGameoverFlag(true);
+		}
 	}
 	if (IsFadingOut())
 	{
@@ -266,7 +251,7 @@ SceneBase* GameScene::Update()
 	// フェードが終了したら遷移する
 	if (m_isNextScene && IsFadeComplete())
 	{
-		return new ResultScene(m_pScoreManager);
+		return new ResultScene(m_pScoreManager,m_isGameover);
 	}
 	
 	return this;
@@ -426,4 +411,41 @@ bool GameScene::IsEnemyAttacking(VECTOR targetPos)
 		}
 	}
 	return false;
+}
+
+void GameScene::ChangeControl()
+{
+	CharacterBase::ControlMode currentMode = m_pPlayer->GetControlMode(); // 現在のモード
+	CharacterBase::ControlMode playerNewMode; // 次のプレイヤーのモード
+	if (currentMode == CharacterBase::ControlMode::PLAYER)
+	{
+		playerNewMode = CharacterBase::ControlMode::COMPANION;
+	}
+	else
+	{
+		playerNewMode = CharacterBase::ControlMode::PLAYER;
+	}
+	m_pPlayer->SetControlMode(playerNewMode);
+	CharacterBase::ControlMode companionNewMode; // コンパニオンのモード
+	if (playerNewMode == CharacterBase::ControlMode::PLAYER)
+	{
+		companionNewMode = CharacterBase::ControlMode::COMPANION;
+	}
+	else
+	{
+		companionNewMode = CharacterBase::ControlMode::PLAYER;
+	}
+	m_pCompanion->SetControlMode(companionNewMode);
+
+	// 切り替え時のエフェクト設定
+	VECTOR effectPos;
+	if (playerNewMode == CharacterBase::ControlMode::PLAYER)
+	{
+		effectPos = m_pPlayer->GetPos();
+	}
+	else
+	{
+		effectPos = m_pCompanion->GetPos();
+	}
+	m_pEffectManager->PlayChangeEffect(effectPos);
 }

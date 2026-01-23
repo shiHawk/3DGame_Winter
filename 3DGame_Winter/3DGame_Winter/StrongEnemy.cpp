@@ -113,7 +113,6 @@ void StrongEnemy::Update()
 			{
 				m_state = StrongEnemyState::RANGEATTACK_CHARGE;
 				m_attackTimer = kChageTime;
-				//m_enemyAttack.active = true;
 				break;
 			}
 		}
@@ -128,9 +127,12 @@ void StrongEnemy::Update()
 		// à⁄ìÆ
 		if (m_toPlayerDistance > kColRadius && m_toPlayerDistance < kTrackingRange)
 		{
-			m_pos.x += m_toPlayerDir.x * kMoveSpeed;
-			m_pos.z += m_toPlayerDir.z * kMoveSpeed;
-			ChangeAnim(m_modelHandle,kWalkAnimNo,true,kWalkAnimIncrement);
+			if (!m_pPlayer->IsDead() || !m_pCompanion->IsDead())
+			{
+				m_pos.x += m_toPlayerDir.x * kMoveSpeed;
+				m_pos.z += m_toPlayerDir.z * kMoveSpeed;
+				ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
+			}
 		}
 		else 
 		{
@@ -184,13 +186,6 @@ void StrongEnemy::Update()
 		}
 		break;
 	}
-	//if (m_isDead)
-	//{
-	//	//m_alpha -= 0.01f;
-	//	m_enemyAttack.active = false;
-	//	End();
-	//	return;
-	//}
 	
 	if (!m_isDead)
 	{
@@ -213,17 +208,6 @@ void StrongEnemy::Draw()
 		DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.2f, 0.0f)), drawPos, kRangeAttackRadius, kDivNum, kOutLineColor, kOutLineColor, true);
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	}
-	/*if (m_enemyAttack.active)
-	{
-		if (m_state == StrongEnemyState::NORMALATTACK)
-		{
-			DrawSphere3D(m_enemyAttack.pos, kColRadius, kDivNum, 0xffffff, 0xffffff, false);
-		}
-		if (m_state == StrongEnemyState::RANGEATTACK)
-		{
-			DrawSphere3D(m_enemyAttack.pos, m_enemyAttack.radius, kDivNum, 0xffffff, 0xffffff, false);
-		}
-	}*/
 }
 
 void StrongEnemy::OnAttack()
@@ -263,7 +247,6 @@ void StrongEnemy::OnDamage(int damage)
 		m_state = StrongEnemyState::DEAD;
 		m_enemyAttack.active = false; // çUåÇîªíËÇè¡Ç∑
 		m_invincibilityTimer = 0.0f;
-
 		// ÉãÅ[Évçƒê∂ÇÕ false Ç…Ç∑ÇÈ
 		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDamageAnimIncrement);
 	}

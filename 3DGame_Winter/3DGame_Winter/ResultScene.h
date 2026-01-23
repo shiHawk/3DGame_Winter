@@ -5,13 +5,14 @@
 class ResultScene :public SceneBase
 {
 public:
-	ResultScene(std::shared_ptr<ScoreManager> pScoreManager);
+	ResultScene(std::shared_ptr<ScoreManager> pScoreManager,bool isGameover);
 	~ResultScene() {};
 	virtual void Init() override;
 	virtual void End() override;
 	virtual SceneBase* Update() override;
 	virtual void Draw() override;
 	virtual SceneID GetSceneID() const override;
+	void SetGameoverFlag(bool gameover) { m_gameoverFlag = gameover; }
 private:
 	std::shared_ptr<ScoreManager> m_pScoreManager;
 	bool m_isNextScene;
@@ -25,5 +26,6 @@ private:
 	int m_fontHandle;
 	int m_bgHandle;
 	int m_retrurnTitleHandle;
+	bool m_gameoverFlag;
 };
 

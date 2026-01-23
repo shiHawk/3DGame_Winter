@@ -38,6 +38,7 @@ private:
 	int m_enemyHPFrameHandle;
 	int m_warriorIconHandle;
 	int m_wizardIconHandle;
+	int m_fontHandle;
 	std::shared_ptr<Player> m_pPlayer;
 	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;
 	std::vector<std::shared_ptr<StrongEnemy>> m_pStrongEnemies;
