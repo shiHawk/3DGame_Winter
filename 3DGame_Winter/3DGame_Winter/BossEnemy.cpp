@@ -65,6 +65,7 @@ void BossEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
     m_pos = kDefaultPos;
     m_hp = kMaxHp;
     m_attackPower = kAttackPower;
+    m_colRadius = kColRadius;
     m_modelHandle = MV1LoadModel(L"Data/model/Skeleton_Rogue.mv1");
     MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
     MV1SetRotationXYZ(m_modelHandle, kDefaultDir);

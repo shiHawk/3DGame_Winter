@@ -26,16 +26,16 @@ namespace
 
 	constexpr int kTitlePosX = 352;
 	constexpr int kTitlePosY = 40;
-	constexpr int kButtonPosX = 490;
+	constexpr int kButtonPosX = 390;
 	constexpr int kButtonPosY = 630;
 
 	// フォントのサイズ、太さ
 	constexpr int kFontSize = 50;
 	constexpr int kFontThick = 5;
 
-	constexpr int SrcX = 35;
-	constexpr int SrcY = 104;
-	constexpr int kStartWidth = 309;
+	constexpr int SrcX = 79;
+	constexpr int SrcY = 101;
+	constexpr int kStartWidth = 500;
 	constexpr int kStartHeight = 35;
 
 	constexpr float kModelScale = 60.0f; // モデルのスケール
@@ -129,7 +129,7 @@ void TitleScene::Init()
 	m_lightHandle = CreateDirLightHandle(kSecondLight);
 
 	SoundManager::GetInstance()->PlayBGM();
-	m_startHandle = LoadGraph(L"Data/title/button.png");
+	m_startHandle = LoadGraph(L"Data/title/button2.png");
 	m_titleLogoHandle = LoadGraph(L"Data/title/titleLogo.png");
 	m_warriorModelHandle = MV1LoadModel(L"Data/model/Barbarian.mv1");
 	m_wizardModelHandle = MV1LoadModel(L"Data/model/Mage.mv1");
@@ -207,7 +207,8 @@ SceneBase* TitleScene::Update()
 		m_pWizardAnim->ChangeAnim(m_wizardModelHandle, kStandUpAnim, false, kAnimIncrement);
 	}
 	
-	if (!m_isNextScene && !IsFadingOut() && Pad::isTrigger(PAD_INPUT_2))
+	if (!m_isNextScene && !IsFadingOut() && Pad::isTrigger(PAD_INPUT_1) || Pad::isTrigger(PAD_INPUT_2) 
+		|| Pad::isTrigger(PAD_INPUT_3) || Pad::isTrigger(PAD_INPUT_4))
 	{
 		StartFadeOut();
 		m_isNextScene = true;

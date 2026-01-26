@@ -18,7 +18,7 @@ namespace
 	constexpr VECTOR kInvalidPos = { 1000000.0f, 1000000.0f, 1000000.0f }; // –³Œø‚ÈÀ•Wi’´‰“•ûj
 	constexpr float kSkyDomeScale = 120.0f;
 	constexpr float kSensingRange = 600.0f;
-	constexpr float kBattleAreaSize = 100.0f;
+	constexpr float kBattleAreaSize = 150.0f;
 	constexpr float kBossBattleAreaSize = 350.0f;
 }
 GameScene::GameScene():
@@ -55,7 +55,7 @@ void GameScene::Init()
 	//m_pNormalEnemy->Init(m_pPlayer,m_pCompanion);
 	m_pCompanion->Init(m_pCamera);
 	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemies, m_pStrongEnemies,m_pBossEnemy);
-	m_pWorldCollision->Init(m_pPlayer, m_pStage, m_pCompanion);
+	m_pWorldCollision->Init(m_pPlayer, m_pStage, m_pCompanion,m_pNormalEnemies,m_pStrongEnemies);
 	m_pFlyingEnemy->Init(m_pPlayer, m_pCompanion);
 	m_pBossEnemy->Init(m_pPlayer, m_pCompanion,m_pEffectManager);
 	//m_pStrongEnemy->Init(m_pPlayer, m_pCompanion);

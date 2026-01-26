@@ -56,6 +56,7 @@ namespace
     constexpr float kAvoidanceMoveSpeed = 0.3f;
 
     constexpr float kInvincibilityTime = 100.0f;
+    constexpr float kAvoidanceInvincibilityTime = 30.0f;
 
     // 各攻撃の攻撃範囲
     constexpr float kAttackRadius = 30.0f;
@@ -130,6 +131,7 @@ void Player::Init(std::shared_ptr<Camera> pCamera, std::shared_ptr<EffectManager
     m_playerState = PlayerState::NORMAL;
     m_attack.active = false;
     m_distanceToEnemy = 0.0f;
+    m_colRadius = kColRadius;
     m_modelHandle = MV1LoadModel(L"Data/model/Barbarian.mv1");
     MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
     MV1SetRotationXYZ(m_modelHandle, kRightDir);
@@ -162,9 +164,10 @@ void Player::Update()
             m_vec.y = kJumpPower;
             m_isJump = true;
         }
-        if (Pad::isTrigger(PAD_INPUT_3) && !m_isAvoidanceFlag)
+        if (Pad::isTrigger(PAD_INPUT_2) && !m_isAvoidanceFlag)
         {
             m_avoidanceTimer = kAvoidanceFrame;
+            m_invincibilityTimer = kAvoidanceInvincibilityTime;
             m_isAvoidanceFlag = true;
         }
         if (m_specialGauge >= kGaugeConsumption && Pad::isTrigger(PAD_INPUT_5))
@@ -360,7 +363,7 @@ void Player::OnAvoidance()
     // スティックが倒されているか（入力があるか）をチェック
     if (VSize(m_moveInput) > kMoveThreshold)
     {
-        // 入力がある場合：m_moveInput (HandleInputで正規化・カメラ補正済み) の方向に回避
+        // 入力がある場合：m_moveInputの方向に回避
         avoidDir = m_moveInput;
     }
     else
@@ -657,7 +660,7 @@ void Player::HandleStateNormal(bool aiWantsToAttack)
     m_comboStep = 0; // 通常時はコンボ数をリセット
 
     // プレイヤーの弱攻撃入力
-    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_4) && !m_attack.active)
+    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_3) && !m_attack.active)
     {
         m_comboStep = 1;
         TryStartAttack(&Player::OnAttack, PlayerState::ROTATING_TO_ATTACK, PlayerState::ATTACKING);
@@ -671,7 +674,7 @@ void Player::HandleStateNormal(bool aiWantsToAttack)
     }
 
     // プレイヤーの単発強攻撃入力 (弱攻撃とは独立して判定)
-    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_2) && !m_attack.active)
+    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_4) && !m_attack.active)
     {
         m_comboStep = 0; // 単発
         TryStartAttack(&Player::OnAttack2, PlayerState::ROTATING_TO_ATTACK2, PlayerState::ATTACKING2);
@@ -682,7 +685,7 @@ void Player::HandleStateAttacking()
 {
     UpdateMovement(m_moveInput);
     // プレイヤー操作時のコンボ連携
-    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_2))
+    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_4))
     {
         m_attack.active = false; // 現在の攻撃をキャンセル
         m_comboStep = 2;         // 2段階目へ
@@ -698,7 +701,7 @@ void Player::HandleStateAttacking2()
 {
     UpdateMovement(m_moveInput);
     // プレイヤー操作時のコンボ連携
-    if (m_controlMode == ControlMode::PLAYER && m_comboStep == 2 && Pad::isTrigger(PAD_INPUT_2))
+    if (m_controlMode == ControlMode::PLAYER && m_comboStep == 2 && Pad::isTrigger(PAD_INPUT_4))
     {
         if (m_attack.timer <= kStrongAttackCancelThreshold)
         {
@@ -841,19 +844,19 @@ void Player::HandlePlayerComboWindow()
     m_comboWindowTimer--;
 
     // 1段階目 (弱) の後→強 (PAD_INPUT_2)
-    if (m_comboStep == 1 && Pad::isTrigger(PAD_INPUT_2))
+    if (m_comboStep == 1 && Pad::isTrigger(PAD_INPUT_4))
     {
         m_comboStep = 2; // 2段階目へ
         TryStartAttack(&Player::OnAttack2, PlayerState::ROTATING_TO_ATTACK2, PlayerState::ATTACKING2);
     }
     // 2段階目 (強A) の後→強 (PAD_INPUT_2)
-    else if (m_comboStep == 2 && Pad::isTrigger(PAD_INPUT_2))
+    else if (m_comboStep == 2 && Pad::isTrigger(PAD_INPUT_4))
     {
         m_comboStep = 3; // 3段階目へ
         TryStartAttack(&Player::OnCombFinishAttack, PlayerState::ROTATING_TO_COMBOFINISH, PlayerState::ATTACKING_COMBOFINISH);
     }
     // 時間切れ、または他の行動（ジャンプや回避など）でコンボ中断
-    else if (m_comboWindowTimer <= 0.0f || Pad::isTrigger(PAD_INPUT_1) || Pad::isTrigger(PAD_INPUT_3))
+    else if (m_comboWindowTimer <= 0.0f || Pad::isTrigger(PAD_INPUT_1) || Pad::isTrigger(PAD_INPUT_2))
     {
         m_playerState = PlayerState::NORMAL;
         m_comboStep = 0;

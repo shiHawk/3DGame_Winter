@@ -26,7 +26,7 @@ namespace
 	constexpr int kTimeScorePosX = 430;
 	constexpr int kTimeScorePosY = 320;
 
-	constexpr int kButtonPosX = 500;
+	constexpr int kButtonPosX = 400;
 	constexpr int kButtonPosY = 600;
 
 	// ”wŒi‚ÌˆÊ’u
@@ -76,7 +76,7 @@ void ResultScene::Init()
 
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_bgHandle = LoadGraph(L"Data/UI/result_seat.png");
-	m_retrurnTitleHandle = LoadGraph(L"Data/title/button.png");
+	m_retrurnTitleHandle = LoadGraph(L"Data/title/button2.png");
 }
 
 void ResultScene::End()
@@ -91,7 +91,8 @@ SceneBase* ResultScene::Update()
 {
 	UpdateFade();
 	SoundManager::GetInstance()->Update();
-	if (!m_isNextScene && !IsFadingOut() && Pad::isTrigger(PAD_INPUT_2))
+	if (!m_isNextScene && !IsFadingOut() && Pad::isTrigger(PAD_INPUT_1) || Pad::isTrigger(PAD_INPUT_2)
+		|| Pad::isTrigger(PAD_INPUT_3) || Pad::isTrigger(PAD_INPUT_4))
 	{
 		StartFadeOut();
 		m_isNextScene = true;
@@ -112,7 +113,7 @@ void ResultScene::Draw()
 {
 	//DrawBox(0, 0, Game::kScreenWidth, Game::kScreenHeight, 0xffffff, true);
 	DrawGraph(kBGPosX,kBGPosY,m_bgHandle,true);
-	DrawRectGraph(kButtonPosX,kButtonPosY,35,104,309,35,m_retrurnTitleHandle,true);
+	DrawRectGraph(kButtonPosX,kButtonPosY,79,101,500,35,m_retrurnTitleHandle,true);
 	if (!m_gameoverFlag)
 	{
 		DrawFormatStringToHandle(kScorePosX, kScorePosY, 0xff8c00, m_fontHandle, L"GameClear!");

@@ -23,7 +23,7 @@ public:
 	void CheckNormalEnemyAttack();
 	void CheckStrongEnemyRangeAttack();
 	void CheckBossEnemyAttack();
-	void PushBackCharacter(VECTOR pos1,float pos1Radius, VECTOR pos2, float pos2Radius,CharacterBase* pTargetCharacter);
+	void PushBackCharacter(CharacterBase* pChar1, CharacterBase* pChar2);
 	const std::vector<VECTOR>& GetHitPositions() const { return m_hitPositions; }
 private:
 	std::shared_ptr<Player> m_pPlayer;

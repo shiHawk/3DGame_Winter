@@ -60,6 +60,7 @@ namespace
 	constexpr unsigned int kTimeColor = 0xff4500;
 	// フォントのサイズ、太さ
 	constexpr int kFontTextSize = 20;
+	constexpr int kManualFontTextSize = 10;
 	constexpr int kFontSize = 15;
 	constexpr int kFontThick = 5;
 }
@@ -79,7 +80,16 @@ UIManager::UIManager():
 	m_enemyHPFrameHandle(-1),
 	m_warriorIconHandle(-1),
 	m_wizardIconHandle(-1),
-	m_fontHandle(-1)
+	m_fontHandle(-1),
+	m_manualFontHandle(-1),
+	m_aButtonHandle(-1),
+	m_bButtonHandle(-1),
+	m_xButtonHandle(-1),
+	m_yButtonHandle(-1),
+	m_rbButtonHandle(-1),
+	m_lbButtonHandle(-1),
+	m_stickHandle(-1),
+	m_manualFrameHandle(-1)
 {
 }
 
@@ -104,7 +114,16 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_bossHPGaugeFlameHandle = LoadGraph(L"Data/UI/BossHPFrame.png");
 	m_enemyHPHandle = LoadGraph(L"Data/UI/EnemyHP.png");
 	m_enemyHPFrameHandle = LoadGraph(L"Data/UI/EnemyHPFrame.png");
+	m_aButtonHandle = LoadGraph(L"Data/UI/AButton.png");
+	m_bButtonHandle = LoadGraph(L"Data/UI/BButton.png");
+	m_xButtonHandle = LoadGraph(L"Data/UI/XButton.png");
+	m_yButtonHandle = LoadGraph(L"Data/UI/YButton.png");
+	m_rbButtonHandle = LoadGraph(L"Data/UI/RBButton.png");
+	m_lbButtonHandle = LoadGraph(L"Data/UI/LBButton.png");
+	m_stickHandle = LoadGraph(L"Data/UI/stick.png");
+	m_manualFrameHandle = LoadGraph(L"Data/UI/frame.png");
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
+	m_manualFontHandle = CreateFontToHandle(L"游明朝 Demibold", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 }
 
 void UIManager::End()
@@ -118,7 +137,16 @@ void UIManager::End()
 	DeleteGraph(m_bossHPGaugeFlameHandle);
 	DeleteGraph(m_enemyHPHandle);
 	DeleteGraph(m_enemyHPFrameHandle);
+	DeleteGraph(m_aButtonHandle);
+	DeleteGraph(m_bButtonHandle);
+	DeleteGraph(m_xButtonHandle);
+	DeleteGraph(m_yButtonHandle);
+	DeleteGraph(m_rbButtonHandle);
+	DeleteGraph(m_lbButtonHandle);
+	DeleteGraph(m_stickHandle);
+	DeleteGraph(m_manualFrameHandle);
 	DeleteFontToHandle(m_fontHandle);
+	DeleteFontToHandle(m_manualFontHandle);
 }
 
 void UIManager::Updata()
@@ -137,6 +165,7 @@ void UIManager::Draw()
 	DrawHp();
 	DrawSg();
 	DrawEnemyHP();
+	DrawManualUI();
 	if (VSize(VSub(m_pPlayer->GetPos(), m_pBossEnemy->GetPos())) <= 1000.0f)
 	{
 		DrawBossHp();
@@ -251,4 +280,26 @@ void UIManager::DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, f
 	{
 		DrawRectExtendGraph(x1, y1, currentX2, y2, 0, 0, currentSrcWidth, kEnemyBarSrcY, m_enemyHPHandle, TRUE);
 	}
+}
+
+void UIManager::DrawManualUI()
+{
+	DrawRectExtendGraph(1000,15,1280,400,703,114,546,778,m_manualFrameHandle,true);
+	DrawGraph(1050,20,m_aButtonHandle,true);
+	DrawFormatStringToHandle(1100, 30, 0xffffff, m_manualFontHandle, L"ジャンプ");
+	DrawGraph(1050,70,m_bButtonHandle,true);
+	DrawFormatStringToHandle(1100, 80, 0xffffff, m_manualFontHandle, L"回避");
+	DrawGraph(1050,120,m_xButtonHandle,true);
+	DrawFormatStringToHandle(1100, 130, 0xffffff, m_manualFontHandle, L"弱攻撃");
+	DrawGraph(1050,170,m_yButtonHandle,true);
+	DrawFormatStringToHandle(1100, 180, 0xffffff, m_manualFontHandle, L"強攻撃");
+	DrawRectExtendGraph(1050, 220,1090,250, 766, 429, 379, 196, m_rbButtonHandle, true);
+	DrawFormatStringToHandle(1100, 228, 0xffffff, m_manualFontHandle, L"キャラチェンジ");
+	DrawRectExtendGraph(1050, 270,1090,300, 766, 429, 379, 196, m_lbButtonHandle, true);
+	DrawFormatStringToHandle(1100, 276, 0xffffff, m_manualFontHandle, L"必殺技");
+	DrawRectExtendGraph(1040, 320,1150,350, 830, 454, 379, 200, m_stickHandle, true);
+	DrawFormatStringToHandle(1100, 325, 0xffffff, m_manualFontHandle, L"ロックオン");
+	DrawFormatStringToHandle(1100, 355, 0xffffff, m_manualFontHandle, L"ロックオン解除");
+	/*DrawRectGraph(1050,220,766,429,379,196,m_rbButtonHandle,true);
+	DrawRectGraph(1050,270,766,429,379,196,m_lbButtonHandle,true);*/
 }

@@ -20,12 +20,18 @@ CharacterBase::CharacterBase():
 	m_prevPos({ 0.0f,0.0f,0.0f }),
 	m_specialGauge(0),
 	m_baseAttackPower(0),
-	m_powerUpBonus(0)
+	m_powerUpBonus(0),
+	m_colRadius(0.0f)
 {
 }
 
 CharacterBase::~CharacterBase()
 {
+}
+
+float CharacterBase::GetColRadius()
+{
+	return m_colRadius;
 }
 
 void CharacterBase::ApplyMovement()

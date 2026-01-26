@@ -65,6 +65,7 @@ void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 	m_pos = pos;
 	m_hp = kMaxHp;
 	m_attackPower = kAttackPower;
+	m_colRadius = kColRadius;
 	MV1SetPosition(m_modelHandle,m_pos);
 }
 

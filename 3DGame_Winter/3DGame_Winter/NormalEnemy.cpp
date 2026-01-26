@@ -68,6 +68,7 @@ void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 	m_hp = kMaxHp;
 	m_attackPower = kAttackPower;
 	m_pos = pos;
+	m_colRadius = kColRadius;
 	m_modelHandle = MV1LoadModel(L"Data/model/Skeleton_Warrior.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
 	MV1SetRotationXYZ(m_modelHandle, kDefaultDir);
@@ -77,6 +78,8 @@ void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 
 void NormalEnemy::End()
 {
+	m_vec.x = 0.0f;
+	m_vec.z = 0.0f;
 	MV1DeleteModel(m_modelHandle);
 }
 
@@ -100,6 +103,10 @@ void NormalEnemy::Update()
 		}
 		return;
 	}
+	// 移動ベクトル(m_vec)をリセット 
+	m_vec.x = 0.0f;
+	m_vec.z = 0.0f;
+	m_vec.y -= 0.5f;
 	SearchTarget();
 	if (m_knockbackTimer > 0.0f)
 	{
@@ -152,8 +159,8 @@ void NormalEnemy::Update()
 		{
 			if (!m_pPlayer->IsDead() || !m_pCompanion->IsDead())
 			{
-				m_pos.x += m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
-				m_pos.z += m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
+				m_vec.x = m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
+				m_vec.z = m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
 				if (VSize(VGet(m_toPlayerDir.x, 0.0f, m_toPlayerDir.z)) > kMoveThreshold)
 				{
 					// 移動中→移動アニメーションへ変更
@@ -188,7 +195,6 @@ void NormalEnemy::Update()
 		//printfDx(L"m_AttackCoolTime:%f\n", m_AttackCoolTime);
 		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 	}
-	
 	MV1SetPosition(m_modelHandle,m_pos);
 	UpdateAnim(m_modelHandle);
 }

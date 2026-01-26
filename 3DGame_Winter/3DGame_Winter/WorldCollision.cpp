@@ -2,6 +2,8 @@
 #include "Player.h"
 #include "Companion.h"
 #include "Stage.h"
+#include "NormalEnemy.h"
+#include "StrongEnemy.h"
 #include <cmath>
 namespace
 {
@@ -30,11 +32,14 @@ WorldCollision::~WorldCollision()
 {
 }
 
-void WorldCollision::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Stage> pStage, std::shared_ptr<Companion> pCompanion)
+void WorldCollision::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Stage> pStage, std::shared_ptr<Companion> pCompanion,
+						  std::vector<std::shared_ptr<NormalEnemy>> pNormalEnemies, std::vector<std::shared_ptr<StrongEnemy>> pStrongEnemies)
 {
 	m_pPlayer = pPlayer;
 	m_pCompanion = pCompanion;
 	m_pStage = pStage;
+	m_pNormalEnemies = pNormalEnemies;
+	m_pStrongEnemies = pStrongEnemies;
 }
 
 void WorldCollision::End()
@@ -52,6 +57,23 @@ void WorldCollision::Update()
 	CheckGroundCollision(m_pCompanion.get());
 	CheckWallCollision(m_pPlayer.get());
 	CheckWallCollision(m_pCompanion.get());
+	for (auto& enemy : m_pNormalEnemies)
+	{
+		if (enemy) // 有効なポインタかチェック
+		{
+			CheckGroundCollision(enemy.get());
+			CheckWallCollision(enemy.get());
+		}
+	}
+
+	for (auto& enemy : m_pStrongEnemies)
+	{
+		if (enemy)
+		{
+			CheckGroundCollision(enemy.get());
+			CheckWallCollision(enemy.get());
+		}
+	}
 }
 
 void WorldCollision::Draw()

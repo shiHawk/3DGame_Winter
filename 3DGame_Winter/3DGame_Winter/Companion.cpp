@@ -119,6 +119,7 @@ void Companion::Init(std::shared_ptr<Camera> pCamera)
 	m_distanceToEnemy = 0.0f;
 	m_hp = kMaxHp;
 	m_attack.active = false;
+	m_colRadius = kColRadius;
 	m_modelHandle = MV1LoadModel(L"Data/model/Mage.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
 	MV1SetRotationXYZ(m_modelHandle,kDefaultDir);
@@ -166,7 +167,7 @@ void Companion::Update()
 			m_vec.y = kJumpPower;
 			m_isJump = true;
 		}
-		if (Pad::isTrigger(PAD_INPUT_3) && !m_isAvoidanceFlag) // ‰ñ”ğ
+		if (Pad::isTrigger(PAD_INPUT_2) && !m_isAvoidanceFlag) // ‰ñ”ğ
 		{
 			m_avoidanceTimer = kAvoidanceFrame;
 			m_isAvoidanceFlag = true;
@@ -551,13 +552,13 @@ void Companion::UpdatePlayerControlState()
 		UpdateMovement(m_moveInput); // ˆÚ“®ˆ—
 		if (m_attackCoolTimer <= 0.0f)
 		{
-			if (Pad::isTrigger(PAD_INPUT_4))
+			if (Pad::isTrigger(PAD_INPUT_3))
 			{
 				OnAttack();
 				m_companionState = CompanionState::NORMAL_ATTACK;
 				m_attackCoolTimer = kAttackCoolTime;
 			}
-			else if (Pad::isTrigger(PAD_INPUT_2))
+			else if (Pad::isTrigger(PAD_INPUT_4))
 			{
 				if (m_distanceToEnemy > 0.0f) // “G‚ª‚¢‚éê‡‚Ì‚İ‰ñ“]
 				{

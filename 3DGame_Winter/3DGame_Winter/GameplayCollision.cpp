@@ -2,6 +2,8 @@
 namespace
 {
 	constexpr float kKnockbackPower = 5.0f;
+	constexpr float kHitBoxScale = 0.001f;
+	constexpr float kPushRate = 0.1f;
 }
 GameplayCollision::GameplayCollision():
 	m_overLapData({ 0.0f,0.0f,0.0f },0.0f, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f },0.0f)
@@ -37,8 +39,41 @@ void GameplayCollision::Update()
 	CheckNormalEnemyAttack();
 	CheckStrongEnemyRangeAttack();
 	CheckBossEnemyAttack();
-	//PushBackCharacter(m_pPlayer->GetPos(),m_pPlayer->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pPlayer.get());
-	//PushBackCharacter(m_pCompanion->GetPos(), m_pCompanion->GetColRadius(),m_pNormalEnemy->GetPos(),m_pNormalEnemy->GetColRadius(),m_pCompanion.get());
+
+	for (auto& enemy : m_pNormalEnemies) {
+		if (!enemy->IsDead()) {
+			PushBackCharacter(m_pPlayer.get(), enemy.get());
+		}
+	}
+	// Strong Enemy
+	for (auto& enemy : m_pStrongEnemies) {
+		if (!enemy->IsDead()) {
+			PushBackCharacter(m_pPlayer.get(), enemy.get());
+		}
+	}
+	// Boss Enemy
+	if (m_pBossEnemy && !m_pBossEnemy->IsDead()) {
+		PushBackCharacter(m_pPlayer.get(), m_pBossEnemy.get());
+	}
+
+	// 2. コンパニオン vs 全エネミー
+	// Normal Enemy
+	for (auto& enemy : m_pNormalEnemies) {
+		if (!enemy->IsDead()) {
+			PushBackCharacter(m_pCompanion.get(), enemy.get());
+		}
+	}
+	// Strong Enemy
+	for (auto& enemy : m_pStrongEnemies) {
+		if (!enemy->IsDead()) {
+			PushBackCharacter(m_pCompanion.get(), enemy.get());
+		}
+	}
+	// Boss Enemy
+	if (m_pBossEnemy && !m_pBossEnemy->IsDead()) {
+		PushBackCharacter(m_pCompanion.get(), m_pBossEnemy.get());
+	}
+	PushBackCharacter(m_pPlayer.get(),m_pCompanion.get());
 }
 
 void GameplayCollision::Draw()
@@ -361,18 +396,57 @@ void GameplayCollision::CheckBossEnemyAttack()
 	}
 }
 
-void GameplayCollision::PushBackCharacter(VECTOR pos1, float pos1Radius, VECTOR pos2, float pos2Radius, CharacterBase* pTargetCharacter)
+void GameplayCollision::PushBackCharacter(CharacterBase* pChar1, CharacterBase* pChar2)
 {
-	m_overLapData.m_penetrationVector = VSub(pos1, pos2);
-	m_overLapData.m_penetrationVectorSize = VSize(m_overLapData.m_penetrationVector);
-	m_overLapData.m_overLapSize = pos1Radius + pos2Radius - m_overLapData.m_penetrationVectorSize;
-	if (m_overLapData.m_overLapSize > 0.0f)
+	// どちらかがいない、または死んでいる場合は処理しない
+	if (!pChar1 || !pChar2) return;
+	 if (pChar1->IsDead() || pChar2->IsDead()) return; 
+
+	// 1. 各キャラクターの情報を取得
+	VECTOR pos1 = pChar1->GetPos();
+	float radius = pChar1->GetColRadius();
+	VECTOR pos2 = pChar2->GetPos();
+	float radius2 = pChar2->GetColRadius();
+
+	// 2. めり込み判定
+	VECTOR vec = VSub(pos1, pos2);   // 2から1へのベクトル
+	float dist = VSize(vec);         // 距離
+	float totalRadius = radius + radius2; // 半径の合計
+
+	// めり込んでいる場合 (距離 < 半径の合計)
+	if (dist < totalRadius && dist > 0.0001f) // 0除算防止
 	{
-		m_overLapData.m_pushDir = VNorm(m_overLapData.m_penetrationVector);
-		m_overLapData.m_pushBack = VScale(m_overLapData.m_pushDir, m_overLapData.m_overLapSize);
-		if (pTargetCharacter)
+		float overlap = totalRadius - dist; // めり込んでいる量
+		VECTOR pushDir = VNorm(vec);        // 押し戻す方向 (2 -> 1)
+		//float pushPower = overlap * kPushRate;
+		// 3. 押し戻し処理
+		// ここで「誰が」「どれくらい」動くかを決めます。
+
+		// BossEnemy判定 (Bossは動かない)
+		bool isChar1Boss = (dynamic_cast<BossEnemy*>(pChar1) != nullptr);
+		bool isChar2Boss = (dynamic_cast<BossEnemy*>(pChar2) != nullptr);
+
+		if (isChar2Boss)
 		{
-			pTargetCharacter->AddPos(m_overLapData.m_pushBack);
+			// 相手がボスなら、自分(Char1)が100%押し出される
+			VECTOR pushVec = VScale(pushDir, overlap);
+			pChar1->AddPos(pushVec);
+		}
+		else if (isChar1Boss)
+		{
+			// 自分がボスなら、相手(Char2)が100%押し出される (方向は逆)
+			VECTOR pushVec = VScale(pushDir, -overlap);
+			pChar2->AddPos(pushVec);
+		}
+		else
+		{
+			// 通常同士、またはPlayer vs Enemyなら、お互いに半分ずつ押し合う (50:50)
+			// ※片方だけ動かすと、壁際などでプルプル震える原因になる
+			VECTOR pushVec1 = VScale(pushDir, overlap * 0.5f);
+			VECTOR pushVec2 = VScale(pushDir, -overlap * 0.5f); // 逆方向
+
+			pChar1->AddPos(pushVec1);
+			pChar2->AddPos(pushVec2);
 		}
 	}
 }

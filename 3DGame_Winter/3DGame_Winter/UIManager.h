@@ -24,6 +24,7 @@ private:
 	void DrawBossHp();
 	void DrawEnemyHP();
 	void DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, float height, float offsetY);
+	void DrawManualUI();
 	float m_playerHpGaugeRate;
 	float m_companionHpGaugeRate;
 	float m_playerSpecialGaugeRate;
@@ -39,6 +40,15 @@ private:
 	int m_warriorIconHandle;
 	int m_wizardIconHandle;
 	int m_fontHandle;
+	int m_manualFontHandle;
+	int m_aButtonHandle;
+	int m_bButtonHandle;
+	int m_xButtonHandle;
+	int m_yButtonHandle;
+	int m_rbButtonHandle;
+	int m_lbButtonHandle;
+	int m_stickHandle;
+	int m_manualFrameHandle;
 	std::shared_ptr<Player> m_pPlayer;
 	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;
 	std::vector<std::shared_ptr<StrongEnemy>> m_pStrongEnemies;
