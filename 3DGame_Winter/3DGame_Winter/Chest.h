@@ -29,6 +29,7 @@ private:
 		int modelHandle;
 		float rotation;
 		float alpha;
+		int chestNo;
 	};
 	std::vector<ChestData> m_chests;
 	std::shared_ptr<Player> m_pPlayer;

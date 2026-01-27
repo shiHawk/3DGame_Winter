@@ -113,7 +113,11 @@ void ResultScene::Draw()
 {
 	//DrawBox(0, 0, Game::kScreenWidth, Game::kScreenHeight, 0xffffff, true);
 	DrawGraph(kBGPosX,kBGPosY,m_bgHandle,true);
+	float angle = (GetNowCount() % 2000) / 2000.0f * DX_PI_F * 2.0f;
+	int alpha = (int)((sin(angle) * 0.5f + 0.5f) * 255); // 0 ～ 255 に変換
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
 	DrawRectGraph(kButtonPosX,kButtonPosY,79,101,500,35,m_retrurnTitleHandle,true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンドモードを解除
 	if (!m_gameoverFlag)
 	{
 		DrawFormatStringToHandle(kScorePosX, kScorePosY, 0xff8c00, m_fontHandle, L"GameClear!");

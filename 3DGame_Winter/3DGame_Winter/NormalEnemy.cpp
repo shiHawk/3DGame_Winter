@@ -156,10 +156,11 @@ void NormalEnemy::Update()
 			m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
 			if (m_toPlayerDistance > kSphereRadius && m_toPlayerDistance < kTrackingRange) // プレイヤーが近すぎず、追跡範囲内なら追跡
 			{
-				if (!m_pPlayer->IsDead() || !m_pCompanion->IsDead())
+				if ((!m_pPlayer->IsDead() || !m_pCompanion->IsDead()) && !m_isDead)
 				{
 					m_vec.x = m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
 					m_vec.z = m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
+					
 					if (VSize(VGet(m_toPlayerDir.x, 0.0f, m_toPlayerDir.z)) > kMoveThreshold)
 					{
 						// 移動中→移動アニメーションへ変更
@@ -230,6 +231,8 @@ void NormalEnemy::OnDamage(int damage)
 	if (m_hp <= 0)
 	{
 		m_hp = 0;
+		m_vec.x = 0.0f;
+		m_vec.z = 0.0f;
 		ChangeAnim(m_modelHandle,kDeathAnimNo,false, kDeathAnimIncrement);
 	}
 	if (m_invincibilityTimer > 0.0f) return;

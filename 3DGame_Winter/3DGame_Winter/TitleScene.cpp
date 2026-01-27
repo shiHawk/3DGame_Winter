@@ -211,6 +211,7 @@ SceneBase* TitleScene::Update()
 		|| Pad::isTrigger(PAD_INPUT_3) || Pad::isTrigger(PAD_INPUT_4))
 	{
 		StartFadeOut();
+		SoundManager::GetInstance()->PlayGameStart();
 		m_isNextScene = true;
 	}
 	if (IsFadingOut())
@@ -241,14 +242,19 @@ void TitleScene::Draw()
 		MV1DrawModel(wallModelHandle);
 	}
 	DrawGraph(kTitlePosX, kTitlePosY, m_titleLogoHandle, true);
+
+	float angle = (GetNowCount() % 2000) / 2000.0f * DX_PI_F * 2.0f;
+	int alpha = (int)((sin(angle) * 0.5f + 0.5f) * 255); // 0 ～ 255 に変換
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
 	DrawRectGraph(kButtonPosX, kButtonPosY, SrcX, SrcY, kStartWidth, kStartHeight, m_startHandle,true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンドモードを解除
+
 	MV1DrawModel(m_warriorModelHandle);
 	MV1DrawModel(m_wizardModelHandle);
 	MV1DrawModel(m_stoolHandle);
 	MV1DrawModel(m_coinHandle);
 	MV1SetDifColorScale(m_boxHandle, GetColorF(kDifColor, kDifColor, kDifColor,1.0f));
 	MV1DrawModel(m_boxHandle);
-	//DrawFormatStringToHandle(kButtonPosX,kButtonPosY,0xffffff,m_fontHandle,L"Press B button");
 	DrawFade();
 }
 

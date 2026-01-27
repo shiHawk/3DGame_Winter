@@ -35,7 +35,7 @@ namespace
 	constexpr unsigned int kAreaColor = 0xff4500;
 	constexpr unsigned int kOutLineColor = 0xff0000;
 	constexpr int kDivNum = 32;
-	constexpr float kInvincibilityTime = 60.0f;
+	constexpr float kInvincibilityTime = 40.0f;
 	constexpr int kMaxHp = 200;
 	constexpr int kAttackPower = 75;
 }

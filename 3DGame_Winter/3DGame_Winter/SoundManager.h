@@ -27,6 +27,8 @@ public:
 	int FadeBGMVol(); // フェードに合わせて音量を小さくする
 	void StopBGM();
 	void SwitchToBossBGM();
+	void PlayChestSE(int no);
+	void PlayGameStart();
 private:
 	SoundManager();
 	~SoundManager() {};
@@ -48,6 +50,10 @@ private:
 	int m_PlayerChangeSEHandle;
 	int m_wizardAttackSound;
 	int m_bossBgmHandle;
+	int m_recoverHpHandle;
+	int m_addSpecialGaugeHandle;
+	int m_powerUpHandle;
+	int m_gameStartHandle;
 	bool m_isBossBgmRequested; // ボスBGMへの切り替え中フラグ
 };
 

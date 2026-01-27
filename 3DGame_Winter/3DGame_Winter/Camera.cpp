@@ -136,9 +136,18 @@ void Camera::Update()
 
 		// 垂直角度も必要に応じて固定
 		m_targetAngleVertical = 0.2f;
+
+		m_lockonRotateAngle += kLockonRotateSpeed;
+
+		// 一周(2π)を超えたら0に戻す
+		if (m_lockonRotateAngle >= DX_PI_F * 2.0f)
+		{
+			m_lockonRotateAngle -= DX_PI_F * 2.0f;
+		}
 	}
 	else
 	{
+		m_lockonRotateAngle = 0.0f; // 回転をリセット
 		// カメラの角度の計算
 		if (m_input.Rx > 0)
 		{
@@ -171,7 +180,6 @@ void Camera::Update()
 		m_cameraTarget = VAdd(m_playerPos, VGet(0.0f, kCameraTarget.y, 0.0f));
 	}
 
-	
 	//printfDx(L"m_targetAngleVertical:%f\nm_targetAngleHorizontal:%f\n", m_targetAngleVertical, m_targetAngleHorizontal);
 	// 水平方向の角度差分を計算
 	float diffH = m_targetAngleHorizontal - m_cameraAngleHorizontal;
@@ -217,7 +225,6 @@ void Camera::Update()
 
 void Camera::Draw()
 {
-	//DrawSphere3D(m_cameraTarget,30.0f,8,0xff0000,0xffffff,true);
 	if (m_isLockOn)
 	{
 		DrawBillboard3D(m_lockOnCameraPos, 0.5f, 0.5f, 384, m_lockonRotateAngle, m_lockonHandle, true);

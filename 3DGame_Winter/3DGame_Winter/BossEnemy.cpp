@@ -245,7 +245,6 @@ void BossEnemy::Draw()
     {
         //DrawSphere3D(m_enemyAttack.pos, m_enemyAttack.radius, kDivNum, 0xffff00, 0xffffff, false);
     }
-    //printfDx(L"BossToPlayer:%f\n",VSize(VSub(m_pos,m_pPlayer->GetPos())));
 }
 
 void BossEnemy::OnAttack()

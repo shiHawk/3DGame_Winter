@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Companion.h"
 #include "EffectManager.h"
+#include "SoundManager.h"
 namespace
 {
 	constexpr float kModelScale = 0.75f;
@@ -22,9 +23,9 @@ Chest::Chest():
 	m_isOpened(false),
 	m_chestHandle(-1)
 {
-	m_chests.push_back({ kChest1Pos,ChestType::SG,false,-1,kChest1Rotation,1.0f });
-	m_chests.push_back({ kChest2Pos,ChestType::HP,false,-1,kChest2Rotation,1.0f });
-	m_chests.push_back({ kChest3Pos,ChestType::BUFF,false,-1,kChest3Rotation,1.0f });
+	m_chests.push_back({ kChest1Pos,ChestType::SG,false,-1,kChest1Rotation,1.0f,0 });
+	m_chests.push_back({ kChest2Pos,ChestType::HP,false,-1,kChest2Rotation,1.0f,1 });
+	m_chests.push_back({ kChest3Pos,ChestType::BUFF,false,-1,kChest3Rotation,1.0f,2 });
 }
 
 void Chest::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager)
@@ -87,14 +88,45 @@ void Chest::Update()
 			continue; // すでに開いていたら無視
 		}
 
+		std::shared_ptr<CharacterBase> characters[] = { m_pPlayer, m_pCompanion };
+
+		for (auto& ch : characters)
+		{
+			VECTOR chPos = ch->GetPos();
+			VECTOR vec = VSub(chPos, chest.pos); // 宝箱からキャラへのベクトル
+			float dist = VSize(vec);
+
+			// 判定半径以内なら押し戻す
+			if (dist < kColRadius)
+			{
+				// 0除算防止（完全に重なっている場合）
+				if (dist < 0.001f) vec = VGet(0, 0, 1);
+
+				// 押し出す方向ベクトル（長さ1）
+				VECTOR normal = VNorm(vec);
+				// 押し戻す量（半径 - 現在の距離）
+				float pushLen = kColRadius - dist;
+				// 新しい座標 = 現在の座標 + (方向 * 押し戻す量)
+				VECTOR newPos = VAdd(chPos, VScale(normal, pushLen));
+
+				// キャラクターの座標を更新
+				ch->SetPos(newPos);
+			}
+		}
+
 		// 当たり判定（距離の計算）
 		float distPlayer = VSize(VSub(chest.pos, m_pPlayer->GetPos()));
 		float distCompanion = VSize(VSub(chest.pos, m_pCompanion->GetPos()));
 		if (distPlayer < kColRadius || distCompanion < kColRadius)
 		{
-			if (!m_isBattleActive)
+			if (m_isBattleActive)
+			{
+				continue;
+			}
+			else
 			{
 				chest.isOpened = true;
+				SoundManager::GetInstance()->PlayChestSE(chest.chestNo);
 			}
 			if (chest.type == ChestType::SG && chest.isOpened)
 			{

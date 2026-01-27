@@ -30,6 +30,10 @@ SoundManager::SoundManager() :
 	m_PlayerChangeSEHandle(-1),
 	m_wizardAttackSound(-1),
 	m_bossBgmHandle(-1),
+	m_recoverHpHandle(-1),
+	m_addSpecialGaugeHandle(-1),
+	m_powerUpHandle(-1),
+	m_gameStartHandle(-1),
 	m_isBossBgmRequested(false)
 {
 }
@@ -48,6 +52,10 @@ void SoundManager::Init(SceneManager* pSceneManager)
 	m_companionSpecialSkilSoundHandle = LoadSoundMem(L"Data/sound/wizardspecialskil.mp3");
 	m_playerSpecialSkilSoundHandle = LoadSoundMem(L"Data/sound/warriorspesialskil.mp3");
 	m_bossBgmHandle = LoadSoundMem(L"Data/sound/bossbattle.mp3");
+	m_recoverHpHandle = LoadSoundMem(L"Data/sound/recoverhp.mp3");
+	m_addSpecialGaugeHandle = LoadSoundMem(L"Data/sound/specialgauge.mp3");
+	m_powerUpHandle = LoadSoundMem(L"Data/sound/powerup.mp3");
+	m_gameStartHandle = LoadSoundMem(L"Data/sound/gamestart.mp3");
 }
 
 void SoundManager::End()
@@ -63,6 +71,10 @@ void SoundManager::End()
 	DeleteSoundMem(m_companionSpecialSkilSoundHandle);
 	DeleteSoundMem(m_playerSpecialSkilSoundHandle);
 	DeleteSoundMem(m_bossBgmHandle);
+	DeleteSoundMem(m_recoverHpHandle);
+	DeleteSoundMem(m_addSpecialGaugeHandle);
+	DeleteSoundMem(m_powerUpHandle);
+	DeleteSoundMem(m_gameStartHandle);
 	SoundManager::GetInstance()->StopBGM();
 }
 
@@ -182,4 +194,19 @@ void SoundManager::SwitchToBossBGM()
 {
 	if (m_currentBgmHandle == m_bossBgmHandle) return; // ä˘Ç…É{ÉXêÌÇ»ÇÁâΩÇ‡ÇµÇ»Ç¢
 	m_isBossBgmRequested = true;
+}
+
+void SoundManager::PlayChestSE(int no)
+{
+	int soundHandle = -1;
+	if (no == 0) soundHandle = m_addSpecialGaugeHandle;
+	else if (no == 1) soundHandle = m_recoverHpHandle;
+	else soundHandle = m_powerUpHandle;
+
+	PlaySoundMem(soundHandle, DX_PLAYTYPE_BACK);
+}
+
+void SoundManager::PlayGameStart()
+{
+	PlaySoundMem(m_gameStartHandle, DX_PLAYTYPE_BACK);
 }

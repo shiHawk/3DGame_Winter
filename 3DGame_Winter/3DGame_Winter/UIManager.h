@@ -49,6 +49,8 @@ private:
 	int m_lbButtonHandle;
 	int m_stickHandle;
 	int m_manualFrameHandle;
+	int m_manualIconHandle;
+	bool m_isDisplayManual;
 	std::shared_ptr<Player> m_pPlayer;
 	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;
 	std::vector<std::shared_ptr<StrongEnemy>> m_pStrongEnemies;

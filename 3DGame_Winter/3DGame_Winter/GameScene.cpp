@@ -191,6 +191,7 @@ SceneBase* GameScene::Update()
 	m_pBossEnemy->Update();
 	m_pSkyDome->Update();
 	m_pChest->Update();
+	m_pChest->SetBattleActiveFlag(m_pBattleAreaManager->IsBattleAreaActive());
 	//m_pStrongEnemy->Update();
 	
 	m_pEffectManager->Update();
@@ -277,8 +278,8 @@ void GameScene::Draw()
 	}
 	m_pBossEnemy->Draw();
 	m_pChest->Draw();
-	m_pUIManager->Draw();
 	m_pCamera->Draw();
+	m_pUIManager->Draw();
 	DrawFade();
 	//DrawGrid();
 }

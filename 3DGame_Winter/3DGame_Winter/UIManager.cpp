@@ -1,4 +1,5 @@
 #include "UIManager.h"
+#include "Pad.h"
 namespace
 {
 	// HPゲージ
@@ -89,7 +90,9 @@ UIManager::UIManager():
 	m_rbButtonHandle(-1),
 	m_lbButtonHandle(-1),
 	m_stickHandle(-1),
-	m_manualFrameHandle(-1)
+	m_manualFrameHandle(-1),
+	m_manualIconHandle(-1),
+	m_isDisplayManual(true)
 {
 }
 
@@ -116,10 +119,11 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_enemyHPFrameHandle = LoadGraph(L"Data/UI/EnemyHPFrame.png");
 	m_aButtonHandle = LoadGraph(L"Data/UI/AButton.png");
 	m_bButtonHandle = LoadGraph(L"Data/UI/BButton.png");
-	m_xButtonHandle = LoadGraph(L"Data/UI/XButton (1).png");
+	m_xButtonHandle = LoadGraph(L"Data/UI/XButton.png");
 	m_yButtonHandle = LoadGraph(L"Data/UI/YButton.png");
 	m_rbButtonHandle = LoadGraph(L"Data/UI/RBButton.png");
 	m_lbButtonHandle = LoadGraph(L"Data/UI/LBButton.png");
+	m_manualIconHandle = LoadGraph(L"Data/UI/StartButton.png");
 	m_stickHandle = LoadGraph(L"Data/UI/stick.png");
 	m_manualFrameHandle = LoadGraph(L"Data/UI/frame.png");
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
@@ -145,6 +149,7 @@ void UIManager::End()
 	DeleteGraph(m_lbButtonHandle);
 	DeleteGraph(m_stickHandle);
 	DeleteGraph(m_manualFrameHandle);
+	DeleteGraph(m_manualIconHandle);
 	DeleteFontToHandle(m_fontHandle);
 	DeleteFontToHandle(m_manualFontHandle);
 }
@@ -158,6 +163,15 @@ void UIManager::Updata()
 
 	m_playerSpecialGaugeRate = static_cast<float>(m_pPlayer->GetSpecialGauge()) / 100.0f;
 	m_companionSpecialGaugeRate = static_cast<float>(m_pCompanion->GetSpecialGauge()) / 100.0f;
+
+	if (Pad::isTrigger(PAD_INPUT_8) && !m_isDisplayManual)
+	{
+		m_isDisplayManual = true;
+	}
+	else if (Pad::isTrigger(PAD_INPUT_8) && m_isDisplayManual)
+	{
+		m_isDisplayManual = false;
+	}
 }
 
 void UIManager::Draw()
@@ -165,11 +179,34 @@ void UIManager::Draw()
 	DrawHp();
 	DrawSg();
 	DrawEnemyHP();
-	DrawManualUI();
+	if (m_isDisplayManual)
+	{
+		DrawManualUI();
+	}
 	if (VSize(VSub(m_pPlayer->GetPos(), m_pBossEnemy->GetPos())) <= 1000.0f)
 	{
 		DrawBossHp();
 	}
+	/*DINPUT_JOYSTATE input;
+	int i;
+	int Color;
+	GetJoypadDirectInputState(DX_INPUT_PAD1, &input);
+	Color = GetColor(255, 255, 255);
+	DrawFormatString(0, 0, Color, L"X:%d Y:%d Z:%d",
+		input.X, input.Y, input.Z);
+	DrawFormatString(0, 16, Color, L"Rx:%d Ry:%d Rz:%d",
+		input.Rx, input.Ry, input.Rz);
+	DrawFormatString(0, 32, Color, L"Slider 0:%d 1:%d",
+		input.Slider[0], input.Slider[1]);
+	DrawFormatString(0, 48, Color, L"POV 0:%d 1:%d 2:%d 3:%d",
+		input.POV[0], input.POV[1],
+		input.POV[2], input.POV[3]);
+	DrawString(0, 64, L"Button", Color);
+	for (i = 0; i < 32; i++)
+	{
+		DrawFormatString(64 + i % 8 * 64, 64 + i / 8 * 16, Color,
+			L"%2d:%d", i, input.Buttons[i]);
+	}*/
 }
 
 void UIManager::DrawHp()
@@ -284,7 +321,7 @@ void UIManager::DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, f
 
 void UIManager::DrawManualUI()
 {
-	DrawRectExtendGraph(1000,15,1280,430,703,114,546,778,m_manualFrameHandle,true);
+	DrawRectExtendGraph(1000,13,1280,460,703,114,546,778,m_manualFrameHandle,true);
 	DrawGraph(1050,20,m_aButtonHandle,true);
 	DrawFormatStringToHandle(1100, 30, 0xffffff, m_manualFontHandle, L"ジャンプ");
 	DrawGraph(1050,70,m_bButtonHandle,true);
@@ -294,7 +331,7 @@ void UIManager::DrawManualUI()
 	DrawGraph(1050,170,m_yButtonHandle,true);
 	DrawFormatStringToHandle(1100, 180, 0xffffff, m_manualFontHandle, L"強攻撃");
 
-	DrawGraph(1010, 220, m_xButtonHandle, true);
+	DrawGraph(1015, 221, m_xButtonHandle, true);
 	DrawGraph(1048, 220, m_yButtonHandle, true);
 	DrawGraph(1080, 220, m_yButtonHandle, true);
 	DrawFormatStringToHandle(1120, 230, 0xffffff, m_manualFontHandle, L"フィニッシュ");
@@ -305,9 +342,11 @@ void UIManager::DrawManualUI()
 	DrawRectExtendGraph(1050, 320,1090,350, 766, 429, 379, 196, m_lbButtonHandle, true);
 	DrawFormatStringToHandle(1100, 325, 0xffffff, m_manualFontHandle, L"必殺技");
 
-	DrawRectExtendGraph(1040, 370,1150,400, 830, 454, 379, 200, m_stickHandle, true);
+	DrawRectExtendGraph(1040, 370,1150,410, 820, 454, 379, 200, m_stickHandle, true);
 	DrawFormatStringToHandle(1100, 365, 0xffffff, m_manualFontHandle, L"ロックオン");
 	DrawFormatStringToHandle(1100, 395, 0xffffff, m_manualFontHandle, L"ロックオン解除");
+
+	DrawFormatStringToHandle(1050, 428, 0xff4500, m_manualFontHandle, L"START　 閉じる");
 	/*DrawRectGraph(1050,220,766,429,379,196,m_rbButtonHandle,true);
 	DrawRectGraph(1050,270,766,429,379,196,m_lbButtonHandle,true);*/
 }
