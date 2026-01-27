@@ -116,7 +116,7 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_enemyHPFrameHandle = LoadGraph(L"Data/UI/EnemyHPFrame.png");
 	m_aButtonHandle = LoadGraph(L"Data/UI/AButton.png");
 	m_bButtonHandle = LoadGraph(L"Data/UI/BButton.png");
-	m_xButtonHandle = LoadGraph(L"Data/UI/XButton.png");
+	m_xButtonHandle = LoadGraph(L"Data/UI/XButton (1).png");
 	m_yButtonHandle = LoadGraph(L"Data/UI/YButton.png");
 	m_rbButtonHandle = LoadGraph(L"Data/UI/RBButton.png");
 	m_lbButtonHandle = LoadGraph(L"Data/UI/LBButton.png");
@@ -284,7 +284,7 @@ void UIManager::DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, f
 
 void UIManager::DrawManualUI()
 {
-	DrawRectExtendGraph(1000,15,1280,400,703,114,546,778,m_manualFrameHandle,true);
+	DrawRectExtendGraph(1000,15,1280,430,703,114,546,778,m_manualFrameHandle,true);
 	DrawGraph(1050,20,m_aButtonHandle,true);
 	DrawFormatStringToHandle(1100, 30, 0xffffff, m_manualFontHandle, L"ジャンプ");
 	DrawGraph(1050,70,m_bButtonHandle,true);
@@ -293,13 +293,21 @@ void UIManager::DrawManualUI()
 	DrawFormatStringToHandle(1100, 130, 0xffffff, m_manualFontHandle, L"弱攻撃");
 	DrawGraph(1050,170,m_yButtonHandle,true);
 	DrawFormatStringToHandle(1100, 180, 0xffffff, m_manualFontHandle, L"強攻撃");
-	DrawRectExtendGraph(1050, 220,1090,250, 766, 429, 379, 196, m_rbButtonHandle, true);
-	DrawFormatStringToHandle(1100, 228, 0xffffff, m_manualFontHandle, L"キャラチェンジ");
-	DrawRectExtendGraph(1050, 270,1090,300, 766, 429, 379, 196, m_lbButtonHandle, true);
-	DrawFormatStringToHandle(1100, 276, 0xffffff, m_manualFontHandle, L"必殺技");
-	DrawRectExtendGraph(1040, 320,1150,350, 830, 454, 379, 200, m_stickHandle, true);
-	DrawFormatStringToHandle(1100, 325, 0xffffff, m_manualFontHandle, L"ロックオン");
-	DrawFormatStringToHandle(1100, 355, 0xffffff, m_manualFontHandle, L"ロックオン解除");
+
+	DrawGraph(1010, 220, m_xButtonHandle, true);
+	DrawGraph(1048, 220, m_yButtonHandle, true);
+	DrawGraph(1080, 220, m_yButtonHandle, true);
+	DrawFormatStringToHandle(1120, 230, 0xffffff, m_manualFontHandle, L"フィニッシュ");
+
+	DrawRectExtendGraph(1050, 270,1090,300, 766, 429, 379, 196, m_rbButtonHandle, true);
+	DrawFormatStringToHandle(1100, 275, 0xffffff, m_manualFontHandle, L"キャラチェンジ");
+
+	DrawRectExtendGraph(1050, 320,1090,350, 766, 429, 379, 196, m_lbButtonHandle, true);
+	DrawFormatStringToHandle(1100, 325, 0xffffff, m_manualFontHandle, L"必殺技");
+
+	DrawRectExtendGraph(1040, 370,1150,400, 830, 454, 379, 200, m_stickHandle, true);
+	DrawFormatStringToHandle(1100, 365, 0xffffff, m_manualFontHandle, L"ロックオン");
+	DrawFormatStringToHandle(1100, 395, 0xffffff, m_manualFontHandle, L"ロックオン解除");
 	/*DrawRectGraph(1050,220,766,429,379,196,m_rbButtonHandle,true);
 	DrawRectGraph(1050,270,766,429,379,196,m_lbButtonHandle,true);*/
 }

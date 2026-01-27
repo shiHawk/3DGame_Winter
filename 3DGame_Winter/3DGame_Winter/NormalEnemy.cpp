@@ -89,8 +89,6 @@ void NormalEnemy::Update()
 	{
 		m_enemyAttack.active = false;
 		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDeathAnimIncrement);
-		// アニメーションを更新する
-		UpdateAnim(m_modelHandle);
 		if (GetIsAnimEnd())
 		{
 			m_isDead = true; 
@@ -101,100 +99,103 @@ void NormalEnemy::Update()
 			End();
 			return;
 		}
-		return;
-	}
-	// 移動ベクトル(m_vec)をリセット 
-	m_vec.x = 0.0f;
-	m_vec.z = 0.0f;
-	m_vec.y -= 0.5f;
-	SearchTarget();
-	if (m_knockbackTimer > 0.0f)
-	{
-		ChangeAnim(m_modelHandle, kKnockbackAnimNo, false, kKnockbackAnimIncrement);
-		m_pos = VAdd(m_pos, VScale(m_knockbackDir, kKnockBackSpeed));
-		m_knockbackTimer -= 1.0f / kFramesPerSecond;
-		//MV1SetPosition(m_modelHandle, m_pos);
-		if (m_knockbackTimer <= 0.0f)
-		{
-			m_knockbackTimer = 0.0f;
-			m_isKnockbackFlag = false;
-			m_recoveryTimer = kRecoveryTime; // 復帰時間を設定
-			// ノックバック終了後、待機状態へ
-			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-		}
-	}
-	else if (m_recoveryTimer > 0.0f) // 復帰待機処理
-	{
-		m_recoveryTimer--; // タイマーを減らす
-		// 待機アニメーションを継続 
-		ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-	}
-	else if (m_invincibilityTimer > 0.0f)
-	{
-		// 無敵時間タイマーを減らす
-		//printfDx(L"m_invincibilityTimer:%f\n", m_invincibilityTimer);
-		m_invincibilityTimer--;
-		ChangeAnim(m_modelHandle, kDamageAnimNo, false, kDamageAnimIncrement);
-		MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 0.6f, 0.6f, 1.0f));
-		if (m_invincibilityTimer <= 0.0f)
-		{
-			m_invincibilityTimer = 0.0f;
-			m_isHitFlag = false;
-			MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, m_alpha));
-			// 無敵時間が終わったら、強制的に待機アニメーションに戻す
-			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-		}
 	}
 	else
 	{
-		if (m_AttackCoolTime > 0.0f)
+		// 移動ベクトル(m_vec)をリセット 
+		m_vec.x = 0.0f;
+		m_vec.z = 0.0f;
+		m_vec.y -= 0.5f;
+		SearchTarget();
+		if (m_knockbackTimer > 0.0f)
 		{
-			m_AttackCoolTime--; // クールタイムを減らす
-		}
-		MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
-		m_toPlayerDistance = VSize(VSub(m_targetPos, m_pos));
-		m_toPlayerDir = VNorm(VSub(m_targetPos, m_pos));
-		m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
-		if (m_toPlayerDistance > kSphereRadius && m_toPlayerDistance < kTrackingRange) // プレイヤーが近すぎず、追跡範囲内なら追跡
-		{
-			if (!m_pPlayer->IsDead() || !m_pCompanion->IsDead())
+			ChangeAnim(m_modelHandle, kKnockbackAnimNo, false, kKnockbackAnimIncrement);
+			m_pos = VAdd(m_pos, VScale(m_knockbackDir, kKnockBackSpeed));
+			m_knockbackTimer -= 1.0f / kFramesPerSecond;
+			//MV1SetPosition(m_modelHandle, m_pos);
+			if (m_knockbackTimer <= 0.0f)
 			{
-				m_vec.x = m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
-				m_vec.z = m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
-				if (VSize(VGet(m_toPlayerDir.x, 0.0f, m_toPlayerDir.z)) > kMoveThreshold)
-				{
-					// 移動中→移動アニメーションへ変更
-					ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
-				}
+				m_knockbackTimer = 0.0f;
+				m_isKnockbackFlag = false;
+				m_recoveryTimer = kRecoveryTime; // 復帰時間を設定
+				// ノックバック終了後、待機状態へ
+				ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 			}
 		}
-		else if (m_toPlayerDistance >= kTrackingRange) // 追跡範囲外なら待機
+		else if (m_recoveryTimer > 0.0f) // 復帰待機処理
 		{
+			m_recoveryTimer--; // タイマーを減らす
+			// 待機アニメーションを継続 
 			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-			m_enemyAttack.active = false; // 攻撃もリセット
+		}
+		else if (m_invincibilityTimer > 0.0f)
+		{
+			// 無敵時間タイマーを減らす
+			//printfDx(L"m_invincibilityTimer:%f\n", m_invincibilityTimer);
+			m_invincibilityTimer--;
+			ChangeAnim(m_modelHandle, kDamageAnimNo, false, kDamageAnimIncrement);
+			MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 0.6f, 0.6f, 1.0f));
+			if (m_invincibilityTimer <= 0.0f)
+			{
+				m_invincibilityTimer = 0.0f;
+				m_isHitFlag = false;
+				MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, m_alpha));
+				// 無敵時間が終わったら、強制的に待機アニメーションに戻す
+				ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+			}
 		}
 		else
 		{
-			if (m_enemyAttack.timer <= 0.0f && m_enemyAttack.active)
+			if (m_AttackCoolTime > 0.0f)
 			{
-				m_enemyAttack.active = false;
-				// 停止後→待機アニメーションへ変更
+				m_AttackCoolTime--; // クールタイムを減らす
+			}
+			MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
+			m_toPlayerDistance = VSize(VSub(m_targetPos, m_pos));
+			m_toPlayerDir = VNorm(VSub(m_targetPos, m_pos));
+			m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
+			if (m_toPlayerDistance > kSphereRadius && m_toPlayerDistance < kTrackingRange) // プレイヤーが近すぎず、追跡範囲内なら追跡
+			{
+				if (!m_pPlayer->IsDead() || !m_pCompanion->IsDead())
+				{
+					m_vec.x = m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
+					m_vec.z = m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
+					if (VSize(VGet(m_toPlayerDir.x, 0.0f, m_toPlayerDir.z)) > kMoveThreshold)
+					{
+						// 移動中→移動アニメーションへ変更
+						ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
+					}
+				}
+			}
+			else if (m_toPlayerDistance >= kTrackingRange) // 追跡範囲外なら待機
+			{
 				ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-				m_AttackCoolTime = kMaxCoolTime;
+				m_enemyAttack.active = false; // 攻撃もリセット
 			}
-			else if (m_enemyAttack.timer <= 0.0f && m_AttackCoolTime <= 0.0f)
+			else
 			{
-				OnAttack();
+				if (m_enemyAttack.timer <= 0.0f && m_enemyAttack.active)
+				{
+					m_enemyAttack.active = false;
+					// 停止後→待機アニメーションへ変更
+					ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+					m_AttackCoolTime = kMaxCoolTime;
+				}
+				else if (m_enemyAttack.timer <= 0.0f && m_AttackCoolTime <= 0.0f)
+				{
+					OnAttack();
+				}
 			}
-		}
 
-		if (m_enemyAttack.active)
-		{
-			m_enemyAttack.timer--;
+			if (m_enemyAttack.active)
+			{
+				m_enemyAttack.timer--;
+			}
+			//printfDx(L"m_AttackCoolTime:%f\n", m_AttackCoolTime);
+			MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 		}
-		//printfDx(L"m_AttackCoolTime:%f\n", m_AttackCoolTime);
-		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 	}
+	
 	MV1SetPosition(m_modelHandle,m_pos);
 	UpdateAnim(m_modelHandle);
 }

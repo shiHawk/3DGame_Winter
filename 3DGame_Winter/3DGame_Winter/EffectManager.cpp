@@ -8,6 +8,7 @@
 namespace
 {
 	constexpr int kParticleMax = 8000;
+	constexpr int kHitEffectPosYOffset = 60.0f;
 	constexpr float kSpecialSkilEffectSize = 100.0f;
 	constexpr float kSpecialSkilSpped = 10.0f;
 	constexpr float kPlayerHitEffectSize = 30.0f;
@@ -114,7 +115,7 @@ void EffectManager::Update()
 	{
 		// 1âÒå¿ÇËÇÃçƒê∂ÅiPlayEffekseer3DEffectÅj
 		int handle = PlayEffekseer3DEffect(m_hitEffectHandle);
-		SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y, pos.z);
+		SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y+ kHitEffectPosYOffset, pos.z);
 		SetScalePlayingEffekseer3DEffect(handle, kPlayerHitEffectSize, kPlayerHitEffectSize, kPlayerHitEffectSize);
 	}
 

@@ -22,9 +22,9 @@ Chest::Chest():
 	m_isOpened(false),
 	m_chestHandle(-1)
 {
-	m_chests.push_back({ kChest1Pos,ChestType::SG,false,-1,kChest1Rotation });
-	m_chests.push_back({ kChest2Pos,ChestType::HP,false,-1,kChest2Rotation });
-	m_chests.push_back({ kChest3Pos,ChestType::BUFF,false,-1,kChest3Rotation });
+	m_chests.push_back({ kChest1Pos,ChestType::SG,false,-1,kChest1Rotation,1.0f });
+	m_chests.push_back({ kChest2Pos,ChestType::HP,false,-1,kChest2Rotation,1.0f });
+	m_chests.push_back({ kChest3Pos,ChestType::BUFF,false,-1,kChest3Rotation,1.0f });
 }
 
 void Chest::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager)
@@ -74,7 +74,18 @@ void Chest::Update()
 {
 	for (auto& chest : m_chests) 
 	{
-		if (chest.isOpened) continue; // すでに開いていたら無視
+		if (chest.isOpened)
+		{
+			if (chest.alpha > 0.0f) 
+			{
+				chest.alpha -= 0.02f; 
+				if (chest.alpha < 0.0f) chest.alpha = 0.0f;
+
+				// 不透明度を更新
+				MV1SetOpacityRate(chest.modelHandle, chest.alpha);
+			}
+			continue; // すでに開いていたら無視
+		}
 
 		// 当たり判定（距離の計算）
 		float distPlayer = VSize(VSub(chest.pos, m_pPlayer->GetPos()));
@@ -113,6 +124,7 @@ void Chest::Draw()
 	for (const auto& chest : m_chests)
 	{
 		MV1DrawModel(chest.modelHandle);
+		
 		// まだ開けられていない場合のみ描画する
 		if (!chest.isOpened)
 		{

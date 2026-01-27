@@ -81,6 +81,7 @@ namespace
     constexpr int kAvoidanceAnimNo = 15;
     constexpr int kDamageAnimNo = 24;
     constexpr int kDeathAnimNo = 26;
+    constexpr int kJumpAnimNo = 10;
     constexpr float kAnimIncrement = 0.4f; // アニメーションの再生速度
     constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
     constexpr float kWalkAnimIncrement = 1.0f; // 歩行アニメーションの再生速度
@@ -99,6 +100,7 @@ namespace
 Player::Player():
     m_controlMode(ControlMode::PLAYER),
     m_playerState(PlayerState::NORMAL),
+    m_jumpState(JumpState::None),
     m_angleY(0.0f),
     m_enemyPos({0.0f,0.0f,0.0f}),
     m_followTargetPos({ 0.0f,0.0f,0.0f }),
@@ -114,7 +116,9 @@ Player::Player():
     m_aiWillDo3HitCombo(false),
     m_isEnemyAttackSensing(false),
     m_retreatDir({0.0f,0.0f,0.0f}),
-    m_evadeCooldown(0.0f)
+    m_evadeCooldown(0.0f),
+    m_jumpDelayTimer(0.0f),
+    m_isJumpPending(false)
 {
 }
 
@@ -159,11 +163,12 @@ void Player::Update()
     //printfDx(L"m_attack2.timer:%f\n", m_attack2.timer);
     if (m_controlMode == ControlMode::PLAYER)
     {
-        if (Pad::isTrigger(PAD_INPUT_1) && !m_isJump)
+        /*if (Pad::isTrigger(PAD_INPUT_1) && !m_isJump)
         {
             m_vec.y = kJumpPower;
             m_isJump = true;
-        }
+            ChangeAnim(m_modelHandle,kJumpAnimNo,false,0.5f);
+        }*/
         if (Pad::isTrigger(PAD_INPUT_2) && !m_isAvoidanceFlag)
         {
             m_avoidanceTimer = kAvoidanceFrame;
@@ -242,39 +247,6 @@ void Player::Update()
    }
     MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     UpdateAnim(m_modelHandle);
-    //printfDx(L"Pos.y:%f\n",m_pos.y);
-    /*if (m_isHitFlag)
-    {
-        printfDx(L"HIt\n");
-    }
-    else
-    {
-        printfDx(L"   \n");
-    }*/
-    //printfDx(L"m_pos.y;%.02f\n", m_pos.y);
-    //printfDx(L"m_pos.x:%f\nm_pos.z:%f\n\n",m_pos.x,m_pos.z);
-    //DINPUT_JOYSTATE input;
-    //int i;
-    //int Color;
-    ////入力状態を取得
-    //GetJoypadDirectInputState(DX_INPUT_PAD1, &input);
-    ////画面に構造体の中身を描画
-    //Color = GetColor(255, 255, 255);
-    //DrawFormatString(0, 0, Color, L"X:%d Y:%d Z:%d",
-    //    input.X, input.Y, input.Z);
-    //DrawFormatString(0, 16, Color, L"Rx:%d Ry:%d Rz:%d",
-    //    input.Rx, input.Ry, input.Rz);
-    //DrawFormatString(0, 32, Color, L"Slider 0:%d 1:%d",
-    //    input.Slider[0], input.Slider[1]);
-    //DrawFormatString(0, 48, Color, L"POV 0:%d 1:%d 2:%d 3:%d",
-    //    input.POV[0], input.POV[1],
-    //    input.POV[2], input.POV[3]);
-    //DrawString(0, 64, L"Button", Color);
-    //for (i = 0; i < 32; i++)
-    //{
-    //    DrawFormatString(64 + i % 8 * 64, 64 + i / 8 * 16, Color,
-    //        L"%2d:%d", i, input.Buttons[i]);
-    //}
 }
 
 void Player::Draw()
@@ -514,7 +486,7 @@ void Player::UpdateMovement(const VECTOR& moveDir)
 {
     m_isInAttackSequence = (m_playerState != PlayerState::NORMAL);
     // 攻撃中でなければ、移動状態に応じてアニメーションを切り替える
-    if (!m_isInAttackSequence)
+    if (!m_isInAttackSequence && !m_isJump)
     {
         if (VSize(VGet(m_vec.x, 0.0f, m_vec.z)) > kMoveThreshold)
         {
@@ -654,11 +626,22 @@ void Player::UpdatePlayerState()
     }
 }
 
+void Player::UpdateJumpState()
+{
+
+}
+
 void Player::HandleStateNormal(bool aiWantsToAttack)
 {
     UpdateMovement(m_moveInput);
     m_comboStep = 0; // 通常時はコンボ数をリセット
-
+    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_1) && !m_isJump)
+    {
+        m_vec.y = kJumpPower;
+        m_isJump = true;
+        ChangeAnim(m_modelHandle, kJumpAnimNo, false, 0.5f);
+        return; // ジャンプしたフレームはこれ以上の攻撃判定などは行わない
+    }
     // プレイヤーの弱攻撃入力
     if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_3) && !m_attack.active)
     {

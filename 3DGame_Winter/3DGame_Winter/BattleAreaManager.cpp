@@ -2,7 +2,7 @@
 namespace
 {
 	constexpr int kDivNum = 16;
-	constexpr float kBattleAreaRadiusSize = 500.0f;
+	constexpr float kBattleAreaRadiusSize = 600.0f;
 	constexpr float kBossBattleAreaRadiusSize = 1500.0f;
 	constexpr float kBattleTriggerDistance = 300.0f;
 	constexpr int kSegmentCount = 64;    // ‰~ü‚ğ•ªŠ„‚·‚é”

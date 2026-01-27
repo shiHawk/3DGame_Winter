@@ -28,6 +28,7 @@ private:
 		bool isOpened;
 		int modelHandle;
 		float rotation;
+		float alpha;
 	};
 	std::vector<ChestData> m_chests;
 	std::shared_ptr<Player> m_pPlayer;

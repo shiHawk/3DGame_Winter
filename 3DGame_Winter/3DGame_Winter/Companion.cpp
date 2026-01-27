@@ -370,6 +370,7 @@ void Companion::UpdateAIState()
 			m_companionState = CompanionState::TRACK_ENEMY;
 			break; // ‚±‚ÌƒtƒŒ[ƒ€‚Å‚ÌFOLLOW_PLAYER‚Ìˆ—‚Í’†’f
 		}
+
 		m_dirToPlayer = VNorm(m_companionToPlayer);
 		float targetAngle = atan2f(m_dirToPlayer.x, m_dirToPlayer.z);
 		float diff = targetAngle - m_angleY;

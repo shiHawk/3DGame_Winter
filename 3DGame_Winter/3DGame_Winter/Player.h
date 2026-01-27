@@ -62,11 +62,20 @@ public:
 		else return false;
 	};
 private:
+	enum JumpState
+	{
+		None,   // ジャンプしていない
+		Start,  // 飛び上がり
+		Loop,   // 空中
+		Land    // 着地
+	};
+	JumpState m_jumpState;
 	ControlMode m_controlMode;
 	PlayerState m_playerState;
 	VECTOR HandleInput();
 	void UpdateMovement(const VECTOR& moveDir);
 	void UpdatePlayerState();
+	void UpdateJumpState();
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<EffectManager> m_pEffectManager;
 	float m_angleY;
@@ -85,6 +94,8 @@ private:
 	bool m_isEnemyAttackSensing;
 	VECTOR m_retreatDir;
 	float m_evadeCooldown;
+	float m_jumpDelayTimer;
+	bool  m_isJumpPending; // ジャンプの力を出すのを待っている状態か
 
 	// ステートごとのハンドラ関数
 	void HandleStateNormal(bool aiWantsToAttack);
