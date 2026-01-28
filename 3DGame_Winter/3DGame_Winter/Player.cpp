@@ -132,6 +132,8 @@ void Player::Init(std::shared_ptr<Camera> pCamera, std::shared_ptr<EffectManager
     m_isJump = false;
     m_attackPower = kAttackPower;
     m_hp = kMaxHp;
+    m_maxHp = kMaxHp;
+    m_maxSpecialGauge = kMaxGauge;
     m_playerState = PlayerState::NORMAL;
     m_attack.active = false;
     m_distanceToEnemy = 0.0f;

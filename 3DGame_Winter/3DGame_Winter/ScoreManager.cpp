@@ -11,7 +11,8 @@ ScoreManager::ScoreManager():
 	m_startTime(0),
 	m_elapsedTimeSeconds(0),
 	m_timeBonus(0),
-	m_gameoverFlag(false)
+	m_gameoverFlag(false),
+	m_treasureCount(0)
 {
 }
 

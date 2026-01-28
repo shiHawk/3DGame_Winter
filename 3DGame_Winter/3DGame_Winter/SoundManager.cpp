@@ -23,10 +23,8 @@ SoundManager::SoundManager() :
 	m_playerThirdAttackSoundHandle(-1),
 	m_playerSpecialSkilSoundHandle(-1),
 	m_companionNormalAttackSoundHandle(-1),
-	m_companionStrongAttackSoundHandle(-1),
 	m_companionSpecialSkilSoundHandle(-1),
 	m_enemyAttackSoundHandle(-1),
-	m_enterSEHandle(-1),
 	m_PlayerChangeSEHandle(-1),
 	m_wizardAttackSound(-1),
 	m_bossBgmHandle(-1),
@@ -34,6 +32,8 @@ SoundManager::SoundManager() :
 	m_addSpecialGaugeHandle(-1),
 	m_powerUpHandle(-1),
 	m_gameStartHandle(-1),
+	m_dramrollHandle(-1),
+	m_dramrollEndHandle(-1),
 	m_isBossBgmRequested(false)
 {
 }
@@ -56,6 +56,8 @@ void SoundManager::Init(SceneManager* pSceneManager)
 	m_addSpecialGaugeHandle = LoadSoundMem(L"Data/sound/specialgauge.mp3");
 	m_powerUpHandle = LoadSoundMem(L"Data/sound/powerup.mp3");
 	m_gameStartHandle = LoadSoundMem(L"Data/sound/gamestart.mp3");
+	m_dramrollHandle = LoadSoundMem(L"Data/sound/dramroll.mp3");
+	m_dramrollEndHandle = LoadSoundMem(L"Data/sound/dramrollend.mp3");
 }
 
 void SoundManager::End()
@@ -75,6 +77,8 @@ void SoundManager::End()
 	DeleteSoundMem(m_addSpecialGaugeHandle);
 	DeleteSoundMem(m_powerUpHandle);
 	DeleteSoundMem(m_gameStartHandle);
+	DeleteSoundMem(m_dramrollHandle);
+	DeleteSoundMem(m_dramrollEndHandle);
 	SoundManager::GetInstance()->StopBGM();
 }
 
@@ -209,4 +213,25 @@ void SoundManager::PlayChestSE(int no)
 void SoundManager::PlayGameStart()
 {
 	PlaySoundMem(m_gameStartHandle, DX_PLAYTYPE_BACK);
+}
+
+void SoundManager::PlayDramroll(bool finFlag)
+{
+	if (!finFlag)
+	{
+		if (CheckSoundMem(m_dramrollHandle) == 0) 
+		{
+			PlaySoundMem(m_dramrollHandle, DX_PLAYTYPE_LOOP);
+		}
+	}
+	else
+	{
+		StopSoundMem(m_dramrollHandle); // カウント中のループ音を止める
+		PlaySoundMem(m_dramrollEndHandle, DX_PLAYTYPE_BACK); // 終了音を再生
+	}
+}
+
+bool SoundManager::IsPlayingFinishSE()
+{
+	return CheckSoundMem(m_dramrollEndHandle) == 1;
 }

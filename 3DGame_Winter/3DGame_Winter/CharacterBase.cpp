@@ -21,12 +21,27 @@ CharacterBase::CharacterBase():
 	m_specialGauge(0),
 	m_baseAttackPower(0),
 	m_powerUpBonus(0),
-	m_colRadius(0.0f)
+	m_colRadius(0.0f),
+	m_isGrounded(true),
+	m_maxHp(0),
+	m_maxSpecialGauge(0)
 {
 }
 
 CharacterBase::~CharacterBase()
 {
+}
+
+void CharacterBase::AddHp(int recovery)
+{
+	m_hp += recovery;
+	if (m_hp > m_maxHp) m_hp = m_maxHp;
+}
+
+void CharacterBase::AddSg(int sg)
+{
+	m_specialGauge += sg;
+	if (m_specialGauge > m_maxSpecialGauge) m_specialGauge = m_maxSpecialGauge;
 }
 
 float CharacterBase::GetColRadius()

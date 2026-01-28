@@ -62,7 +62,7 @@ NormalEnemy::~NormalEnemy()
 {
 }
 
-void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, VECTOR pos)
+void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, VECTOR pos, float startAngle)
 {
 	Enemy::Init(pPlayer, pCompanion);
 	m_hp = kMaxHp;
@@ -71,7 +71,7 @@ void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 	m_colRadius = kColRadius;
 	m_modelHandle = MV1LoadModel(L"Data/model/Skeleton_Warrior.mv1");
 	MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
-	MV1SetRotationXYZ(m_modelHandle, kDefaultDir);
+	MV1SetRotationXYZ(m_modelHandle, VGet(0.0f,startAngle,0.0f));
 	MV1SetPosition(m_modelHandle, m_pos);
 	AttachAnim(m_modelHandle, kIdleAnimNo);
 }
@@ -148,52 +148,59 @@ void NormalEnemy::Update()
 		{
 			if (m_AttackCoolTime > 0.0f)
 			{
-				m_AttackCoolTime--; // クールタイムを減らす
+				m_AttackCoolTime--;
 			}
 			MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
+
+			// 距離を計算
 			m_toPlayerDistance = VSize(VSub(m_targetPos, m_pos));
-			m_toPlayerDir = VNorm(VSub(m_targetPos, m_pos));
-			m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
-			if (m_toPlayerDistance > kSphereRadius && m_toPlayerDistance < kTrackingRange) // プレイヤーが近すぎず、追跡範囲内なら追跡
+
+			// --- 追跡範囲内（kTrackingRange未満）の場合のみ回転と行動を行う ---
+			if (m_toPlayerDistance < kTrackingRange)
 			{
-				if ((!m_pPlayer->IsDead() || !m_pCompanion->IsDead()) && !m_isDead)
+				// 方向と角度を計算して回転を適用
+				m_toPlayerDir = VNorm(VSub(m_targetPos, m_pos));
+				m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
+				MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
+
+				if (m_toPlayerDistance > kSphereRadius) // 追跡中
 				{
-					m_vec.x = m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
-					m_vec.z = m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
-					
-					if (VSize(VGet(m_toPlayerDir.x, 0.0f, m_toPlayerDir.z)) > kMoveThreshold)
+					if ((!m_pPlayer->IsDead() || !m_pCompanion->IsDead()) && !m_isDead)
 					{
-						// 移動中→移動アニメーションへ変更
-						ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
+						m_vec.x = m_toPlayerDir.x * kMoveSpeed * kMoveDecRate;
+						m_vec.z = m_toPlayerDir.z * kMoveSpeed * kMoveDecRate;
+
+						if (VSize(VGet(m_toPlayerDir.x, 0.0f, m_toPlayerDir.z)) > kMoveThreshold)
+						{
+							ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
+						}
+					}
+				}
+				else // 攻撃範囲内（密着時）
+				{
+					if (m_enemyAttack.timer <= 0.0f && m_enemyAttack.active)
+					{
+						m_enemyAttack.active = false;
+						ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+						m_AttackCoolTime = kMaxCoolTime;
+					}
+					else if (m_enemyAttack.timer <= 0.0f && m_AttackCoolTime <= 0.0f)
+					{
+						OnAttack();
 					}
 				}
 			}
-			else if (m_toPlayerDistance >= kTrackingRange) // 追跡範囲外なら待機
+			else // --- 追跡範囲外の場合 ---
 			{
 				ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-				m_enemyAttack.active = false; // 攻撃もリセット
-			}
-			else
-			{
-				if (m_enemyAttack.timer <= 0.0f && m_enemyAttack.active)
-				{
-					m_enemyAttack.active = false;
-					// 停止後→待機アニメーションへ変更
-					ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-					m_AttackCoolTime = kMaxCoolTime;
-				}
-				else if (m_enemyAttack.timer <= 0.0f && m_AttackCoolTime <= 0.0f)
-				{
-					OnAttack();
-				}
+				m_enemyAttack.active = false;
+				// ここで回転処理を呼んでいないため、以前の向きを維持します
 			}
 
 			if (m_enemyAttack.active)
 			{
 				m_enemyAttack.timer--;
 			}
-			//printfDx(L"m_AttackCoolTime:%f\n", m_AttackCoolTime);
-			MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
 		}
 	}
 	

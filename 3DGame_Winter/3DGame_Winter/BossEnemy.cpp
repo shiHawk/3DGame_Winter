@@ -6,6 +6,7 @@ namespace
     constexpr float kColRadius = 50.0f;
     constexpr VECTOR kDefaultPos = { -5405.0f,741.0f,9199.0f };
     constexpr VECTOR kDefaultDir = { 0.0,270.0f,0.0f };
+    constexpr VECTOR kDefaultTarfetPos = { 0.0,0.0f,0.0f };
     constexpr float kModelScale = 180.0f; // ƒ‚ƒfƒ‹‚ÌƒXƒP[ƒ‹
     constexpr float kChageTime = 1.5f;
     constexpr float kCoolDownTime = 1.5f;
@@ -42,6 +43,8 @@ namespace
     constexpr float kInvincibilityTime = 30.0f;
     constexpr int kMaxHp = 800;
     constexpr int kAttackPower = 75;
+    constexpr int kStrongAttackPower = 80;
+    constexpr int kRangeAttackPower = 95;
 }
 
 BossEnemy::BossEnemy() :
@@ -49,8 +52,9 @@ BossEnemy::BossEnemy() :
     m_enemyAttack(kAttackRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
     m_alpha(0.0f),
     m_targetAngle(0.0f),
-    m_attackTimer(0.0f),
-    m_actionCheckTimer(0.0f)
+    m_attackTimer(kCoolDownTime),
+    m_actionCheckTimer(0.0f),
+    m_storngAttackTargetPos({ 0.0f,0.0f,0.0f })
 {
 }
 
@@ -143,6 +147,15 @@ void BossEnemy::Update()
 
     case BossEnemyState::STRONG_ATTACK_CHARGE: // ‹­UŒ‚‚Ì—­‚ßi—\’›j
         m_attackTimer -= 1.0f / kFramesPerSecond;
+        if (m_attackTimer > 0.2f)
+        {
+            m_storngAttackTargetPos = m_targetPos;
+        }
+        else
+        {
+            VECTOR dir = VNorm(VSub(m_storngAttackTargetPos, m_pos)); // UŒ‚ˆÊ’u‚ğŒÅ’è‚µ‚½‚ç‚»‚Ì•ûŒü‚ğŒü‚«‘±‚¯‚é
+            m_targetAngle = atan2f(dir.x, dir.z);
+        }
         ChangeAnim(m_modelHandle, kChargeAnimNo, false, 0.2f); // ‚ä‚Á‚­‚è—­‚ß‚éƒAƒjƒ
         if (m_attackTimer <= 0)
         {
@@ -165,12 +178,15 @@ void BossEnemy::Update()
     {
         // UŒ‚‰‰o’†
         m_enemyAttack.timer--;
+        VECTOR dir = VNorm(VSub(m_storngAttackTargetPos, m_pos)); // UŒ‚’†‚àUŒ‚ˆÊ’u‚Ì•ûŒü‚ğŒü‚«‘±‚¯‚é
+        m_targetAngle = atan2f(dir.x, dir.z);
         ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, 1.0f);
         if (m_enemyAttack.timer <= 0)
         {
             m_enemyAttack.active = false;
+            m_storngAttackTargetPos = kDefaultTarfetPos;
             m_state = BossEnemyState::COOLDOWN;
-            m_attackTimer = kCoolDownTime * (m_hp < kMaxHp * 0.5f ? 0.5f : 1.0f); // HP”¼•ªˆÈ‰º‚ÅŒ„’Zk
+            m_attackTimer = kCoolDownTime; // HP”¼•ªˆÈ‰º‚ÅŒ„’Zk
         }
         break;
     }
@@ -182,7 +198,7 @@ void BossEnemy::Update()
         {
             m_enemyAttack.active = false;
             m_state = BossEnemyState::COOLDOWN;
-            m_attackTimer = kCoolDownTime * (m_hp < kMaxHp * 0.5f ? 0.5f : 1.0f); // HP”¼•ªˆÈ‰º‚ÅŒ„’Zk
+            m_attackTimer = kCoolDownTime; // HP”¼•ªˆÈ‰º‚ÅŒ„’Zk
         }
         break;
 
@@ -233,7 +249,7 @@ void BossEnemy::Draw()
         float currentRadius = kStrongAttackRadius * progress;
 
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-        VECTOR drawPos = VAdd(m_targetPos, VGet(0.0f, 1.0f, 0.0f));
+        VECTOR drawPos = VAdd(m_storngAttackTargetPos, VGet(0.0f, 1.0f, 0.0f));
         // —\’›‚Ì•`‰æ
         DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.1f, 0.0f)), drawPos, currentRadius, kDivNum, kAreaColor, kAreaColor, true);
 
@@ -251,6 +267,7 @@ void BossEnemy::OnAttack()
 {
     m_enemyAttack.timer = kNormalAttackDuration;
     m_enemyAttack.active = true;
+    m_attackPower = kAttackPower;
     m_enemyAttack.dir = VNorm(VGet(sinf(m_targetAngle), 0.0f, cosf(m_targetAngle)));
     m_enemyAttack.pos = VAdd(m_pos, VScale(m_enemyAttack.dir, kNormalAttackRange));
     m_enemyAttack.radius = kAttackRadius;
@@ -258,8 +275,9 @@ void BossEnemy::OnAttack()
 
 void BossEnemy::OnStrongAttack()
 {
-    m_enemyAttack.pos = m_targetPos;
+    m_enemyAttack.pos = m_storngAttackTargetPos;
     m_enemyAttack.active = true;
+    m_attackPower = kStrongAttackPower;
     m_enemyAttack.dir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
     m_enemyAttack.timer = kStrongAttackDuration;
     m_enemyAttack.radius = kStrongAttackRadius;
@@ -270,6 +288,7 @@ void BossEnemy::OnRangeAttack()
 {
     m_enemyAttack.pos = m_pos;
     m_enemyAttack.active = true;
+    m_attackPower = kRangeAttackPower;
     m_enemyAttack.dir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
     m_enemyAttack.timer = kRangeAttackDuration;
     m_enemyAttack.radius = kRangeAttackRadius;
@@ -295,16 +314,6 @@ void BossEnemy::OnDamage(int damage)
 float BossEnemy::GetColRadius()
 {
     return kColRadius;
-}
-
-VECTOR BossEnemy::GetDir()
-{
-    return VECTOR();
-}
-
-int BossEnemy::GetBossEnemyAttackPower()
-{
-    return m_attackPower;
 }
 
 void BossEnemy::UpdateDefault()

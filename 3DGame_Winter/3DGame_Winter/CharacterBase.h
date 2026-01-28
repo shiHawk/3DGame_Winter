@@ -24,8 +24,8 @@ public:
 	bool IsHitFlag() { return m_isHitFlag; }
 	int GetHp() { return m_hp; }
 	int GetSpecialGauge() { return m_specialGauge; }
-	void AddHp(int recovery) { m_hp += recovery; }
-	void AddSg(int sg) { m_specialGauge += sg; }
+	void AddHp(int recovery);
+	void AddSg(int sg);
 	void PowerUp(int attackPowerValue) { m_powerUpBonus += attackPowerValue; }
 	float GetColRadius();
 	enum class ControlMode
@@ -34,6 +34,8 @@ public:
 		COMPANION
 	};
 	float GetInvincibilityTimer() { return m_invincibilityTimer; }
+	void SetIsGrounded(bool grounded) { m_isGrounded = grounded; }
+	bool GetIsGrounded() const { return m_isGrounded; }
 protected:
 	virtual void OnAttack() abstract;
 	void ApplyMovement();
@@ -65,5 +67,8 @@ protected:
 	int m_baseAttackPower;   // 攻撃の種類ごとの基礎攻撃力
 	int m_powerUpBonus;  // 宝箱で得た増加分（初期値0）
 	float m_colRadius;
+	bool m_isGrounded; // 真下に地面があるかどうか
+	int m_maxHp;           // 最大HP
+	int m_maxSpecialGauge; // 最大ゲージ
 };
 

@@ -66,7 +66,7 @@ void GameScene::Init()
 	m_pScoreManager->Init();
 	m_pSkyDome->Init();
 	m_pSkyDome->SetScale(kSkyDomeScale);
-	m_pChest->Init(m_pPlayer, m_pCompanion,m_pEffectManager);
+	m_pChest->Init(m_pPlayer, m_pCompanion,m_pEffectManager,m_pScoreManager);
 	SoundManager::GetInstance()->PlayBGM();
 }
 

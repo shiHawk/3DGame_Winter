@@ -12,8 +12,7 @@ public:
 	void Draw() override;
 	virtual void OnDamage(int damage)override;
 	float GetColRadius();
-	virtual VECTOR GetDir() override;
-	int GetBossEnemyAttackPower();
+	virtual VECTOR GetDir() override { return m_enemyAttack.dir; };
 	AttackSphere GetAttackInfo() { return m_enemyAttack; }
 	int GetAttackPower() { return m_attackPower; }
 private:
@@ -41,6 +40,7 @@ private:
 	float m_targetAngle;
 	float m_attackTimer;
 	float m_actionCheckTimer; // 行動抽選のクールダウンタイマー
+	VECTOR m_storngAttackTargetPos;
 	std::shared_ptr<CharacterBase> m_lockedTarget;
 	std::shared_ptr<EffectManager> m_pEffectManager;
 };

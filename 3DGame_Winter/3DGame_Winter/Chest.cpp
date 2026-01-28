@@ -3,6 +3,7 @@
 #include "Companion.h"
 #include "EffectManager.h"
 #include "SoundManager.h"
+#include "ScoreManager.h"
 namespace
 {
 	constexpr float kModelScale = 0.75f;
@@ -28,11 +29,13 @@ Chest::Chest():
 	m_chests.push_back({ kChest3Pos,ChestType::BUFF,false,-1,kChest3Rotation,1.0f,2 });
 }
 
-void Chest::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager)
+void Chest::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, 
+				 std::shared_ptr<EffectManager> pEffectManager,std::shared_ptr<ScoreManager> pScoreManager)
 {
 	m_pPlayer = pPlayer;
 	m_pCompanion = pCompanion;
 	m_pEffectManager = pEffectManager;
+	m_pScoreManager = pScoreManager;
 	m_chestHandle = MV1LoadModel(L"Data/model/chest.mv1");
 	for (auto& chest : m_chests)
 	{
@@ -126,6 +129,7 @@ void Chest::Update()
 			else
 			{
 				chest.isOpened = true;
+				m_pScoreManager->AddTreasureCount();
 				SoundManager::GetInstance()->PlayChestSE(chest.chestNo);
 			}
 			if (chest.type == ChestType::SG && chest.isOpened)
@@ -156,11 +160,5 @@ void Chest::Draw()
 	for (const auto& chest : m_chests)
 	{
 		MV1DrawModel(chest.modelHandle);
-		
-		// ‚Ü‚¾ŠJ‚¯‚ç‚ê‚Ä‚¢‚È‚¢ê‡‚Ì‚İ•`‰æ‚·‚é
-		if (!chest.isOpened)
-		{
-			
-		}
 	}
 }

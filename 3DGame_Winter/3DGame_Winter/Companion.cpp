@@ -118,6 +118,8 @@ void Companion::Init(std::shared_ptr<Camera> pCamera)
 	m_vec = kDefaultVec;
 	m_distanceToEnemy = 0.0f;
 	m_hp = kMaxHp;
+	m_maxHp = kMaxHp;
+	m_maxSpecialGauge = kMaxGauge;
 	m_attack.active = false;
 	m_colRadius = kColRadius;
 	m_modelHandle = MV1LoadModel(L"Data/model/Mage.mv1");

@@ -139,6 +139,12 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 				// 坂道に沿った移動補正(必要であれば)
 			}
 		}
+		
+		pTargetCharacter->SetIsGrounded(true);
+	}
+	else
+	{
+		pTargetCharacter->SetIsGrounded(true);
 	}
 	// 判定結果からプレイヤーに反映
 	// 地面が見つかり、かつ プレイヤーのY座標が地面より下(またはめり込んでいる)場合

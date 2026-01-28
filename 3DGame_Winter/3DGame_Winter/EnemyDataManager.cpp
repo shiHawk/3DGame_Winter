@@ -19,23 +19,26 @@ void EnemyDataManager::LoadEnemyData(const std::string fileName,
 	while (std::getline(file, line))
 	{
 		std::istringstream stream(line); // 一行分をストリームに変換する
-		std::string type, strX, strY, strZ;
+		std::string type, strX, strY, strZ, strRotY;
 
 		if (!std::getline(stream, type, ',')) continue; // 敵の種類
 		if (!std::getline(stream, strX, ',')) continue;	// x座標
 		if (!std::getline(stream, strY, ',')) continue;	// y座標
 		if (!std::getline(stream, strZ, ',')) continue;	// z座標
+		if (!std::getline(stream, strRotY, ',')) continue; // 向きを読み込む
 
 		// 文字列をfloatに変換する
 		float x = std::stof(strX);
 		float y = std::stof(strY);
 		float z = std::stof(strZ);
+		float rotY = std::stof(strRotY);
 		VECTOR enemyPos = VGet(x, y, z); // VECTOR型に変換する
+		float angleRad = rotY;
 
 		if (type == "normalEnemy")
 		{
 			auto normalEnemy = std::make_shared<NormalEnemy>();
-			normalEnemy->Init(pPlayer,pCompanion,enemyPos);
+			normalEnemy->Init(pPlayer,pCompanion,enemyPos,angleRad);
 			pNormalEnemies.push_back(normalEnemy);
 		}
 		if (type == "strongEnemy")

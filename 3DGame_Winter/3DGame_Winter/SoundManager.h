@@ -29,6 +29,8 @@ public:
 	void SwitchToBossBGM();
 	void PlayChestSE(int no);
 	void PlayGameStart();
+	void PlayDramroll(bool finFlag);
+	bool IsPlayingFinishSE();
 private:
 	SoundManager();
 	~SoundManager() {};
@@ -41,19 +43,19 @@ private:
 	int m_playerFirstAttackSoundHandle; // 一段目の攻撃
 	int m_playerSecondAttackSoundHandle; // 二段目の攻撃
 	int m_playerThirdAttackSoundHandle; // 三段目の攻撃
-	int m_playerSpecialSkilSoundHandle;
-	int m_companionNormalAttackSoundHandle; 
-	int m_companionStrongAttackSoundHandle;
-	int m_companionSpecialSkilSoundHandle;
-	int m_enemyAttackSoundHandle;
-	int m_enterSEHandle;
-	int m_PlayerChangeSEHandle;
-	int m_wizardAttackSound;
-	int m_bossBgmHandle;
-	int m_recoverHpHandle;
-	int m_addSpecialGaugeHandle;
-	int m_powerUpHandle;
-	int m_gameStartHandle;
+	int m_playerSpecialSkilSoundHandle; // 必殺技
+	int m_companionNormalAttackSoundHandle; // 杖殴り
+	int m_companionSpecialSkilSoundHandle; // 必殺技
+	int m_enemyAttackSoundHandle; // 敵の攻撃
+	int m_PlayerChangeSEHandle; // キャラチェンジ
+	int m_wizardAttackSound;  // 魔法攻撃
+	int m_bossBgmHandle; // ボス戦
+	int m_recoverHpHandle; // 回復
+	int m_addSpecialGaugeHandle; // SpecialGauge
+	int m_powerUpHandle; // バフ
+	int m_gameStartHandle; // 決定音
+	int m_dramrollHandle;
+	int m_dramrollEndHandle;
 	bool m_isBossBgmRequested; // ボスBGMへの切り替え中フラグ
 };
 
