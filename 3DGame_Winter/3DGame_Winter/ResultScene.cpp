@@ -133,6 +133,7 @@ SceneBase* ResultScene::Update()
 	{
 		m_drawTimeScore += kRollUpSpeed;
 		if (m_drawTimeScore > m_timeScore) m_drawTimeScore = m_timeScore;
+		if (m_gameoverFlag) m_drawTimeScore = 0;
 	}
 	else if (m_drawTreasureScore < m_treasureScore) 
 	{
@@ -187,6 +188,10 @@ void ResultScene::Draw()
 	if (!m_gameoverFlag)
 	{
 		DrawFormatStringToHandle(kScorePosX, kScorePosY, 0xff8c00, m_fontHandle, L"GameClear!");
+	}
+	else
+	{
+		DrawFormatStringToHandle(kScorePosX, kScorePosY, 0x5A189A, m_fontHandle, L"GameOver");
 	}
 	DrawFormatStringToHandle(kTimeScorePosX,kTimeScorePosY,0x87cefa,m_fontHandle,L"TimeScore:%d", m_drawTimeScore);
 	DrawFormatStringToHandle(kTimeScorePosX, kTreasurePosY,0x87cefa,m_fontHandle,L"TreasureScore:%d", m_drawTreasureScore);
