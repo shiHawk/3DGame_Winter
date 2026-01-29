@@ -301,14 +301,15 @@ void BossEnemy::OnDamage(int damage)
     m_isHitFlag = true;
     m_hp -= damage;
     m_invincibilityTimer = kInvincibilityTime;
-    if (m_hp <= 0)
-    {
-        m_enemyAttack.active = false;
-        m_hp = 0;
-        m_state = BossEnemyState::DEAD;
-        ChangeAnim(m_modelHandle,kDeathAnimNo,false,0.4f);
-        //m_pEffectManager->PlayBossDeathEffect(m_pos);
-    }
+    //if (m_hp <= 0)
+    //{
+    //    m_enemyAttack.active = false;
+    //    m_hp = 0;
+    //    m_state = BossEnemyState::DEAD;
+    //    ChangeAnim(m_modelHandle,kDeathAnimNo,false,0.4f);
+    //    //m_pEffectManager->PlayBossDeathEffect(m_pos);
+    //}
+    if (m_hp < 0) m_hp = 0;
 }
 
 float BossEnemy::GetColRadius()
