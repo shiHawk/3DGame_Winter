@@ -191,6 +191,28 @@ void Player::Update()
         {
             m_pos = VGet(m_followTargetPos.x, m_followTargetPos.y, m_followTargetPos.z - kPostWarpPosZ);
         }
+        //if (m_isEnemyAttackSensing )
+        //{
+        //    // 敵から反対方向へのベクトルを計算
+        //    VECTOR escapeVec = VSub(m_pos, m_enemyPos);
+        //    escapeVec.y = 0.0f; // 上下方向には逃げない
+
+        //    // ベクトルの長さが0に近い（敵と完全に重なっている）場合の安全策
+        //    if (VSize(escapeVec) > 0.001f)
+        //    {
+        //        m_retreatDir = VNorm(escapeVec); // 逃げる方向をセット
+        //    }
+        //    else
+        //    {
+        //        // 重なっている場合はとりあえず手前(Zマイナス)など適当な方向に逃げる
+        //        m_retreatDir = VGet(0.0f, 0.0f, -1.0f);
+        //    }
+
+        //    // ステートを自動回避に変更
+        //    m_playerState = PlayerState::AUTO_EVADE;
+        //    m_avoidanceTimer = kAvoidanceFrame; // 回避時間セット
+        //    m_isEnemyAttackSensing = false;
+        //}
         //if (m_isEnemyAttackSensing && m_playerState != PlayerState::AUTO_EVADE)
         //{
         //    VECTOR escapeVec = VSub(m_pos, m_enemyPos);
@@ -754,6 +776,7 @@ void Player::HandleStateDeath()
 
 void Player::HandleStateAutoEvade()
 {
+    m_isInAttackSequence = false;
     m_avoidanceTimer -= 1.0f;
 
     // 退避方向（retreatDir）を向く
@@ -764,8 +787,10 @@ void Player::HandleStateAutoEvade()
     m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
 
     // 移動ベクトルをセット（kPlayerMoveSpeed または回避用速度）
-    m_vec.x = m_retreatDir.x * kMoveSpeed;
-    m_vec.z = m_retreatDir.z * kMoveSpeed;
+    float avoidSpeed = kForwardLineLength * kAvoidanceMoveSpeed;
+
+    m_vec.x = m_retreatDir.x * avoidSpeed;
+    m_vec.z = m_retreatDir.z * avoidSpeed;
 
     // アニメーション設定
     ChangeAnim(m_modelHandle, kAvoidanceAnimNo, false, kAnimIncrement);
@@ -780,7 +805,7 @@ void Player::HandleStateAutoEvade()
             m_angleY = atan2f(-currentDirToEnemy.x, -currentDirToEnemy.z);
         }
 
-        m_vec = VGet(0, 0, 0);
+        m_vec = VGet(0.0f, 0.0f, 0.0f);
         m_playerState = PlayerState::NORMAL;
         m_isEnemyAttackSensing = false;
     }
