@@ -12,7 +12,7 @@ public:
 	void Draw() override;
 	virtual void OnAttack() override;
 	void OnRangeAttack();
-	virtual void OnDamage(int damage)override;
+	virtual void OnDamage(int damage, bool isHatePlayer)override;
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
 	AttackSphere GetAttackInfo() { return m_enemyAttack; }

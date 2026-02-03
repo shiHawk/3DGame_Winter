@@ -563,7 +563,7 @@ void Companion::UpdatePlayerControlState()
 			}
 			else if (Pad::isTrigger(PAD_INPUT_4))
 			{
-				if (m_distanceToEnemy > 0.0f) // “G‚ª‚¢‚éê‡‚Ì‚İ‰ñ“]
+				if (m_distanceToEnemy > 0.0f && m_distanceToEnemy <= kLongRangeAttackDistance) // “G‚ª‚¢‚éê‡‚Ì‚İ‰ñ“]
 				{
 					m_companionState = CompanionState::TURN_FOR_STRONG_ATTACK; // ‰ñ“]ƒXƒe[ƒg‚É‘JˆÚ
 				}
@@ -574,7 +574,7 @@ void Companion::UpdatePlayerControlState()
 					m_attackCoolTimer = kAttackCoolTime;
 				}
 			}
-			else if (Pad::isTrigger(PAD_INPUT_5) && m_specialGauge <= 100)
+			else if (Pad::isTrigger(PAD_INPUT_5) && m_specialGauge >= 100)
 			{
 				if (m_distanceToEnemy > 0.0f) // “G‚ª‚¢‚éê‡‚Ì‚İ‰ñ“]
 				{

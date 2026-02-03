@@ -15,7 +15,7 @@ namespace
 	constexpr int kSphereDifColor = 0x000fff;
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kMoveSpeed = 10.0f;
-	constexpr float kCompanionMoveSpeed = 8.0f;
+	constexpr float kCompanionMoveSpeed = 9.0f;
     constexpr float kJumpPower = 15.0f;
     constexpr float kGravity = -0.7f;
     // d—ÍŒW”iUŒ‚’†j

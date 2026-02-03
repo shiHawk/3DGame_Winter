@@ -103,7 +103,7 @@ void GameplayCollision::CheckPlayerAttack()
 			VECTOR hitPos = VAdd(m_pPlayer->GetAttackPos(), VScale(normVec, playerAttackRadius));
 			m_hitPositions.push_back(hitPos); // リストに保存
 
-			enemy->OnDamage(m_pPlayer->GetAttackPower());
+			enemy->OnDamage(m_pPlayer->GetAttackPower(),true);
 			m_pPlayer->AddSpecialGauge(5);
 			if (m_pPlayer->IsComboFinish())
 			{
@@ -126,7 +126,7 @@ void GameplayCollision::CheckPlayerAttack()
 			VECTOR normVec = VNorm(hitInfo.m_deltaVector);
 			VECTOR hitPos = VAdd(m_pPlayer->GetAttackPos(), VScale(normVec, playerAttackRadius));
 			m_hitPositions.push_back(hitPos); // リストに保存
-			enemy->OnDamage(m_pPlayer->GetAttackPower());
+			enemy->OnDamage(m_pPlayer->GetAttackPower(),true);
 			m_pPlayer->AddSpecialGauge(5);
 		}
 	}
@@ -142,7 +142,7 @@ void GameplayCollision::CheckPlayerAttack()
 			VECTOR normVec = VNorm(hitInfo.m_deltaVector);
 			VECTOR hitPos = VAdd(m_pPlayer->GetAttackPos(), VScale(normVec, playerAttackRadius));
 			m_hitPositions.push_back(hitPos); // リストに保存
-			m_pBossEnemy->OnDamage(m_pPlayer->GetAttackPower());
+			m_pBossEnemy->OnDamage(m_pPlayer->GetAttackPower(),true);
 			m_pPlayer->AddSpecialGauge(5);
 		}
 	}
@@ -185,7 +185,7 @@ void GameplayCollision::CheckCompanionAttack()
 			VECTOR normVec = VNorm(hitInfo.m_deltaVector);
 			VECTOR hitPos = VAdd(m_pCompanion->GetAttackPos(), VScale(normVec, companionAttackRadius));
 			m_hitPositions.push_back(hitPos); // リストに保存
-			enemy->OnDamage(m_pCompanion->GetAttackPower());
+			enemy->OnDamage(m_pCompanion->GetAttackPower(),false);
 			m_pCompanion->AddSpecialGauge(5);
 		}
 	}
@@ -201,7 +201,7 @@ void GameplayCollision::CheckCompanionAttack()
 			VECTOR normVec = VNorm(hitInfo.m_deltaVector);
 			VECTOR hitPos = VAdd(m_pCompanion->GetAttackPos(), VScale(normVec, companionAttackRadius));
 			m_hitPositions.push_back(hitPos); // リストに保存
-			enemy->OnDamage(m_pCompanion->GetAttackPower());
+			enemy->OnDamage(m_pCompanion->GetAttackPower(),false);
 			m_pCompanion->AddSpecialGauge(5);
 		}
 	}
@@ -218,7 +218,7 @@ void GameplayCollision::CheckCompanionAttack()
 			VECTOR normVec = VNorm(hitInfo.m_deltaVector);
 			VECTOR hitPos = VAdd(m_pCompanion->GetAttackPos(), VScale(normVec, companionAttackRadius));
 			m_hitPositions.push_back(hitPos); // リストに保存
-			m_pBossEnemy->OnDamage(m_pCompanion->GetAttackPower());
+			m_pBossEnemy->OnDamage(m_pCompanion->GetAttackPower(),false);
 			m_pCompanion->AddSpecialGauge(5);
 		}
 	}
@@ -420,7 +420,7 @@ void GameplayCollision::PushBackCharacter(CharacterBase* pChar1, CharacterBase* 
 		VECTOR pushDir = VNorm(vec);        // 押し戻す方向 (2 -> 1)
 		//float pushPower = overlap * kPushRate;
 		// 3. 押し戻し処理
-		// ここで「誰が」「どれくらい」動くかを決めます。
+		// ここで「誰が」「どれくらい」動くかを決める
 
 		// BossEnemy判定 (Bossは動かない)
 		bool isChar1Boss = (dynamic_cast<BossEnemy*>(pChar1) != nullptr);

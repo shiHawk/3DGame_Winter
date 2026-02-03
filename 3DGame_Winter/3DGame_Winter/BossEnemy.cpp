@@ -45,6 +45,8 @@ namespace
     constexpr int kAttackPower = 75;
     constexpr int kStrongAttackPower = 80;
     constexpr int kRangeAttackPower = 95;
+    constexpr float kAttenuationRate = 0.75f; // 被ダメージの減衰率
+    constexpr float kCumulativeRate = 1.5f; // 被ダメージの累加率
 }
 
 BossEnemy::BossEnemy() :
@@ -295,12 +297,20 @@ void BossEnemy::OnRangeAttack()
     m_pEffectManager->BossEnemyRangeAttackEffect(m_enemyAttack.pos);
 }
 
-void BossEnemy::OnDamage(int damage)
+void BossEnemy::OnDamage(int damage, bool isHatePlayer)
 {
     if (m_invincibilityTimer > 0.0f || m_state == BossEnemyState::DEAD) return;
     m_isHitFlag = true;
     m_hp -= damage;
     m_invincibilityTimer = kInvincibilityTime;
+    if (isHatePlayer)
+    {
+        m_playerHate += (float)damage;
+    }
+    else
+    {
+        m_companionHate += (float)damage * 3;
+    }
     //if (m_hp <= 0)
     //{
     //    m_enemyAttack.active = false;

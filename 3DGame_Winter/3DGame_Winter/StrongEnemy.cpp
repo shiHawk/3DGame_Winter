@@ -38,6 +38,8 @@ namespace
 	constexpr float kInvincibilityTime = 40.0f;
 	constexpr int kMaxHp = 200;
 	constexpr int kAttackPower = 75;
+	constexpr float kAttenuationRate = 0.75f; // 被ダメージの減衰率
+	constexpr float kCumulativeRate = 1.5f; // 被ダメージの累加率
 }
 
 StrongEnemy::StrongEnemy():
@@ -231,16 +233,26 @@ void StrongEnemy::OnRangeAttack()
 	m_pEffectManager->StrongEnemyRangeAttackEffect(m_enemyAttack.pos);
 }
 
-void StrongEnemy::OnDamage(int damage)
+void StrongEnemy::OnDamage(int damage, bool isHatePlayer)
 {
 	// すでに死んでいる、または無敵なら無視
 	if (m_state == StrongEnemyState::DEAD || m_invincibilityTimer > 0.0f) return;
 
 	// 1. 先にダメージ計算を行う
-	m_hp -= damage;
+	//m_hp -= damage;
+	if (isHatePlayer)
+	{
+		m_hp -= damage * kCumulativeRate;
+		m_playerHate += (float)damage;
+	}
+	else
+	{
+		m_hp -= damage * kAttenuationRate;
+		m_companionHate += (float)damage * 3;
+	}
 	m_enemyAttack.timer = 0.0f;
 	m_isHitFlag = true;
-
+	
 	// 2. 計算後のHPで死亡判定を行う
 	if (m_hp <= 0)
 	{

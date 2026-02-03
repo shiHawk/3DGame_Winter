@@ -14,7 +14,7 @@ public:
 	virtual void Update()= 0;
 	virtual void Draw() = 0;
 	virtual void OnAttack();
-	virtual void OnDamage(int damage);
+	virtual void OnDamage(int damage,bool isFromPlayerDamage);
 protected:
 	void SearchTarget();
 	std::shared_ptr<Player> m_pPlayer;
@@ -27,5 +27,7 @@ protected:
 	VECTOR m_targetPos;
 	float m_toCompanionDistance;
 	float m_AttackCoolTime;
+	float m_playerHate;
+	float m_companionHate;
 };
 

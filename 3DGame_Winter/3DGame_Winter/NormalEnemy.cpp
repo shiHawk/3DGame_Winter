@@ -43,6 +43,8 @@ namespace
 	constexpr float kKnockbackDuration = 0.4f;
 	constexpr float kKnockBackSpeed = 5.0f;
 	constexpr float kRecoveryTime = 15.0f;
+	constexpr float kAttenuationRate = 0.75f; // 被ダメージの減衰率
+	constexpr float kCumulativeRate = 1.5f; // 被ダメージの累加率
 	// 秒数変換
 	constexpr float kFramesPerSecond = 60.0f;
 }
@@ -155,7 +157,7 @@ void NormalEnemy::Update()
 			// 距離を計算
 			m_toPlayerDistance = VSize(VSub(m_targetPos, m_pos));
 
-			// --- 追跡範囲内（kTrackingRange未満）の場合のみ回転と行動を行う ---
+			// 追跡範囲内（kTrackingRange未満）の場合のみ回転と行動を行う
 			if (m_toPlayerDistance < kTrackingRange)
 			{
 				// 方向と角度を計算して回転を適用
@@ -190,7 +192,7 @@ void NormalEnemy::Update()
 					}
 				}
 			}
-			else // --- 追跡範囲外の場合 ---
+			else // 追跡範囲外の場合
 			{
 				ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 				m_enemyAttack.active = false;
@@ -229,12 +231,22 @@ void NormalEnemy::OnAttack()
 	ChangeAnim(m_modelHandle,kAttackAnimNo,false,kAttackAnimIncrement);
 }
 
-void NormalEnemy::OnDamage(int damage)
+void NormalEnemy::OnDamage(int damage, bool isHatePlayer)
 {
 	m_enemyAttack.active = false;
 	m_enemyAttack.timer = 0.0f;
 	m_isHitFlag = true;
-	m_hp -= damage;
+	//m_hp -= damage;
+	if (isHatePlayer) 
+	{
+		m_hp -= damage*kAttenuationRate;
+		m_playerHate += (float)damage;
+	}
+	else 
+	{
+		m_hp -= damage * kCumulativeRate;
+		m_companionHate += (float)damage*3;
+	}
 	if (m_hp <= 0)
 	{
 		m_hp = 0;
@@ -244,10 +256,6 @@ void NormalEnemy::OnDamage(int damage)
 	}
 	if (m_invincibilityTimer > 0.0f) return;
 	
-	if (m_isKnockbackFlag)
-	{
-
-	}
 	m_invincibilityTimer = kInvincibilityTime;
 	//printfDx(L"m_hp:%d\n",m_hp);
 }

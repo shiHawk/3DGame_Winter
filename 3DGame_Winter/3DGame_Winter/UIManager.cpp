@@ -50,6 +50,37 @@ namespace
 	constexpr int kWizardSgPosX = 751;
 	constexpr int kWizardSgPosY = 678;
 
+	// ボスHPゲージ
+	constexpr int kBossMaxHp = 800; // ボスの最大HP
+	constexpr int kBossHpFrameX1 = 274;
+	constexpr int kBossHpFrameY1 = 550;
+	constexpr int kBossHpFrameX2 = 1006; // kDistX2と同じ
+	constexpr int kBossHpFrameY2 = 647;
+	constexpr int kBossHpSrcX = 63;
+	constexpr int kBossHpSrcY = 153;
+	constexpr int kBossHpSrcW = 636;
+	constexpr int kBossHpSrcH = 187;
+	constexpr int kBossHpBarMaxDestWidth = 400;
+	constexpr float kBossDrawDistance = 1000.0f;
+
+	// マニュアルUI
+	constexpr int kManualFrameX1 = 1000;
+	constexpr int kManualFrameY1 = 13;
+	constexpr int kManualFrameX2 = 1280;
+	constexpr int kManualFrameY2 = 460;
+	constexpr int kManualFrameSrcX = 703;
+	constexpr int kManualFrameSrcY = 114;
+	constexpr int kManualFrameSrcW = 546;
+	constexpr int kManualFrameSrcH = 778;
+
+	// 特殊ボタン（RB/LB/Stick）の描画サイズと切り出し
+	constexpr int kSpecialButtonWidth = 40;  // 1090 - 1050
+	constexpr int kSpecialButtonHeight = 30;
+	constexpr int kSpecialButtonSrcX = 766;
+	constexpr int kSpecialButtonSrcY = 429;
+	constexpr int kSpecialButtonSrcW = 379;
+	constexpr int kSpecialButtonSrcH = 196;
+
 	constexpr int kHpGaugeFrameWidth = 370; // ゲージの横幅
 	// スコアの位置
 	constexpr int kScorePosX = 650;
@@ -59,6 +90,11 @@ namespace
 	// 経過時間の位置
 	constexpr int kTimePosX = 830;
 	constexpr unsigned int kTimeColor = 0xff4500;
+	constexpr int kUIPosX = 1050;
+	constexpr int kUITextPosX = 1100;
+	constexpr int kComboButtonX1 = 1015;
+	constexpr int kComboButtonX2 = 1048;
+	constexpr int kComboButtonX3 = 1080;
 	// フォントのサイズ、太さ
 	constexpr int kFontTextSize = 20;
 	constexpr int kManualFontTextSize = 10;
@@ -92,7 +128,8 @@ UIManager::UIManager():
 	m_stickHandle(-1),
 	m_manualFrameHandle(-1),
 	m_manualIconHandle(-1),
-	m_isDisplayManual(true)
+	m_isDisplayManual(true),
+	m_isDisplayBossHp(false)
 {
 }
 
@@ -152,6 +189,7 @@ void UIManager::End()
 	DeleteGraph(m_manualIconHandle);
 	DeleteFontToHandle(m_fontHandle);
 	DeleteFontToHandle(m_manualFontHandle);
+	m_isDisplayBossHp = false;
 }
 
 void UIManager::Updata()
@@ -159,7 +197,7 @@ void UIManager::Updata()
 	// 残りHPの割合を更新
 	m_playerHpGaugeRate = static_cast<float>(m_pPlayer->GetHp()) / m_pPlayer->GetMaxHp();
 	m_companionHpGaugeRate = static_cast<float>(m_pCompanion->GetHp()) / m_pCompanion->GetMaxHp();
-	m_bossHpGaugeRate = static_cast<float>(m_pBossEnemy->GetHp()) / 800;
+	m_bossHpGaugeRate = static_cast<float>(m_pBossEnemy->GetHp()) / kBossMaxHp;
 
 	m_playerSpecialGaugeRate = static_cast<float>(m_pPlayer->GetSpecialGauge()) / 100.0f;
 	m_companionSpecialGaugeRate = static_cast<float>(m_pCompanion->GetSpecialGauge()) / 100.0f;
@@ -184,6 +222,10 @@ void UIManager::Draw()
 		DrawManualUI();
 	}
 	if (VSize(VSub(m_pPlayer->GetPos(), m_pBossEnemy->GetPos())) <= 1000.0f)
+	{
+		m_isDisplayBossHp = true;
+	}
+	if (m_isDisplayBossHp)
 	{
 		DrawBossHp();
 	}
@@ -248,7 +290,8 @@ void UIManager::DrawBossHp()
 	int currentDestWidth = static_cast<int>(maxDestWidth * m_bossHpGaugeRate);
 
 	// 1. ボスHPフレーム（背景・装飾）を重ねて描画
-	DrawRectExtendGraph(274, 550, kDistX2, 647, 63, 153, 636, 187, m_bossHPGaugeFlameHandle, true);
+	DrawRectExtendGraph(kBossHpFrameX1, kBossHpFrameY1, kDistX2, kBossHpFrameY2, 
+					    kBossHpSrcX, kBossHpSrcY, kBossHpSrcW, kBossHpSrcH, m_bossHPGaugeFlameHandle, true);
 	// 2. HPバーを描画（フレームの後ろ側になるように）
 	DrawRectExtendGraph(kDistX1, kDistY1, kDistX1 + currentDestWidth, kDistY2,
 		kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_bossHpGaugeRate),
@@ -321,32 +364,33 @@ void UIManager::DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, f
 
 void UIManager::DrawManualUI()
 {
-	DrawRectExtendGraph(1000,13,1280,460,703,114,546,778,m_manualFrameHandle,true);
-	DrawGraph(1050,20,m_aButtonHandle,true);
-	DrawFormatStringToHandle(1100, 30, 0xffffff, m_manualFontHandle, L"ジャンプ");
-	DrawGraph(1050,70,m_bButtonHandle,true);
-	DrawFormatStringToHandle(1100, 80, 0xffffff, m_manualFontHandle, L"回避");
-	DrawGraph(1050,120,m_xButtonHandle,true);
-	DrawFormatStringToHandle(1100, 130, 0xffffff, m_manualFontHandle, L"弱攻撃");
-	DrawGraph(1050,170,m_yButtonHandle,true);
-	DrawFormatStringToHandle(1100, 180, 0xffffff, m_manualFontHandle, L"強攻撃");
+	DrawRectExtendGraph(kManualFrameX1, kManualFrameY1, kManualFrameX2, kManualFrameY2, 
+					    kManualFrameSrcX, kManualFrameSrcY, kManualFrameSrcW, kManualFrameSrcH,m_manualFrameHandle,true);
+	DrawGraph(kUIPosX,20,m_aButtonHandle,true);
+	DrawFormatStringToHandle(kUITextPosX, 30, 0xffffff, m_manualFontHandle, L"ジャンプ");
+	DrawGraph(kUIPosX,70,m_bButtonHandle,true);
+	DrawFormatStringToHandle(kUITextPosX, 80, 0xffffff, m_manualFontHandle, L"回避");
+	DrawGraph(kUIPosX,120,m_xButtonHandle,true);
+	DrawFormatStringToHandle(kUITextPosX, 130, 0xffffff, m_manualFontHandle, L"弱攻撃");
+	DrawGraph(kUIPosX,170,m_yButtonHandle,true);
+	DrawFormatStringToHandle(kUITextPosX, 180, 0xffffff, m_manualFontHandle, L"強攻撃");
 
-	DrawGraph(1015, 221, m_xButtonHandle, true);
-	DrawGraph(1048, 220, m_yButtonHandle, true);
-	DrawGraph(1080, 220, m_yButtonHandle, true);
+	DrawGraph(kComboButtonX1, 221, m_xButtonHandle, true);
+	DrawGraph(kComboButtonX2, 220, m_yButtonHandle, true);
+	DrawGraph(kComboButtonX3, 220, m_yButtonHandle, true);
 	DrawFormatStringToHandle(1120, 230, 0xffffff, m_manualFontHandle, L"フィニッシュ");
 
-	DrawRectExtendGraph(1050, 270,1090,300, 766, 429, 379, 196, m_rbButtonHandle, true);
-	DrawFormatStringToHandle(1100, 275, 0xffffff, m_manualFontHandle, L"キャラチェンジ");
+	DrawRectExtendGraph(kUIPosX, 270,1090,300, kSpecialButtonSrcX, kSpecialButtonSrcY, kSpecialButtonSrcW, kSpecialButtonSrcH, m_rbButtonHandle, true);
+	DrawFormatStringToHandle(kUITextPosX, 275, 0xffffff, m_manualFontHandle, L"キャラチェンジ");
 
-	DrawRectExtendGraph(1050, 320,1090,350, 766, 429, 379, 196, m_lbButtonHandle, true);
-	DrawFormatStringToHandle(1100, 325, 0xffffff, m_manualFontHandle, L"必殺技");
+	DrawRectExtendGraph(kUIPosX, 320,1090,350, kSpecialButtonSrcX, kSpecialButtonSrcY, kSpecialButtonSrcW, kSpecialButtonSrcH, m_lbButtonHandle, true);
+	DrawFormatStringToHandle(kUITextPosX, 325, 0xffffff, m_manualFontHandle, L"必殺技");
 
 	DrawRectExtendGraph(1040, 370,1150,410, 820, 454, 379, 200, m_stickHandle, true);
-	DrawFormatStringToHandle(1100, 365, 0xffffff, m_manualFontHandle, L"ロックオン");
-	DrawFormatStringToHandle(1100, 395, 0xffffff, m_manualFontHandle, L"ロックオン解除");
+	DrawFormatStringToHandle(kUITextPosX, 365, 0xffffff, m_manualFontHandle, L"ロックオン");
+	DrawFormatStringToHandle(kUITextPosX, 395, 0xffffff, m_manualFontHandle, L"ロックオン解除");
 
-	DrawFormatStringToHandle(1050, 428, 0xff4500, m_manualFontHandle, L"START　 閉じる");
+	DrawFormatStringToHandle(kUIPosX, 428, 0xff4500, m_manualFontHandle, L"START　 閉じる");
 	/*DrawRectGraph(1050,220,766,429,379,196,m_rbButtonHandle,true);
 	DrawRectGraph(1050,270,766,429,379,196,m_lbButtonHandle,true);*/
 }

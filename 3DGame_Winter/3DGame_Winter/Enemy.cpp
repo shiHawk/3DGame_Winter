@@ -9,6 +9,8 @@ namespace
 	constexpr int kSphereSpcColor = 0xffffff;
 	constexpr float kMoveSpeed = 5.0f;
 	constexpr float kMoveDecRate = 0.8f;
+	constexpr float kHateDecayRate = 0.99f;
+	constexpr float kDistanceWeight = 1000.0f;
 }
 
 Enemy::Enemy():
@@ -17,7 +19,9 @@ m_toPlayerDistance(0.0f),
 m_toCompanionDir({ 0.0f,0.0f,0.0f }),
 m_toCompanionDistance(0.0f),
 m_AttackCoolTime(0.0f),
-m_targetPos({ 0.0f,0.0f,0.0f })
+m_targetPos({ 0.0f,0.0f,0.0f }),
+m_playerHate(0),
+m_companionHate(0)
 {
 }
 
@@ -36,7 +40,7 @@ void Enemy::OnAttack()
 
 }
 
-void Enemy::OnDamage(int damage)
+void Enemy::OnDamage(int damage, bool isHatePlayer)
 {
 }
 
@@ -44,11 +48,30 @@ void Enemy::SearchTarget()
 {
 	// プレイヤーとの距離
 	float distToPlayer = VSize(VSub(m_pPlayer->GetPos(), m_pos));
-	// 仲間との距離
+	// コンパニオンとの距離
 	float distToCompanion = VSize(VSub(m_pCompanion->GetPos(), m_pos));
+	// ヘイト値の計算　敵との距離が近いほどヘイト値が上がりやすくなる
+	float playerWeight = m_playerHate + (kDistanceWeight / (distToPlayer + 1.0f));
+	float companionWeight = m_companionHate + (kDistanceWeight / (distToCompanion + 1.0f));
 
+	if (m_pPlayer->IsDead()) playerWeight = -1.0f;
+	if (m_pCompanion->IsDead()) companionWeight = -1.0f;
+
+	// ヘイトが高いほうをターゲットにする
+	if (playerWeight > companionWeight) 
+	{
+		m_targetPos = m_pPlayer->GetPos();
+	}
+	else 
+	{
+		m_targetPos = m_pCompanion->GetPos();
+	}
+
+	// ヘイトの自然減衰
+	m_playerHate *= kHateDecayRate;
+	m_companionHate *= kHateDecayRate;
 	// 近い方をターゲットに設定する
-	if (distToPlayer < distToCompanion) 
+	/*if (distToPlayer < distToCompanion) 
 	{
 		m_targetPos = m_pPlayer->GetPos();
 	}
@@ -64,7 +87,7 @@ void Enemy::SearchTarget()
 	if (m_pCompanion->IsDead())
 	{
 		m_targetPos = m_pPlayer->GetPos();
-	}
+	}*/
 
 	if (m_pPlayer->IsDead() && m_pCompanion->IsDead())
 	{
