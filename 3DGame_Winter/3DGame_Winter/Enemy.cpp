@@ -21,7 +21,8 @@ m_toCompanionDistance(0.0f),
 m_AttackCoolTime(0.0f),
 m_targetPos({ 0.0f,0.0f,0.0f }),
 m_playerHate(0),
-m_companionHate(0)
+m_companionHate(0),
+m_isAttackCharge(false)
 {
 }
 
@@ -58,6 +59,7 @@ void Enemy::SearchTarget()
 	if (m_pCompanion->IsDead()) companionWeight = -1.0f;
 
 	// ヘイトが高いほうをターゲットにする
+	// OnDamage関数が呼ばれたときにもヘイト値が上昇する
 	if (playerWeight > companionWeight) 
 	{
 		m_targetPos = m_pPlayer->GetPos();
@@ -70,24 +72,7 @@ void Enemy::SearchTarget()
 	// ヘイトの自然減衰
 	m_playerHate *= kHateDecayRate;
 	m_companionHate *= kHateDecayRate;
-	// 近い方をターゲットに設定する
-	/*if (distToPlayer < distToCompanion) 
-	{
-		m_targetPos = m_pPlayer->GetPos();
-	}
-	else 
-	{
-		m_targetPos = m_pCompanion->GetPos();
-	}
-
-	if (m_pPlayer->IsDead())
-	{
-		m_targetPos = m_pCompanion->GetPos();
-	}
-	if (m_pCompanion->IsDead())
-	{
-		m_targetPos = m_pPlayer->GetPos();
-	}*/
+	
 
 	if (m_pPlayer->IsDead() && m_pCompanion->IsDead())
 	{

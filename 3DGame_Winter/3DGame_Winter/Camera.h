@@ -42,8 +42,8 @@ private:
 	VECTOR m_targetToPlayer;
 	float m_targetToPlayerDistance;
 	VECTOR m_lockOnCameraPos;
-	int m_lockonHandle;
-	float m_lockonRotateAngle;
+	int m_lockOnHandle;
+	float m_lockOnRotateAngle;
 	bool m_isBossBattle;
 };
 

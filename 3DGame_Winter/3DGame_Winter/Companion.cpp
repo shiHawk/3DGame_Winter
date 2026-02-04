@@ -305,7 +305,7 @@ void Companion::Draw()
 
 void Companion::OnAttack()
 {
-	m_attackPower = kAttackPower;
+	m_attackPower = kAttackPower + m_powerUpBonus + m_changePowerUpBonus;
 	m_attack.radius = kAttackRadius;
 	m_attack.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
 	m_attack.active = true;
@@ -315,7 +315,7 @@ void Companion::OnAttack()
 
 void Companion::OnStrongAttack()
 {
-	m_attackPower = kStrongAttackPower;
+	m_attackPower = kStrongAttackPower + m_powerUpBonus + m_changePowerUpBonus;
 	m_attack.radius = kAttackRadius;
 	m_attack.timer = kStrongAttackDuration;
 	m_attack.active = true;
@@ -340,7 +340,7 @@ void Companion::OnStrongAttack()
 void Companion::OnSpecialSkil()
 {
 	m_specialGauge -= 100;
-	m_attackPower = kStrongAttackPower;
+	m_attackPower = kStrongAttackPower + m_powerUpBonus + m_changePowerUpBonus;
 	m_attack.radius = kSpecialSkilRadius;
 	m_attack.dir = VNorm(VGet(sinf(m_angleY), 0.0f, cosf(m_angleY)));
 	m_attack.active = true;

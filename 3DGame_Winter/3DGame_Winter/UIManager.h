@@ -25,6 +25,7 @@ private:
 	void DrawEnemyHP();
 	void DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, float height, float offsetY);
 	void DrawManualUI();
+	void DrawBuffUI();
 	float m_playerHpGaugeRate;
 	float m_companionHpGaugeRate;
 	float m_playerSpecialGaugeRate;

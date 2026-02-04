@@ -229,6 +229,10 @@ void UIManager::Draw()
 	{
 		DrawBossHp();
 	}
+	if (m_pPlayer->GetPowerUpBonus() > 0)
+	{
+		DrawBuffUI();
+	}
 	/*DINPUT_JOYSTATE input;
 	int i;
 	int Color;
@@ -393,4 +397,9 @@ void UIManager::DrawManualUI()
 	DrawFormatStringToHandle(kUIPosX, 428, 0xff4500, m_manualFontHandle, L"STARTÅ@ ï¬Ç∂ÇÈ");
 	/*DrawRectGraph(1050,220,766,429,379,196,m_rbButtonHandle,true);
 	DrawRectGraph(1050,270,766,429,379,196,m_lbButtonHandle,true);*/
+}
+
+void UIManager::DrawBuffUI()
+{
+	
 }

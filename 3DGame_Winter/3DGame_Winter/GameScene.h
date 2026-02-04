@@ -60,5 +60,6 @@ private:
 	std::shared_ptr<Chest> m_pChest;
 	bool m_isNextScene;
 	bool m_isGameover;
+	float m_powerUpTime;
 };
 

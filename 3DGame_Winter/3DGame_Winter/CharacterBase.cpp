@@ -24,7 +24,8 @@ CharacterBase::CharacterBase():
 	m_colRadius(0.0f),
 	m_isGrounded(true),
 	m_maxHp(0),
-	m_maxSpecialGauge(0)
+	m_maxSpecialGauge(0),
+	m_changePowerUpBonus(0)
 {
 }
 

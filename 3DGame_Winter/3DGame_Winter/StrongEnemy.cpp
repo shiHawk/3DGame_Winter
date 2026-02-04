@@ -152,10 +152,12 @@ void StrongEnemy::Update()
 		}
 		break;
 	case StrongEnemy::RANGEATTACK_CHARGE:
+		m_isAttackCharge = true;
 		m_attackTimer -= 1.0f / kFramesPerSecond;
 		ChangeAnim(m_modelHandle, 4, false, kAttackAnimIncrement);
 		if (m_attackTimer < 0.0f)
 		{
+			m_isAttackCharge = false;
 			OnRangeAttack();
 			m_state = StrongEnemyState::RANGEATTACK;
 		}

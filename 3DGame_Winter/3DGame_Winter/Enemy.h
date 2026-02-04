@@ -15,6 +15,7 @@ public:
 	virtual void Draw() = 0;
 	virtual void OnAttack();
 	virtual void OnDamage(int damage,bool isFromPlayerDamage);
+	bool IsAttackCharge() { return m_isAttackCharge; }
 protected:
 	void SearchTarget();
 	std::shared_ptr<Player> m_pPlayer;
@@ -29,5 +30,6 @@ protected:
 	float m_AttackCoolTime;
 	float m_playerHate;
 	float m_companionHate;
+	bool m_isAttackCharge;
 };
 

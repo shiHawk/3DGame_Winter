@@ -155,22 +155,26 @@ void BossEnemy::Update()
         }
         else
         {
+            m_isAttackCharge = true;
             VECTOR dir = VNorm(VSub(m_storngAttackTargetPos, m_pos)); // 攻撃位置を固定したらその方向を向き続ける
             m_targetAngle = atan2f(dir.x, dir.z);
         }
         ChangeAnim(m_modelHandle, kChargeAnimNo, false, 0.2f); // ゆっくり溜めるアニメ
         if (m_attackTimer <= 0)
         {
+            m_isAttackCharge = false;
             OnStrongAttack(); // 強攻撃実行
             m_state = BossEnemyState::STRONG_ATTACK;
         }
         break;
 
     case BossEnemyState::RANGE_ATTACK_CHARGE: // 範囲攻撃の溜め（予兆）
+        m_isAttackCharge = true;
         m_attackTimer -= 1.0f / kFramesPerSecond;
         ChangeAnim(m_modelHandle, kChargeAnimNo, false, 0.2f);
         if (m_attackTimer <= 0)
         {
+            m_isAttackCharge = false;
             OnRangeAttack(); // 範囲攻撃実行
             m_state = BossEnemyState::RANGE_ATTACK;
         }

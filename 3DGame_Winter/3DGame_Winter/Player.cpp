@@ -53,10 +53,14 @@ namespace
     constexpr float kSpecialSkilDuration = 80.0f; 
     constexpr float kStrongAttackCancelThreshold = 10.0f;
     constexpr float kAvoidanceFrame = 15.0f;
+    constexpr float kAutoAvoidanceFrame = 20.0f;
     constexpr float kAvoidanceMoveSpeed = 0.3f;
 
     constexpr float kInvincibilityTime = 100.0f;
     constexpr float kAvoidanceInvincibilityTime = 30.0f;
+    constexpr float kCurrentAvoidSpeed = 10.0f;
+    constexpr float kAIAvoidSpeed = 20.0f;
+    constexpr float kAvoidCooltime = 60.0f;
 
     // 各攻撃の攻撃範囲
     constexpr float kAttackRadius = 30.0f;
@@ -191,44 +195,34 @@ void Player::Update()
         {
             m_pos = VGet(m_followTargetPos.x, m_followTargetPos.y, m_followTargetPos.z - kPostWarpPosZ);
         }
-        //if (m_isEnemyAttackSensing )
-        //{
-        //    // 敵から反対方向へのベクトルを計算
-        //    VECTOR escapeVec = VSub(m_pos, m_enemyPos);
-        //    escapeVec.y = 0.0f; // 上下方向には逃げない
+        // 敵の攻撃に合わせて回避を行う
+        if (m_isEnemyAttackSensing && m_playerState != PlayerState::AUTO_EVADE && m_evadeCooldown <= 0.0f)
+        {
+            m_invincibilityTimer = kAvoidanceInvincibilityTime;
+            // 敵から反対方向へのベクトルを計算
+            VECTOR escapeVec = VSub(m_pos, m_enemyPos);
+            escapeVec.y = 0.0f; // 上下方向には逃げない
 
-        //    // ベクトルの長さが0に近い（敵と完全に重なっている）場合の安全策
-        //    if (VSize(escapeVec) > 0.001f)
-        //    {
-        //        m_retreatDir = VNorm(escapeVec); // 逃げる方向をセット
-        //    }
-        //    else
-        //    {
-        //        // 重なっている場合はとりあえず手前(Zマイナス)など適当な方向に逃げる
-        //        m_retreatDir = VGet(0.0f, 0.0f, -1.0f);
-        //    }
+            // ベクトルの長さが0に近い（敵と完全に重なっている）場合の安全策
+            if (VSize(escapeVec) > 0.001f)
+            {
+                m_retreatDir = VNorm(escapeVec); // 逃げる方向をセット
+            }
+           
+            // ステートを自動回避に変更
+            m_playerState = PlayerState::AUTO_EVADE;
+            m_avoidanceTimer = kAutoAvoidanceFrame; // 回避時間セット
+            m_evadeCooldown = kAvoidCooltime;
+            m_isEnemyAttackSensing = false;
 
-        //    // ステートを自動回避に変更
-        //    m_playerState = PlayerState::AUTO_EVADE;
-        //    m_avoidanceTimer = kAvoidanceFrame; // 回避時間セット
-        //    m_isEnemyAttackSensing = false;
-        //}
-        //if (m_isEnemyAttackSensing && m_playerState != PlayerState::AUTO_EVADE)
-        //{
-        //    VECTOR escapeVec = VSub(m_pos, m_enemyPos);
-        //    escapeVec.y = 0.0f; // 上下方向には逃げないようにYを0にする
+            m_vec.x = m_retreatDir.x * kAIAvoidSpeed;
+            m_vec.z = m_retreatDir.z * kAIAvoidSpeed;
+        }
 
-        //    // ベクトルの長さが0に近い（敵と完全に重なっている）場合の安全策
-        //    if (VSize(escapeVec) > 0.001f)
-        //    {
-        //        // 正規化して方向単位ベクトルにする
-        //        m_retreatDir = VNorm(escapeVec);
-        //    }
-        //    m_playerState = PlayerState::AUTO_EVADE;
-        //    m_isAvoidanceFlag = true;
-        //    m_avoidanceTimer = kAvoidanceFrame;
-        //    m_isEnemyAttackSensing = false;
-        //}
+        if (m_evadeCooldown > 0.0f)
+        {
+            m_evadeCooldown--;
+        }
     }
     
     if (!m_isInAttackSequence)
@@ -297,7 +291,7 @@ void Player::Draw()
 
 void Player::OnAttack()
 {
-    m_attackPower = kAttackPower+m_powerUpBonus;
+    m_attackPower = kAttackPower+m_powerUpBonus+m_changePowerUpBonus;
     m_attack.radius = kAttackRadius;
     m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
@@ -313,7 +307,7 @@ void Player::OnAttack()
 
 void Player::OnAttack2()
 {
-    m_attackPower = kStrongAttackPower + m_powerUpBonus;
+    m_attackPower = kStrongAttackPower + m_powerUpBonus + m_changePowerUpBonus;
     m_attack.radius = kStrongAttackRadius;
     m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
@@ -329,7 +323,7 @@ void Player::OnAttack2()
 
 void Player::OnCombFinishAttack()
 {
-    m_attackPower = kComboFinishAttackPower + m_powerUpBonus;
+    m_attackPower = kComboFinishAttackPower + m_powerUpBonus + m_changePowerUpBonus;
     m_attack.radius = kComboFinishAttackRadius;
     m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
@@ -341,7 +335,7 @@ void Player::OnCombFinishAttack()
 
 void Player::OnSpecialSkil()
 {
-    m_attackPower = kSpecialSkilPower + m_powerUpBonus;
+    m_attackPower = kSpecialSkilPower + m_powerUpBonus + m_changePowerUpBonus;
     m_attack.radius = kSpecialSkilRadius;
     m_attack.active = true;
     m_attack.pos = m_pos;
@@ -756,7 +750,6 @@ void Player::HandleStateDamage()
 {
     UpdateMovement(m_moveInput);
     ChangeAnim(m_modelHandle,kDamageAnimNo,false,0.4f);
-    //m_invincibilityTimer--;
     if (GetIsAnimEnd())
     {
         //m_isHitFlag = false;
@@ -778,19 +771,14 @@ void Player::HandleStateAutoEvade()
 {
     m_isInAttackSequence = false;
     m_avoidanceTimer -= 1.0f;
-
+    m_vec.x = m_retreatDir.x * kCurrentAvoidSpeed;
+    m_vec.z = m_retreatDir.z * kCurrentAvoidSpeed;
     // 退避方向（retreatDir）を向く
     float targetAngle = atan2f(-m_retreatDir.x, -m_retreatDir.z);
     float diff = targetAngle - m_angleY;
     if (diff > DX_PI_F)      diff -= 2.0f * DX_PI_F;
     else if (diff < -DX_PI_F) diff += 2.0f * DX_PI_F;
     m_angleY = std::lerp(m_angleY, m_angleY + diff, kRotateSpeed);
-
-    // 移動ベクトルをセット（kPlayerMoveSpeed または回避用速度）
-    float avoidSpeed = kForwardLineLength * kAvoidanceMoveSpeed;
-
-    m_vec.x = m_retreatDir.x * avoidSpeed;
-    m_vec.z = m_retreatDir.z * avoidSpeed;
 
     // アニメーション設定
     ChangeAnim(m_modelHandle, kAvoidanceAnimNo, false, kAnimIncrement);

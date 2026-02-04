@@ -17,13 +17,16 @@ namespace
 	constexpr float kEnemySearchRange = 800.0f; // 敵を探す最大範囲
 	constexpr VECTOR kInvalidPos = { 1000000.0f, 1000000.0f, 1000000.0f }; // 無効な座標（超遠方）
 	constexpr float kSkyDomeScale = 120.0f;
-	constexpr float kSensingRange = 600.0f;
+	constexpr float kSensingRange = 100.0f;
 	constexpr float kBattleAreaSize = 150.0f;
 	constexpr float kBossBattleAreaSize = 350.0f;
+	constexpr int kChangePowerUpBonus = 30;
+	constexpr float kPowerUpTimeLimit = 50.0f;
 }
 GameScene::GameScene():
 	m_isNextScene(false),
-	m_isGameover(false)
+	m_isGameover(false),
+	m_powerUpTime(0.0f)
 {
 }
 
@@ -154,9 +157,6 @@ SceneBase* GameScene::Update()
 		m_pCamera->SetPlayerDir(m_pCompanion->GetPlayerDir());
 	}
 	m_pPlayer->SetFollowTargetPos(m_pCompanion->GetPos());
-	//m_pPlayer->SetEnemyPos(m_pNormalEnemy->GetPos());
-	//m_pCamera->SetLockOnPosition(m_pNormalEnemy->GetPos());
-	//m_pCompanion->SetEnemyPos(m_pNormalEnemy->GetPos());
 	m_pCompanion->SetPlayerPos(m_pPlayer->GetPos());
 
 	// 最も近い敵の座標を取得
@@ -217,7 +217,7 @@ SceneBase* GameScene::Update()
 
 	if (m_pBattleAreaManager->IsBattleAreaActive())
 	{
-		if (VSize(VSub(m_pBossEnemy->GetPos(), m_pPlayer->GetPos())) <= 2000.0f)
+		if (VSize(VSub(m_pBossEnemy->GetPos(), m_pPlayer->GetPos())) <= 2000.0f || VSize(VSub(m_pBossEnemy->GetPos(), m_pCompanion->GetPos())) <= 2000.0f)
 		{
 			m_pEffectManager->BattleAreaEffect(m_pBattleAreaManager->GetCenterPos(), kBossBattleAreaSize);
 			SoundManager::GetInstance()->SwitchToBossBGM();
@@ -233,6 +233,17 @@ SceneBase* GameScene::Update()
 	{
 		// エリアが無効ならエフェクトを停止
 		m_pEffectManager->StopBattleAreaEffect();
+	}
+
+	if (m_powerUpTime > 0.0f)
+	{
+		m_powerUpTime--;
+	}
+	else
+	{
+		m_powerUpTime = 0.0f;
+		m_pPlayer->ResetPower();
+		m_pCompanion->ResetPower();
 	}
 
 	if (!m_isNextScene && !IsFadingOut() && (m_pBossEnemy->IsDead() || (m_pPlayer->IsDead() && m_pCompanion->IsDead())))
@@ -392,7 +403,7 @@ bool GameScene::IsEnemyAttacking(VECTOR targetPos)
 	{
 		if (enemy->IsDead()) continue;
 
-		if (enemy->GetAttackInfo().active)
+		if (enemy->IsAttackCharge())
 		{
 			if (VSquareSize(VSub(enemy->GetPos(), targetPos)) < rangeSq)
 			{
@@ -403,7 +414,7 @@ bool GameScene::IsEnemyAttacking(VECTOR targetPos)
 
 	if (m_pBossEnemy && !m_pBossEnemy->IsDead())
 	{
-		if (m_pBossEnemy->GetAttackInfo().active)
+		if (m_pBossEnemy->IsAttackCharge())
 		{
 			if (VSquareSize(VSub(m_pBossEnemy->GetPos(), targetPos)) < rangeSq)
 			{
@@ -416,6 +427,12 @@ bool GameScene::IsEnemyAttacking(VECTOR targetPos)
 
 void GameScene::ChangeControl()
 {
+	if (m_powerUpTime > 0.0f)
+	{
+		m_powerUpTime = 0.0f;
+		m_pPlayer->ResetPower();
+		m_pCompanion->ResetPower();
+	}
 	CharacterBase::ControlMode currentMode = m_pPlayer->GetControlMode(); // 現在のモード
 	CharacterBase::ControlMode playerNewMode; // 次のプレイヤーのモード
 	if (currentMode == CharacterBase::ControlMode::PLAYER)
@@ -427,6 +444,7 @@ void GameScene::ChangeControl()
 		playerNewMode = CharacterBase::ControlMode::PLAYER;
 	}
 	m_pPlayer->SetControlMode(playerNewMode);
+	m_pPlayer->ChangePowerUp(kChangePowerUpBonus);
 	CharacterBase::ControlMode companionNewMode; // コンパニオンのモード
 	if (playerNewMode == CharacterBase::ControlMode::PLAYER)
 	{
@@ -437,6 +455,7 @@ void GameScene::ChangeControl()
 		companionNewMode = CharacterBase::ControlMode::PLAYER;
 	}
 	m_pCompanion->SetControlMode(companionNewMode);
+	m_pCompanion->ChangePowerUp(kChangePowerUpBonus);
 
 	// 切り替え時のエフェクト設定
 	VECTOR effectPos;
@@ -449,4 +468,5 @@ void GameScene::ChangeControl()
 		effectPos = m_pCompanion->GetPos();
 	}
 	m_pEffectManager->PlayChangeEffect(effectPos);
+	m_powerUpTime = kPowerUpTimeLimit;
 }

@@ -56,8 +56,8 @@ Camera::Camera():
 	m_targetToPlayerDistance(0.0f),
 	m_lockOnCameraPos({ 0.0f,0.0f,0.0f }),
 	m_playerDir({ 0.0f,0.0f,0.0f }),
-	m_lockonHandle(-1),
-	m_lockonRotateAngle(0.0f),
+	m_lockOnHandle(-1),
+	m_lockOnRotateAngle(0.0f),
 	m_isBossBattle(-1)
 {
 }
@@ -93,7 +93,7 @@ void Camera::Init()
 	// farはあまり大きすぎる数字を設定しないように気を付ける(表示バグに繋がる)
 	SetCameraNearFar(kCameraNearClip, kCameraFarClip);
 	m_isLockOn = false;
-	m_lockonHandle = LoadGraph(L"Data/UI/Lockon.png");
+	m_lockOnHandle = LoadGraph(L"Data/UI/Lockon.png");
 }
 
 void Camera::End()
@@ -102,7 +102,7 @@ void Camera::End()
 	m_cameraPos = kDefaultCameraPos;
 	m_cameraTarget = kCameraTarget;
 	DeleteLightHandle(m_lightHandle);
-	DeleteGraph(m_lockonHandle);
+	DeleteGraph(m_lockOnHandle);
 }
 
 void Camera::Update()
@@ -137,17 +137,17 @@ void Camera::Update()
 		// 垂直角度も必要に応じて固定
 		m_targetAngleVertical = 0.2f;
 
-		m_lockonRotateAngle += kLockonRotateSpeed;
+		m_lockOnRotateAngle += kLockonRotateSpeed;
 
 		// 一周(2π)を超えたら0に戻す
-		if (m_lockonRotateAngle >= DX_PI_F * 2.0f)
+		if (m_lockOnRotateAngle >= DX_PI_F * 2.0f)
 		{
-			m_lockonRotateAngle -= DX_PI_F * 2.0f;
+			m_lockOnRotateAngle -= DX_PI_F * 2.0f;
 		}
 	}
 	else
 	{
-		m_lockonRotateAngle = 0.0f; // 回転をリセット
+		m_lockOnRotateAngle = 0.0f; // 回転をリセット
 		// カメラの角度の計算
 		if (m_input.Rx > 0)
 		{
@@ -227,7 +227,8 @@ void Camera::Draw()
 {
 	if (m_isLockOn)
 	{
-		DrawBillboard3D(m_lockOnCameraPos, 0.5f, 0.5f, 384, m_lockonRotateAngle, m_lockonHandle, true);
+		VECTOR screenPos = ConvWorldPosToScreenPos(m_lockOnCameraPos);
+		DrawBillboard3D(m_lockOnCameraPos, 0.5f, 0.5f, 384, m_lockOnRotateAngle, m_lockOnHandle, true);
 	}
 }
 
