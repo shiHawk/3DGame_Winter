@@ -11,6 +11,8 @@ namespace
 	constexpr float kMoveDecRate = 0.8f;
 	constexpr float kHateDecayRate = 0.99f;
 	constexpr float kDistanceWeight = 1000.0f;
+	constexpr float kMaxDistanceBonus = 200.0f; // 距離によるヘイトの最大加算値
+	constexpr float kAffectRadius = 1000.0f;    // 距離ボーナスが発生する最大半径
 }
 
 Enemy::Enemy():
@@ -22,7 +24,8 @@ m_AttackCoolTime(0.0f),
 m_targetPos({ 0.0f,0.0f,0.0f }),
 m_playerHate(0),
 m_companionHate(0),
-m_isAttackCharge(false)
+m_isAttackCharge(false),
+m_deathTimer(0.0f)
 {
 }
 
@@ -51,9 +54,12 @@ void Enemy::SearchTarget()
 	float distToPlayer = VSize(VSub(m_pPlayer->GetPos(), m_pos));
 	// コンパニオンとの距離
 	float distToCompanion = VSize(VSub(m_pCompanion->GetPos(), m_pos));
-	// ヘイト値の計算　敵との距離が近いほどヘイト値が上がりやすくなる
-	float playerWeight = m_playerHate + (kDistanceWeight / (distToPlayer + 1.0f));
-	float companionWeight = m_companionHate + (kDistanceWeight / (distToCompanion + 1.0f));
+	// 距離が近いほどヘイト値のボーナスが大きく、遠いほど0に近づく
+	float playerDistBonus = max(0.0f, kMaxDistanceBonus * (1.0f - (distToPlayer / kAffectRadius)));
+	float companionDistBonus = max(0.0f, kMaxDistanceBonus * (1.0f - (distToCompanion / kAffectRadius)));
+	
+	float playerWeight = m_playerHate + playerDistBonus;
+	float companionWeight = m_companionHate + companionDistBonus;
 
 	if (m_pPlayer->IsDead()) playerWeight = -1.0f;
 	if (m_pCompanion->IsDead()) companionWeight = -1.0f;

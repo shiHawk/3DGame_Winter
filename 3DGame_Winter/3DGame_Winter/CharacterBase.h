@@ -30,6 +30,7 @@ public:
 	void ChangePowerUp(int attackPowerValue) { m_changePowerUpBonus += attackPowerValue; }
 	void ResetPower() { m_changePowerUpBonus = 0; }
 	int GetPowerUpBonus() { return m_powerUpBonus; }
+	int GetChangePowerUpBonus() { return m_changePowerUpBonus; }
 	float GetColRadius();
 	enum class ControlMode
 	{
@@ -69,7 +70,7 @@ protected:
 	int m_specialGauge; // 必殺ゲージ
 	int m_baseAttackPower;   // 攻撃の種類ごとの基礎攻撃力
 	int m_powerUpBonus;  // 宝箱で得た増加分（初期値0）
-	int m_changePowerUpBonus;  // 宝箱で得た増加分（初期値0）
+	int m_changePowerUpBonus;  // キャラ交代で得た増加分（初期値0）
 	float m_colRadius;
 	bool m_isGrounded; // 真下に地面があるかどうか
 	int m_maxHp;           // 最大HP

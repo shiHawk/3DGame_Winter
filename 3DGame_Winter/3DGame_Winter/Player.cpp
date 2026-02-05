@@ -53,12 +53,12 @@ namespace
     constexpr float kSpecialSkilDuration = 80.0f; 
     constexpr float kStrongAttackCancelThreshold = 10.0f;
     constexpr float kAvoidanceFrame = 15.0f;
-    constexpr float kAutoAvoidanceFrame = 20.0f;
     constexpr float kAvoidanceMoveSpeed = 0.3f;
 
     constexpr float kInvincibilityTime = 100.0f;
     constexpr float kAvoidanceInvincibilityTime = 30.0f;
     constexpr float kCurrentAvoidSpeed = 10.0f;
+    constexpr float kAutoAvoidanceFrame = 20.0f;
     constexpr float kAIAvoidSpeed = 20.0f;
     constexpr float kAvoidCooltime = 60.0f;
 
@@ -169,12 +169,6 @@ void Player::Update()
     //printfDx(L"m_attack2.timer:%f\n", m_attack2.timer);
     if (m_controlMode == ControlMode::PLAYER)
     {
-        /*if (Pad::isTrigger(PAD_INPUT_1) && !m_isJump)
-        {
-            m_vec.y = kJumpPower;
-            m_isJump = true;
-            ChangeAnim(m_modelHandle,kJumpAnimNo,false,0.5f);
-        }*/
         if (Pad::isTrigger(PAD_INPUT_2) && !m_isAvoidanceFlag)
         {
             m_avoidanceTimer = kAvoidanceFrame;
@@ -211,6 +205,8 @@ void Player::Update()
            
             // ステートを自動回避に変更
             m_playerState = PlayerState::AUTO_EVADE;
+            m_attack.active = false; // 攻撃判定を確実に消去
+            m_attack.timer = 0.0f;
             m_avoidanceTimer = kAutoAvoidanceFrame; // 回避時間セット
             m_evadeCooldown = kAvoidCooltime;
             m_isEnemyAttackSensing = false;
@@ -286,7 +282,7 @@ void Player::Draw()
     }
 #endif
     //printfDx(L"pos.x:%f ,pos.y:%f ,pos.z:%f\n",m_pos.x,m_pos.y,m_pos.z);
-    //printfDx(L"hp:%d\n",m_hp);
+    //printfDx(L"powerUp:%d\n",m_powerUpBonus+m_changePowerUpBonus);
 }
 
 void Player::OnAttack()

@@ -53,7 +53,7 @@ namespace
 	constexpr float kStrongAttackDuration = 50.0f;
 	constexpr float kSpecialSkilDuration = 110.0f;
 
-	constexpr float kAttackRadius = 30.0f;
+	constexpr float kAttackRadius = 50.0f;
 	constexpr float kSpecialSkilRadius = 300.0f;
 	constexpr float kAttackRange = 90.0f;
 	constexpr float kAttackCoolTime = 40.0f;
@@ -65,7 +65,7 @@ namespace
 
 	constexpr float kStopDistance = 160.0f; // ƒvƒŒƒCƒ„[‚â“G‚Ö‚Ì’ÇÕ‚ğ~‚ß‚é‹——£
 	constexpr float kLongRangeAttackDistance = 480.0f;
-	constexpr float kCloseRangeAttackDistance = kStopDistance * 0.7f; // ‹ß‹——£UŒ‚‚Ì‚İ‚ğs‚¤‹——£
+	constexpr float kCloseRangeAttackDistance = 150.0f; // ‹ß‹——£UŒ‚‚Ì‚İ‚ğs‚¤‹——£
 	constexpr float kEnemyLeashDistance = 600.0f; // “G‚Ö‚Ì’ÇÕ‚ğ’ú‚ß‚é‹——£
 	constexpr float kWarpDistance = 900.0f;
 	constexpr float kPostWarpPosZ = 100.0f;
@@ -420,7 +420,7 @@ void Companion::UpdateAIState()
 				// 0`100‚Ì—”‚ğæ“¾‚µ‚ÄAs“®‚ğŒˆ’è‚·‚é
 				int decision = GetRand(100);
 
-				if (decision < 50) // 50%‚ÌŠm—¦‚Å‹ßÚUŒ‚
+				if (decision < 25) // 25%‚ÌŠm—¦‚Å‹ßÚUŒ‚
 				{
 					m_vec = { 0.0f, 0.0f, 0.0f };
 					OnAttack();

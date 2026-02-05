@@ -21,6 +21,7 @@ private:
 	void OnRangeAttack();
 	void UpdateDefault();
 	void UpdateMove();
+	void SetShield();
 	enum BossEnemyState
 	{
 		DEFAULT,
@@ -43,4 +44,5 @@ private:
 	VECTOR m_storngAttackTargetPos;
 	std::shared_ptr<CharacterBase> m_lockedTarget;
 	std::shared_ptr<EffectManager> m_pEffectManager;
+	int m_shieldEffectHandle;
 };

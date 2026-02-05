@@ -29,6 +29,9 @@ public:
 	void PlayChestEffect(int no);
 	void PlayBossDeathEffect(VECTOR pos);
 	void StopBossDeathEffect();
+	int PlayShieldEffect(VECTOR pos, float angleY);
+	void UpdateShieldEffect(int handle, VECTOR pos, float angleY); // エフェクトの向きの更新
+	void StopShieldEffect(int handle); // 主に二重呼び出しを止める
 private:
 	void SetEffectPos(float x, float y, float z);
 	int m_meleeSpecialEffectHandle; // 近接キャラの必殺技エフェクト
@@ -51,6 +54,7 @@ private:
 	int m_SgChestHandle;
 	int m_BuffChestHandle;
 	int m_bossDeathHandle;
+	int m_shieldHandle;
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;
 	std::shared_ptr<GameplayCollision> m_pGameplayCollision;

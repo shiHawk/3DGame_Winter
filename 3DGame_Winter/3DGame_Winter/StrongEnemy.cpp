@@ -21,6 +21,7 @@ namespace
 	constexpr int kWalkAnimNo = 15;
 	constexpr int kAttackAnimNo = 13;
 	constexpr int kRangeAttackAnimNo = 0;
+	constexpr int kRangeAttackChargeAnimNo = 4;
 	constexpr int kDamageAnimNo = 7;
 	constexpr int kDeathAnimNo = 8;
 	// アニメーション速度
@@ -48,8 +49,7 @@ StrongEnemy::StrongEnemy():
 	m_targetAngle(0.0f),
 	m_state(DEFAULT),
 	m_attackTimer(0.0f),
-	m_actionCheckTimer(0.0f),
-	m_deathTimer(0.0f)
+	m_actionCheckTimer(0.0f)
 {
 }
 
@@ -69,6 +69,7 @@ void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 	m_attackPower = kAttackPower;
 	m_colRadius = kColRadius;
 	MV1SetPosition(m_modelHandle,m_pos);
+	m_deathTimer = 0.0f;
 }
 
 void StrongEnemy::End()
@@ -154,7 +155,7 @@ void StrongEnemy::Update()
 	case StrongEnemy::RANGEATTACK_CHARGE:
 		m_isAttackCharge = true;
 		m_attackTimer -= 1.0f / kFramesPerSecond;
-		ChangeAnim(m_modelHandle, 4, false, kAttackAnimIncrement);
+		ChangeAnim(m_modelHandle, kRangeAttackChargeAnimNo, false, kAttackAnimIncrement);
 		if (m_attackTimer < 0.0f)
 		{
 			m_isAttackCharge = false;
@@ -181,6 +182,7 @@ void StrongEnemy::Update()
 		}
 		break;
 	case StrongEnemy::DEAD:
+		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDamageAnimIncrement);
 		m_vec = { 0.0f,0.0f,0.0f };
 		m_deathTimer += 1.0f / kFramesPerSecond;
 		if (GetIsAnimEnd() || m_deathTimer > 3.0f)

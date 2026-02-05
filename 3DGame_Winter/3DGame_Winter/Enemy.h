@@ -31,5 +31,6 @@ protected:
 	float m_playerHate;
 	float m_companionHate;
 	bool m_isAttackCharge;
+	float m_deathTimer;
 };
 

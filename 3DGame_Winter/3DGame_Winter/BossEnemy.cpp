@@ -15,6 +15,7 @@ namespace
     constexpr float kRangeAttackDuration = 60.0f;
     constexpr float kStrongAttackDuration = 100.0f;
     constexpr float kTrackingRange = 1000.0f;
+    constexpr float kShieldRange = 150.0f;
     constexpr float kActionCheckInterval = 0.5f; // 抽選頻度
     constexpr float kNormalAttackDuration = 40.0f;
     constexpr float kNormalAttackRange = 90.0f;
@@ -33,6 +34,8 @@ namespace
     constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
     constexpr float kAttackAnimIncrement = 0.5f; // 攻撃アニメーションの再生速度
     constexpr float kDamageAnimIncrement = 0.6f; // 被弾アニメーションの再生速度
+    constexpr float kDeathAnimIncrement = 0.4f; // 死亡アニメーションの再生速度
+    constexpr float kChargeAnimIncrement = 0.2f; // 溜めアニメーションの再生速度
 
     constexpr int kRandMax = 100;
     constexpr int kRangeAttackProbability = 30;
@@ -41,11 +44,11 @@ namespace
     constexpr unsigned int kOutLineColor = 0xff0000;
     constexpr int kDivNum = 32;
     constexpr float kInvincibilityTime = 30.0f;
-    constexpr int kMaxHp = 800;
+    constexpr int kMaxHp = 1000;
     constexpr int kAttackPower = 75;
     constexpr int kStrongAttackPower = 80;
     constexpr int kRangeAttackPower = 95;
-    constexpr float kAttenuationRate = 0.75f; // 被ダメージの減衰率
+    constexpr float kAttenuationRate = 0.5f; // 被ダメージの減衰率
     constexpr float kCumulativeRate = 1.5f; // 被ダメージの累加率
 }
 
@@ -56,7 +59,8 @@ BossEnemy::BossEnemy() :
     m_targetAngle(0.0f),
     m_attackTimer(kCoolDownTime),
     m_actionCheckTimer(0.0f),
-    m_storngAttackTargetPos({ 0.0f,0.0f,0.0f })
+    m_storngAttackTargetPos({ 0.0f,0.0f,0.0f }),
+    m_shieldEffectHandle(-1)
 {
 }
 
@@ -82,7 +86,6 @@ void BossEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 void BossEnemy::End()
 {
     MV1DeleteModel(m_modelHandle);
-    //m_pEffectManager->StopBossDeathEffect();
 }
 
 void BossEnemy::Update()
@@ -92,11 +95,12 @@ void BossEnemy::Update()
     {
         m_state = BossEnemyState::DEAD;
         m_enemyAttack.active = false;
-        ChangeAnim(m_modelHandle, kDeathAnimNo, false, 0.4f);
+        ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDeathAnimIncrement);
     }
     if (m_state == BossEnemyState::DEAD)
     {
         m_vec = { 0.0f, 0.0f, 0.0f }; // 移動停止
+        ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDeathAnimIncrement);
         UpdateAnim(m_modelHandle);
         MV1SetPosition(m_modelHandle, m_pos);
         
@@ -159,7 +163,14 @@ void BossEnemy::Update()
             VECTOR dir = VNorm(VSub(m_storngAttackTargetPos, m_pos)); // 攻撃位置を固定したらその方向を向き続ける
             m_targetAngle = atan2f(dir.x, dir.z);
         }
-        ChangeAnim(m_modelHandle, kChargeAnimNo, false, 0.2f); // ゆっくり溜めるアニメ
+        ChangeAnim(m_modelHandle, kChargeAnimNo, false, kChargeAnimIncrement); // ゆっくり溜めるアニメ
+        if (m_shieldEffectHandle != -1)
+        {
+            // 現在のボスの位置と向きからシールドの座標を再計算
+            VECTOR forwardDir = VGet(sinf(m_targetAngle), 0.0f, cosf(m_targetAngle));
+            VECTOR shieldPos = VAdd(m_pos, VScale(forwardDir, kShieldRange));
+            m_pEffectManager->UpdateShieldEffect(m_shieldEffectHandle, shieldPos, m_targetAngle);
+        }
         if (m_attackTimer <= 0)
         {
             m_isAttackCharge = false;
@@ -171,7 +182,14 @@ void BossEnemy::Update()
     case BossEnemyState::RANGE_ATTACK_CHARGE: // 範囲攻撃の溜め（予兆）
         m_isAttackCharge = true;
         m_attackTimer -= 1.0f / kFramesPerSecond;
-        ChangeAnim(m_modelHandle, kChargeAnimNo, false, 0.2f);
+        ChangeAnim(m_modelHandle, kChargeAnimNo, false, kChargeAnimIncrement);
+        if (m_shieldEffectHandle != -1) 
+        {
+            // 現在のボスの位置と向きからシールドの座標を再計算
+            VECTOR forwardDir = VGet(sinf(m_targetAngle), 0.0f, cosf(m_targetAngle));
+            VECTOR shieldPos = VAdd(m_pos, VScale(forwardDir, kShieldRange));
+            m_pEffectManager->UpdateShieldEffect(m_shieldEffectHandle, shieldPos, m_targetAngle);
+        }
         if (m_attackTimer <= 0)
         {
             m_isAttackCharge = false;
@@ -305,15 +323,31 @@ void BossEnemy::OnDamage(int damage, bool isHatePlayer)
 {
     if (m_invincibilityTimer > 0.0f || m_state == BossEnemyState::DEAD) return;
     m_isHitFlag = true;
-    m_hp -= damage;
+    //m_hp -= damage;
     m_invincibilityTimer = kInvincibilityTime;
-    if (isHatePlayer)
+    if (isHatePlayer) // 近接キャラから攻撃を受けたとき
     {
         m_playerHate += (float)damage;
+        if (m_state == BossEnemyState::STRONG_ATTACK_CHARGE || m_state == BossEnemyState::RANGE_ATTACK_CHARGE)
+        {
+            m_hp -= damage * kAttenuationRate; // チャージ中は近距離攻撃のダメージを減らす
+        }
+        else
+        {
+            m_hp -= damage;
+        }
     }
     else
     {
-        m_companionHate += (float)damage * 3;
+        m_companionHate += (float)damage*3;
+        if (m_state == BossEnemyState::STRONG_ATTACK_CHARGE || m_state == BossEnemyState::RANGE_ATTACK_CHARGE)
+        {
+            m_hp -= damage * kCumulativeRate; // チャージ中は遠距離攻撃のダメージを増やす
+        }
+        else
+        {
+            m_hp -= damage;
+        }
     }
     //if (m_hp <= 0)
     //{
@@ -351,6 +385,7 @@ void BossEnemy::UpdateDefault()
             m_state = BossEnemyState::STRONG_ATTACK_CHARGE;
             m_attackTimer = kChageTime; // 基準の溜め時間
             m_pEffectManager->EnemyStrongAttackChargeEffect(m_pos);
+            SetShield();
             //m_enemyAttack.active = true; // 描画を開始するためにここでONにする
         }
         else if (rand < 70)
@@ -358,6 +393,7 @@ void BossEnemy::UpdateDefault()
             m_state = BossEnemyState::RANGE_ATTACK_CHARGE;
             // 溜め時間を定数と一致させる
             m_attackTimer = kChageTime;
+            SetShield();
             //m_enemyAttack.active = true; // ONにする
         }
         else
@@ -383,4 +419,18 @@ void BossEnemy::UpdateMove()
     {
         m_state = BossEnemyState::DEFAULT;
     }
+}
+
+void BossEnemy::SetShield()
+{
+    // すでに再生中なら一旦止める（二重再生防止）
+    if (m_shieldEffectHandle != -1) 
+    {
+        m_pEffectManager->StopShieldEffect(m_shieldEffectHandle);
+    }
+    // 出現位置を計算（ボスの位置 + 前方ベクトル × 距離）
+    VECTOR forwardDir = VGet(sinf(m_targetAngle), 0.0f, cosf(m_targetAngle));
+    VECTOR shieldPos = VAdd(m_pos, VScale(forwardDir, kShieldRange));
+    //エフェクト再生
+    m_shieldEffectHandle = m_pEffectManager->PlayShieldEffect(shieldPos, m_targetAngle);
 }

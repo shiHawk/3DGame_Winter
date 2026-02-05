@@ -17,11 +17,11 @@ namespace
 	constexpr float kEnemySearchRange = 800.0f; // 敵を探す最大範囲
 	constexpr VECTOR kInvalidPos = { 1000000.0f, 1000000.0f, 1000000.0f }; // 無効な座標（超遠方）
 	constexpr float kSkyDomeScale = 120.0f;
-	constexpr float kSensingRange = 100.0f;
+	constexpr float kSensingRange = 300.0f;
 	constexpr float kBattleAreaSize = 150.0f;
 	constexpr float kBossBattleAreaSize = 350.0f;
 	constexpr int kChangePowerUpBonus = 30;
-	constexpr float kPowerUpTimeLimit = 50.0f;
+	constexpr float kPowerUpTimeLimit = 100.0f;
 }
 GameScene::GameScene():
 	m_isNextScene(false),
@@ -292,7 +292,6 @@ void GameScene::Draw()
 	m_pCamera->Draw();
 	m_pUIManager->Draw();
 	DrawFade();
-	//DrawGrid();
 }
 
 SceneID GameScene::GetSceneID() const
@@ -300,41 +299,22 @@ SceneID GameScene::GetSceneID() const
 	return SceneID::GameScene;
 }
 
-void GameScene::DrawGrid()
-{
-	// Y=0の平面にグリッドを描く
-	for (float i = -kGridSize; i <= kGridSize; i += kGridInterval)
-	{
-		// Z方向に平行な線（X固定）
-		DrawLine3D(
-			VGet(i, 0.0f, -kGridSize),  // 始点
-			VGet(i, 0.0f, kGridSize),   // 終点
-			kGridColor
-		);
-
-		// X方向に平行な線（Z固定）
-		DrawLine3D(
-			VGet(-kGridSize, 0.0f, i),  // 始点
-			VGet(kGridSize, 0.0f, i),   // 終点
-			kGridColor
-		);
-	}
-}
-
 VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos)
 {
 	float minDistanceSq = kEnemySearchRange * kEnemySearchRange;
-	VECTOR nearestPos = kInvalidPos; // 初期値として「無効な座標」を設定
+	VECTOR nearestPos = kInvalidPos; // 初期値として無効な座標を設定
 	bool found = false;
 
 	// NormalEnemiesから探す
-	for (auto& enemy : m_pNormalEnemies) {
+	for (auto& enemy : m_pNormalEnemies) 
+	{
 		if (enemy->IsDead())
 		{
 			continue;
 		}
 		float distSq = VSquareSize(VSub(enemy->GetPos(), basePos));
-		if (distSq < minDistanceSq) {
+		if (distSq < minDistanceSq) 
+		{
 			minDistanceSq = distSq;
 			nearestPos = enemy->GetPos();
 			found = true;
@@ -342,7 +322,8 @@ VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos)
 	}
 
 	// StrongEnemiesからも探す
-	for (auto& enemy : m_pStrongEnemies) {
+	for (auto& enemy : m_pStrongEnemies) 
+	{
 		if (enemy->IsDead())
 		{
 			continue;

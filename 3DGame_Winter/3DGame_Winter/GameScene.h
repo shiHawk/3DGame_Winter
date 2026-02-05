@@ -33,7 +33,6 @@ public:
 	virtual void Draw() override;
 	virtual SceneID GetSceneID() const override;
 private:
-	void DrawGrid();
 	VECTOR GetNearestEnemyPos(VECTOR basePos);
 	void DeathProcessing();
 	bool IsEnemyAttacking(VECTOR targetPos);

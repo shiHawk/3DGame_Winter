@@ -51,6 +51,8 @@ private:
 	int m_stickHandle;
 	int m_manualFrameHandle;
 	int m_manualIconHandle;
+	int m_buffIconHandle;
+	int m_buffSwapIconHandle; // Œğ‘ã‚Ìˆê“I‚ÈUŒ‚—ÍUP‚Ìƒoƒt
 	bool m_isDisplayManual;
 	bool m_isDisplayBossHp;
 	std::shared_ptr<Player> m_pPlayer;

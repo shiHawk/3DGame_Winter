@@ -11,8 +11,8 @@ namespace
 	constexpr int kHitEffectPosYOffset = 60.0f;
 	constexpr float kSpecialSkilEffectSize = 100.0f;
 	constexpr float kSpecialSkilSpped = 10.0f;
-	constexpr float kPlayerHitEffectSize = 30.0f;
-	constexpr float kFireEffectSize = 50.0f;
+	constexpr float kPlayerHitEffectSize = 50.0f;
+	constexpr float kFireEffectSize = 60.0f;
 	constexpr float kChangeEffectSize = 50.0f;
 	constexpr float kChangeEffectOffsetY = 50.0f;
 	constexpr float kPlayerAttack1Size = 60.0f;
@@ -27,6 +27,7 @@ namespace
 	constexpr float kBattleAreaSize = 120.0f;
 	constexpr float kChestEffectSize = 100.0f;
 	constexpr float kBossDeathEffectSize = 50.0f;
+	constexpr float kBossChargeShieldEffectSize = 200.0f;
 }
 
 EffectManager::EffectManager() :
@@ -52,7 +53,8 @@ EffectManager::EffectManager() :
 	m_HpChestHandle(-1),
 	m_SgChestHandle(-1),
 	m_BuffChestHandle(-1),
-	m_bossDeathHandle(-1)
+	m_bossDeathHandle(-1),
+	m_shieldHandle(-1)
 {
 }
 
@@ -82,6 +84,7 @@ void EffectManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Compan
 	m_SgChestHandle = LoadEffekseerEffect(L"Data/effect/SpecialGauge.efkefc");
 	m_BuffChestHandle = LoadEffekseerEffect(L"Data/effect/PowerUp.efkefc");
 	m_bossDeathHandle = LoadEffekseerEffect(L"Data/effect/MagicWater.efkefc");
+	m_shieldHandle = LoadEffekseerEffect(L"Data/effect/BossChargeShield.efkefc");
 	m_playerEffectHandle = -1;
 }
 
@@ -105,6 +108,7 @@ void EffectManager::End()
 	DeleteEffekseerEffect(m_SgChestHandle);
 	DeleteEffekseerEffect(m_BuffChestHandle);
 	DeleteEffekseerEffect(m_bossDeathHandle);
+	DeleteEffekseerEffect(m_shieldHandle);
 	StopBattleAreaEffect();
 }
 
@@ -328,6 +332,26 @@ void EffectManager::StopBossDeathEffect()
 		StopEffekseer3DEffect(m_bossDeathHandle);
 		m_bossDeathHandle = -1; // ƒnƒ“ƒhƒ‹‚ð–³Œø’l‚É–ß‚·
 	}
+}
+
+int EffectManager::PlayShieldEffect(VECTOR pos, float angleY)
+{
+	int handle = PlayEffekseer3DEffect(m_shieldHandle);
+	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y, pos.z);
+	SetRotationPlayingEffekseer3DEffect(handle, 0.0f, angleY, 0.0f);
+	SetScalePlayingEffekseer3DEffect(handle, kBossChargeShieldEffectSize, kBossChargeShieldEffectSize, kBossChargeShieldEffectSize);
+	return handle;
+}
+
+void EffectManager::UpdateShieldEffect(int handle, VECTOR pos, float angleY)
+{
+	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y, pos.z);
+	SetRotationPlayingEffekseer3DEffect(handle, 0.0f, angleY-DX_PI_F, 0.0f);
+}
+
+void EffectManager::StopShieldEffect(int handle)
+{
+	StopEffekseer3DEffect(handle);
 }
 
 void EffectManager::SetEffectPos(float x, float y, float z)

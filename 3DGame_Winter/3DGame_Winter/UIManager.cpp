@@ -51,7 +51,7 @@ namespace
 	constexpr int kWizardSgPosY = 678;
 
 	// ボスHPゲージ
-	constexpr int kBossMaxHp = 800; // ボスの最大HP
+	constexpr int kBossMaxHp = 1000; // ボスの最大HP
 	constexpr int kBossHpFrameX1 = 274;
 	constexpr int kBossHpFrameY1 = 550;
 	constexpr int kBossHpFrameX2 = 1006; // kDistX2と同じ
@@ -87,6 +87,8 @@ namespace
 	constexpr int kCharaTextPosY = 20;
 	constexpr int kCharaPosY = 45;
 	constexpr unsigned int kScoreColor = 0xffdead;
+
+	constexpr int kBuffIconPosY = 590;
 	// 経過時間の位置
 	constexpr int kTimePosX = 830;
 	constexpr unsigned int kTimeColor = 0xff4500;
@@ -128,6 +130,8 @@ UIManager::UIManager():
 	m_stickHandle(-1),
 	m_manualFrameHandle(-1),
 	m_manualIconHandle(-1),
+	m_buffIconHandle(-1),
+	m_buffSwapIconHandle(-1),
 	m_isDisplayManual(true),
 	m_isDisplayBossHp(false)
 {
@@ -162,6 +166,8 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_lbButtonHandle = LoadGraph(L"Data/UI/LBButton.png");
 	m_manualIconHandle = LoadGraph(L"Data/UI/StartButton.png");
 	m_stickHandle = LoadGraph(L"Data/UI/stick.png");
+	m_buffIconHandle = LoadGraph(L"Data/UI/powerUpIcon.png");
+	m_buffSwapIconHandle = LoadGraph(L"Data/UI/powerUpSwapIcon.png");
 	m_manualFrameHandle = LoadGraph(L"Data/UI/frame.png");
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_manualFontHandle = CreateFontToHandle(L"游明朝 Demibold", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
@@ -187,6 +193,8 @@ void UIManager::End()
 	DeleteGraph(m_stickHandle);
 	DeleteGraph(m_manualFrameHandle);
 	DeleteGraph(m_manualIconHandle);
+	DeleteGraph(m_buffIconHandle);
+	DeleteGraph(m_buffSwapIconHandle);
 	DeleteFontToHandle(m_fontHandle);
 	DeleteFontToHandle(m_manualFontHandle);
 	m_isDisplayBossHp = false;
@@ -229,10 +237,7 @@ void UIManager::Draw()
 	{
 		DrawBossHp();
 	}
-	if (m_pPlayer->GetPowerUpBonus() > 0)
-	{
-		DrawBuffUI();
-	}
+	DrawBuffUI();
 	/*DINPUT_JOYSTATE input;
 	int i;
 	int Color;
@@ -401,5 +406,18 @@ void UIManager::DrawManualUI()
 
 void UIManager::DrawBuffUI()
 {
+	if (m_pPlayer->GetPowerUpBonus() > 0)
+	{
+		DrawGraph(kPlayerHpGaugeLeft, kBuffIconPosY, m_buffIconHandle, true);
+		DrawGraph(kCompanionHpGaugeLeft, kBuffIconPosY, m_buffIconHandle, true);
+	}
 	
+	if (m_pPlayer->GetChangePowerUpBonus() > 0)
+	{
+		DrawGraph(200, kBuffIconPosY, m_buffSwapIconHandle, true);
+	}
+	if (m_pCompanion->GetChangePowerUpBonus() > 0)
+	{
+		DrawGraph(800, kBuffIconPosY, m_buffSwapIconHandle, true);
+	}
 }
