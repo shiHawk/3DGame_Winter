@@ -35,7 +35,7 @@ public:
 private:
 	VECTOR GetNearestEnemyPos(VECTOR basePos);
 	void DeathProcessing();
-	bool IsEnemyAttacking(VECTOR targetPos);
+	bool IsEnemyAttacking(VECTOR targetPos); 
 	void ChangeControl();
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<Player> m_pPlayer;

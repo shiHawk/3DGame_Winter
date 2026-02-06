@@ -11,7 +11,7 @@ namespace
     constexpr float kChageTime = 1.5f;
     constexpr float kCoolDownTime = 1.5f;
     constexpr float kRangeAttackRadius = 250.0f;
-    constexpr float kStrongAttackRadius = 150.0f;
+    constexpr float kStrongAttackRadius = 105.0f;
     constexpr float kRangeAttackDuration = 60.0f;
     constexpr float kStrongAttackDuration = 100.0f;
     constexpr float kTrackingRange = 1000.0f;
@@ -47,7 +47,7 @@ namespace
     constexpr int kMaxHp = 1000;
     constexpr int kAttackPower = 75;
     constexpr int kStrongAttackPower = 80;
-    constexpr int kRangeAttackPower = 95;
+    constexpr int kRangeAttackPower = 100;
     constexpr float kAttenuationRate = 0.5f; // 被ダメージの減衰率
     constexpr float kCumulativeRate = 1.5f; // 被ダメージの累加率
 }
@@ -339,7 +339,7 @@ void BossEnemy::OnDamage(int damage, bool isHatePlayer)
     }
     else
     {
-        m_companionHate += (float)damage*3;
+        m_companionHate += (float)damage * 9;
         if (m_state == BossEnemyState::STRONG_ATTACK_CHARGE || m_state == BossEnemyState::RANGE_ATTACK_CHARGE)
         {
             m_hp -= damage * kCumulativeRate; // チャージ中は遠距離攻撃のダメージを増やす

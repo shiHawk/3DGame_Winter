@@ -39,7 +39,7 @@ namespace
 	constexpr float kInvincibilityTime = 40.0f;
 	constexpr int kMaxHp = 200;
 	constexpr int kAttackPower = 75;
-	constexpr float kAttenuationRate = 0.75f; // 被ダメージの減衰率
+	constexpr float kAttenuationRate = 0.65f; // 被ダメージの減衰率
 	constexpr float kCumulativeRate = 1.5f; // 被ダメージの累加率
 }
 

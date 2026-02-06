@@ -73,6 +73,8 @@ namespace
 	constexpr int kManualFrameSrcW = 546;
 	constexpr int kManualFrameSrcH = 778;
 
+	constexpr int kButtonPosY = 220;
+
 	// 特殊ボタン（RB/LB/Stick）の描画サイズと切り出し
 	constexpr int kSpecialButtonWidth = 40;  // 1090 - 1050
 	constexpr int kSpecialButtonHeight = 30;
@@ -384,9 +386,9 @@ void UIManager::DrawManualUI()
 	DrawGraph(kUIPosX,170,m_yButtonHandle,true);
 	DrawFormatStringToHandle(kUITextPosX, 180, 0xffffff, m_manualFontHandle, L"強攻撃");
 
-	DrawGraph(kComboButtonX1, 221, m_xButtonHandle, true);
-	DrawGraph(kComboButtonX2, 220, m_yButtonHandle, true);
-	DrawGraph(kComboButtonX3, 220, m_yButtonHandle, true);
+	DrawGraph(kComboButtonX1, kButtonPosY, m_xButtonHandle, true);
+	DrawGraph(kComboButtonX2, kButtonPosY, m_yButtonHandle, true);
+	DrawGraph(kComboButtonX3, kButtonPosY, m_yButtonHandle, true);
 	DrawFormatStringToHandle(1120, 230, 0xffffff, m_manualFontHandle, L"フィニッシュ");
 
 	DrawRectExtendGraph(kUIPosX, 270,1090,300, kSpecialButtonSrcX, kSpecialButtonSrcY, kSpecialButtonSrcW, kSpecialButtonSrcH, m_rbButtonHandle, true);
@@ -420,4 +422,9 @@ void UIManager::DrawBuffUI()
 	{
 		DrawGraph(800, kBuffIconPosY, m_buffSwapIconHandle, true);
 	}
+}
+
+void UIManager::DrawDamage(VECTOR pos)
+{
+	
 }

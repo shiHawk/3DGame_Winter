@@ -7,7 +7,7 @@
 #include "EffectManager.h"
 namespace
 {
-    constexpr VECTOR kDefaultPos = { -946.0f,-59.0f,-415.0f };
+    constexpr VECTOR kDefaultPos = { -946.0f,-59.0f,-400.0f };
     constexpr VECTOR kDefaultVec = { 0.0f,0.0f,0.0f };
     constexpr VECTOR kRightDir = { 0.0f,270.0f * DX_PI_F / 180.0f,0.0f };
 	constexpr float kSphereRadius = 20.0f;
@@ -55,12 +55,14 @@ namespace
     constexpr float kAvoidanceFrame = 15.0f;
     constexpr float kAvoidanceMoveSpeed = 0.3f;
 
-    constexpr float kInvincibilityTime = 100.0f;
-    constexpr float kAvoidanceInvincibilityTime = 30.0f;
-    constexpr float kCurrentAvoidSpeed = 10.0f;
-    constexpr float kAutoAvoidanceFrame = 20.0f;
+    constexpr float kInvincibilityTime = 100.0f; // 被弾後の無敵時間
+    constexpr float kAvoidanceInvincibilityTime = 30.0f; // 回避の無敵時間
+    constexpr float kCurrentAvoidSpeed = 12.0f; // 回避時の移動速度
+    constexpr float kAutoAvoidanceFrame = 22.0f; // 回避時間
     constexpr float kAIAvoidSpeed = 20.0f;
-    constexpr float kAvoidCooltime = 60.0f;
+    constexpr float kAvoidCooltime = 60.0f; // 自動回避のクールタイム
+    constexpr float kAutoAvoidDistance = 190.0f; // 今すぐ回避アクションをとる判断をする範囲
+    constexpr float kAvoidWeightTime = 40.0f;
 
     // 各攻撃の攻撃範囲
     constexpr float kAttackRadius = 30.0f;
@@ -122,7 +124,9 @@ Player::Player():
     m_retreatDir({0.0f,0.0f,0.0f}),
     m_evadeCooldown(0.0f),
     m_jumpDelayTimer(0.0f),
-    m_isJumpPending(false)
+    m_isJumpPending(false),
+    m_postAvoidWaitTimer(0.0f),
+    m_reactionTimer(0.0f)
 {
 }
 
@@ -189,30 +193,41 @@ void Player::Update()
         {
             m_pos = VGet(m_followTargetPos.x, m_followTargetPos.y, m_followTargetPos.z - kPostWarpPosZ);
         }
+        float distSqToEnemy = VSquareSize(VSub(m_enemyPos, m_pos)); // 広域で攻撃を感知しており、かつ一定距離以内なら回避
+        float avoidDistSq = kAutoAvoidDistance * kAutoAvoidDistance;
         // 敵の攻撃に合わせて回避を行う
-        if (m_isEnemyAttackSensing && m_playerState != PlayerState::AUTO_EVADE && m_evadeCooldown <= 0.0f)
+        if (m_isEnemyAttackSensing && distSqToEnemy < avoidDistSq && m_playerState != PlayerState::AUTO_EVADE && m_evadeCooldown <= 0.0f)
         {
-            m_invincibilityTimer = kAvoidanceInvincibilityTime;
-            // 敵から反対方向へのベクトルを計算
-            VECTOR escapeVec = VSub(m_pos, m_enemyPos);
-            escapeVec.y = 0.0f; // 上下方向には逃げない
-
-            // ベクトルの長さが0に近い（敵と完全に重なっている）場合の安全策
-            if (VSize(escapeVec) > 0.001f)
+            m_reactionTimer++; // 感知している時間をカウント
+            if (m_reactionTimer > 10) // 10フレーム後に回避を行う
             {
-                m_retreatDir = VNorm(escapeVec); // 逃げる方向をセット
-            }
-           
-            // ステートを自動回避に変更
-            m_playerState = PlayerState::AUTO_EVADE;
-            m_attack.active = false; // 攻撃判定を確実に消去
-            m_attack.timer = 0.0f;
-            m_avoidanceTimer = kAutoAvoidanceFrame; // 回避時間セット
-            m_evadeCooldown = kAvoidCooltime;
-            m_isEnemyAttackSensing = false;
+                m_reactionTimer = 0.0f;
+                m_invincibilityTimer = kAvoidanceInvincibilityTime;
+                // 敵から反対方向へのベクトルを計算
+                VECTOR escapeVec = VSub(m_pos, m_enemyPos);
+                escapeVec.y = 0.0f; // 上下方向には逃げない
 
-            m_vec.x = m_retreatDir.x * kAIAvoidSpeed;
-            m_vec.z = m_retreatDir.z * kAIAvoidSpeed;
+                // ベクトルの長さが0に近い（敵と完全に重なっている）場合の安全策
+                if (VSize(escapeVec) > 0.001f)
+                {
+                    m_retreatDir = VNorm(escapeVec); // 逃げる方向をセット
+                }
+
+                // ステートを自動回避に変更
+                m_playerState = PlayerState::AUTO_EVADE;
+                m_attack.active = false; // 攻撃判定を確実に消去
+                m_attack.timer = 0.0f;
+                m_avoidanceTimer = kAutoAvoidanceFrame; // 回避時間セット
+                m_evadeCooldown = kAvoidCooltime;
+                //m_isEnemyAttackSensing = false;
+
+                m_vec.x = m_retreatDir.x * kAIAvoidSpeed;
+                m_vec.z = m_retreatDir.z * kAIAvoidSpeed;
+            }
+        }
+        else
+        {
+            m_reactionTimer = 0.0f;
         }
 
         if (m_evadeCooldown > 0.0f)
@@ -282,7 +297,7 @@ void Player::Draw()
     }
 #endif
     //printfDx(L"pos.x:%f ,pos.y:%f ,pos.z:%f\n",m_pos.x,m_pos.y,m_pos.z);
-    //printfDx(L"powerUp:%d\n",m_powerUpBonus+m_changePowerUpBonus);
+    //printfDx(L"m_distanceToEnemy:%f\n", m_distanceToEnemy);
 }
 
 void Player::OnAttack()
@@ -346,7 +361,7 @@ void Player::OnAvoidance()
     m_avoidanceTimer--;
     VECTOR avoidDir;
     // kMoveThreshold は移動とみなす入力の閾値
-    // スティックが倒されているか（入力があるか）をチェック
+    // スティックが倒されているか(入力があるか)をチェック
     if (VSize(m_moveInput) > kMoveThreshold)
     {
         // 入力がある場合：m_moveInputの方向に回避
@@ -440,8 +455,17 @@ VECTOR Player::HandleInput()
         VECTOR dirToTarget = VSub(m_followTargetPos, m_pos);
         dirToTarget.y = 0.0f;
         float distanceToTarget = VSize(dirToTarget);
+        if (m_postAvoidWaitTimer > 0.0f) 
+        {
+            m_postAvoidWaitTimer -= 1.0f;
+            return VGet(0.0f, 0.0f, 0.0f); // 何もしない
+        }
+        if (m_isEnemyAttackSensing)
+        {
+            return VGet(0.0f, 0.0f, 0.0f);
+        }
 
-        // 敵が検索範囲外（非常に遠い）またはリーシュ距離より遠い場合
+        // 敵が検索範囲外（非常に遠い）の場合
         if (m_distanceToEnemy > kEnemyLeashDistance)
         {
             // プレイヤーを追従
@@ -791,6 +815,7 @@ void Player::HandleStateAutoEvade()
 
         m_vec = VGet(0.0f, 0.0f, 0.0f);
         m_playerState = PlayerState::NORMAL;
+        m_postAvoidWaitTimer = kAvoidWeightTime;
         m_isEnemyAttackSensing = false;
     }
 }

@@ -26,6 +26,14 @@ private:
 	void DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, float height, float offsetY);
 	void DrawManualUI();
 	void DrawBuffUI();
+	void DrawDamage(VECTOR pos);
+	struct DamageText 
+	{
+		VECTOR worldPos; // 出現した3D座標
+		int damage;      // 表示する数値
+		float timer;     // 残り表示時間
+		unsigned int color; // 色
+	};
 	float m_playerHpGaugeRate;
 	float m_companionHpGaugeRate;
 	float m_playerSpecialGaugeRate;

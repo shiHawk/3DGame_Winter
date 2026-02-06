@@ -65,7 +65,7 @@ namespace
 
 	constexpr float kStopDistance = 160.0f; // プレイヤーや敵への追跡を止める距離
 	constexpr float kLongRangeAttackDistance = 480.0f;
-	constexpr float kCloseRangeAttackDistance = 150.0f; // 近距離攻撃のみを行う距離
+	constexpr float kCloseRangeAttackDistance = 250.0f; // 近距離攻撃のみを行う距離
 	constexpr float kEnemyLeashDistance = 600.0f; // 敵への追跡を諦める距離
 	constexpr float kWarpDistance = 900.0f;
 	constexpr float kPostWarpPosZ = 100.0f;
@@ -426,7 +426,7 @@ void Companion::UpdateAIState()
 					OnAttack();
 					m_companionState = CompanionState::NORMAL_ATTACK;
 				}
-				else // 50%の確率で距離を取って遠距離攻撃（仕切り直し）
+				else // 75%の確率で距離を取って遠距離攻撃（仕切り直し）
 				{
 					m_avoidanceTimer = 20.0f;
 					m_companionState = CompanionState::PREPARE_STRONG_ATTACK;

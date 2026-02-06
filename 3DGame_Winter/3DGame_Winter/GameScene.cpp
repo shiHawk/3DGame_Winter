@@ -364,7 +364,7 @@ void GameScene::DeathProcessing()
 
 bool GameScene::IsEnemyAttacking(VECTOR targetPos)
 {
-	// 感知する範囲（これ以上離れている敵の攻撃は無視する）
+	// 感知する範囲（これ以上離れている敵の攻撃は無視する)
 	float rangeSq = kSensingRange * kSensingRange;
 	for (const auto& enemy : m_pNormalEnemies)
 	{
@@ -384,7 +384,7 @@ bool GameScene::IsEnemyAttacking(VECTOR targetPos)
 	{
 		if (enemy->IsDead()) continue;
 
-		if (enemy->IsAttackCharge())
+		if (enemy->IsAttackCharge() || enemy->GetAttackInfo().active)
 		{
 			if (VSquareSize(VSub(enemy->GetPos(), targetPos)) < rangeSq)
 			{
@@ -395,7 +395,7 @@ bool GameScene::IsEnemyAttacking(VECTOR targetPos)
 
 	if (m_pBossEnemy && !m_pBossEnemy->IsDead())
 	{
-		if (m_pBossEnemy->IsAttackCharge())
+		if (m_pBossEnemy->IsAttackCharge() || m_pBossEnemy->GetAttackInfo().active)
 		{
 			if (VSquareSize(VSub(m_pBossEnemy->GetPos(), targetPos)) < rangeSq)
 			{
@@ -419,24 +419,27 @@ void GameScene::ChangeControl()
 	if (currentMode == CharacterBase::ControlMode::PLAYER)
 	{
 		playerNewMode = CharacterBase::ControlMode::COMPANION;
+		m_pPlayer->ResetPower();
 	}
 	else
 	{
 		playerNewMode = CharacterBase::ControlMode::PLAYER;
+		m_pPlayer->ChangePowerUp(kChangePowerUpBonus);
 	}
 	m_pPlayer->SetControlMode(playerNewMode);
-	m_pPlayer->ChangePowerUp(kChangePowerUpBonus);
+
 	CharacterBase::ControlMode companionNewMode; // コンパニオンのモード
 	if (playerNewMode == CharacterBase::ControlMode::PLAYER)
 	{
 		companionNewMode = CharacterBase::ControlMode::COMPANION;
+		m_pCompanion->ResetPower();
 	}
 	else
 	{
 		companionNewMode = CharacterBase::ControlMode::PLAYER;
+		m_pCompanion->ChangePowerUp(kChangePowerUpBonus);
 	}
 	m_pCompanion->SetControlMode(companionNewMode);
-	m_pCompanion->ChangePowerUp(kChangePowerUpBonus);
 
 	// 切り替え時のエフェクト設定
 	VECTOR effectPos;

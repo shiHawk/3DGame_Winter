@@ -96,6 +96,8 @@ private:
 	float m_evadeCooldown;
 	float m_jumpDelayTimer;
 	bool  m_isJumpPending; // ジャンプの力を出すのを待っている状態か
+	float m_postAvoidWaitTimer;
+	float m_reactionTimer;
 
 	// ステートごとのハンドラ関数
 	void HandleStateNormal(bool aiWantsToAttack);

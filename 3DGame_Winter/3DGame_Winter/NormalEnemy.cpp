@@ -43,7 +43,7 @@ namespace
 	constexpr float kKnockbackDuration = 0.4f;
 	constexpr float kKnockBackSpeed = 5.0f;
 	constexpr float kRecoveryTime = 15.0f;
-	constexpr float kAttenuationRate = 0.75f; // 被ダメージの減衰率
+	constexpr float kAttenuationRate = 0.8f; // 被ダメージの減衰率
 	constexpr float kCumulativeRate = 1.75f; // 被ダメージの累加率
 	// 秒数変換
 	constexpr float kFramesPerSecond = 60.0f;
