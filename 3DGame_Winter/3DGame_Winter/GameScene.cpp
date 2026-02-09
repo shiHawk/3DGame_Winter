@@ -420,11 +420,13 @@ void GameScene::ChangeControl()
 	{
 		playerNewMode = CharacterBase::ControlMode::COMPANION;
 		m_pPlayer->ResetPower();
+		m_pUIManager->SetOperationChara(false);
 	}
 	else
 	{
 		playerNewMode = CharacterBase::ControlMode::PLAYER;
 		m_pPlayer->ChangePowerUp(kChangePowerUpBonus);
+		m_pUIManager->SetOperationChara(true);
 	}
 	m_pPlayer->SetControlMode(playerNewMode);
 

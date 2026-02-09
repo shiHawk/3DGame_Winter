@@ -65,7 +65,7 @@ namespace
 
 	constexpr float kStopDistance = 160.0f; // ƒvƒŒƒCƒ„[‚â“G‚Ö‚Ì’ÇÕ‚ğ~‚ß‚é‹——£
 	constexpr float kLongRangeAttackDistance = 480.0f;
-	constexpr float kCloseRangeAttackDistance = 250.0f; // ‹ß‹——£UŒ‚‚Ì‚İ‚ğs‚¤‹——£
+	constexpr float kCloseRangeAttackDistance = 200.0f; // ‹ß‹——£UŒ‚‚Ì‚İ‚ğs‚¤‹——£
 	constexpr float kEnemyLeashDistance = 600.0f; // “G‚Ö‚Ì’ÇÕ‚ğ’ú‚ß‚é‹——£
 	constexpr float kWarpDistance = 900.0f;
 	constexpr float kPostWarpPosZ = 100.0f;

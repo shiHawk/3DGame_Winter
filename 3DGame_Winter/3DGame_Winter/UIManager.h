@@ -18,6 +18,8 @@ public:
 	void End();
 	void Updata();
 	void Draw();
+	void DrawOperationPlayer();
+	void SetOperationChara(bool isWarriorOperation) { m_isOperationWarrior = isWarriorOperation; }
 private:
 	void DrawHp();
 	void DrawSg();
@@ -61,8 +63,10 @@ private:
 	int m_manualIconHandle;
 	int m_buffIconHandle;
 	int m_buffSwapIconHandle; // Œğ‘ã‚Ìˆê“I‚ÈUŒ‚—ÍUP‚Ìƒoƒt
+	int m_operationPlayerUI;
 	bool m_isDisplayManual;
 	bool m_isDisplayBossHp;
+	bool m_isOperationWarrior;
 	std::shared_ptr<Player> m_pPlayer;
 	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;
 	std::vector<std::shared_ptr<StrongEnemy>> m_pStrongEnemies;

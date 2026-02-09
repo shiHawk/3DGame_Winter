@@ -83,6 +83,10 @@ namespace
 	constexpr int kSpecialButtonSrcW = 379;
 	constexpr int kSpecialButtonSrcH = 196;
 
+	// バフUIの位置
+	constexpr int kWarriorBuffUIPosX = 280;
+	constexpr int kWizardBuffUIPosX = 880;
+
 	constexpr int kHpGaugeFrameWidth = 370; // ゲージの横幅
 	// スコアの位置
 	constexpr int kScorePosX = 650;
@@ -134,8 +138,10 @@ UIManager::UIManager():
 	m_manualIconHandle(-1),
 	m_buffIconHandle(-1),
 	m_buffSwapIconHandle(-1),
+	m_operationPlayerUI(-1),
 	m_isDisplayManual(true),
-	m_isDisplayBossHp(false)
+	m_isDisplayBossHp(false),
+	m_isOperationWarrior(true)
 {
 }
 
@@ -170,6 +176,7 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_stickHandle = LoadGraph(L"Data/UI/stick.png");
 	m_buffIconHandle = LoadGraph(L"Data/UI/powerUpIcon.png");
 	m_buffSwapIconHandle = LoadGraph(L"Data/UI/powerUpSwapIcon.png");
+	m_operationPlayerUI = LoadGraph(L"Data/UI/OperationUI.png");
 	m_manualFrameHandle = LoadGraph(L"Data/UI/frame.png");
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_manualFontHandle = CreateFontToHandle(L"游明朝 Demibold", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
@@ -197,6 +204,7 @@ void UIManager::End()
 	DeleteGraph(m_manualIconHandle);
 	DeleteGraph(m_buffIconHandle);
 	DeleteGraph(m_buffSwapIconHandle);
+	DeleteGraph(m_operationPlayerUI);
 	DeleteFontToHandle(m_fontHandle);
 	DeleteFontToHandle(m_manualFontHandle);
 	m_isDisplayBossHp = false;
@@ -240,6 +248,7 @@ void UIManager::Draw()
 		DrawBossHp();
 	}
 	DrawBuffUI();
+	DrawOperationPlayer();
 	/*DINPUT_JOYSTATE input;
 	int i;
 	int Color;
@@ -410,21 +419,33 @@ void UIManager::DrawBuffUI()
 {
 	if (m_pPlayer->GetPowerUpBonus() > 0)
 	{
-		DrawGraph(kPlayerHpGaugeLeft, kBuffIconPosY, m_buffIconHandle, true);
-		DrawGraph(kCompanionHpGaugeLeft, kBuffIconPosY, m_buffIconHandle, true);
+		DrawGraph(kWarriorBuffUIPosX, kBuffIconPosY, m_buffIconHandle, true);
+		DrawGraph(kWizardBuffUIPosX, kBuffIconPosY, m_buffIconHandle, true);
 	}
 	
 	if (m_pPlayer->GetChangePowerUpBonus() > 0)
 	{
-		DrawGraph(200, kBuffIconPosY, m_buffSwapIconHandle, true);
+		DrawGraph(220, kBuffIconPosY, m_buffSwapIconHandle, true);
 	}
 	if (m_pCompanion->GetChangePowerUpBonus() > 0)
 	{
-		DrawGraph(800, kBuffIconPosY, m_buffSwapIconHandle, true);
+		DrawGraph(820, kBuffIconPosY, m_buffSwapIconHandle, true);
 	}
 }
 
 void UIManager::DrawDamage(VECTOR pos)
 {
 	
+}
+
+void UIManager::DrawOperationPlayer()
+{
+	if (m_isOperationWarrior)
+	{
+		DrawGraph(170, kBuffIconPosY, m_operationPlayerUI, true);
+	}
+	else
+	{
+		DrawGraph(770, kBuffIconPosY, m_operationPlayerUI, true);
+	}
 }

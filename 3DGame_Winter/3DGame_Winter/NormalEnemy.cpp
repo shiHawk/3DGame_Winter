@@ -90,6 +90,7 @@ void NormalEnemy::Update()
 	if (m_hp <= 0)
 	{
 		m_enemyAttack.active = false;
+		m_alpha -= 0.02f;
 		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDeathAnimIncrement);
 		if (GetIsAnimEnd())
 		{

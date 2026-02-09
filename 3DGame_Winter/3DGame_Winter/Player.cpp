@@ -199,7 +199,7 @@ void Player::Update()
         if (m_isEnemyAttackSensing && distSqToEnemy < avoidDistSq && m_playerState != PlayerState::AUTO_EVADE && m_evadeCooldown <= 0.0f)
         {
             m_reactionTimer++; // 感知している時間をカウント
-            if (m_reactionTimer > 10) // 10フレーム後に回避を行う
+            if (m_reactionTimer > 10.0f) // 10フレーム後に回避を行う
             {
                 m_reactionTimer = 0.0f;
                 m_invincibilityTimer = kAvoidanceInvincibilityTime;
