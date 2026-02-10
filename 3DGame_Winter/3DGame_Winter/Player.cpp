@@ -108,7 +108,6 @@ Player::Player():
     m_playerState(PlayerState::NORMAL),
     m_jumpState(JumpState::None),
     m_angleY(0.0f),
-    m_enemyPos({0.0f,0.0f,0.0f}),
     m_followTargetPos({ 0.0f,0.0f,0.0f }),
     m_attack(kAttackRadius,{0.0f,0.0f,0.0f},false,0.0f,{0.0f,0.0f,0.0f}),
     m_dirToEnemy({0.0f,0.0f,0.0f}),

@@ -88,7 +88,6 @@ Companion::Companion():
 	m_controlMode(ControlMode::COMPANION),
 	m_companionState(CompanionState::NORMAL),
 	m_forwardDir({0.0f,0.0f,0.0f}),
-	m_enemyPos({ 0.0f,0.0f,0.0f }),
 	m_playerPos({ 0.0f,0.0f,0.0f }),
 	m_dirToEnemy({ 0.0f,0.0f,0.0f }),
 	m_dirToPlayer({ 0.0f,0.0f,0.0f }),

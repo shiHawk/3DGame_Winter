@@ -12,6 +12,7 @@ public:
 	VECTOR GetPrevPos() { return m_prevPos; }
 	void AddPos(VECTOR offset) { m_pos = VAdd(m_pos, offset); }
 	void SetPos(VECTOR newPos) { m_pos = newPos; }
+	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; };
 	void SetVecX(float newVecX) { m_vec.x = newVecX; }
 	void SetVecY(float newVecY) { m_vec.y = newVecY; }
 	void SetVecZ(float newVecZ) { m_vec.z = newVecZ; }
@@ -46,6 +47,7 @@ protected:
 	VECTOR m_pos;
 	VECTOR m_vec;
 	VECTOR m_moveInput;
+	VECTOR m_enemyPos;
 	int m_hp;
 	int m_attackPower;
 	bool m_isDead;

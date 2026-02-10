@@ -11,6 +11,7 @@ CharacterBase::CharacterBase():
 	m_pos({0.0f,0.0f,0.0f}),
 	m_vec({ 0.0f,0.0f,0.0f }),
 	m_moveInput({ 0.0f,0.0f,0.0f }),
+	m_enemyPos({ 0.0f,0.0f,0.0f }),
 	m_isJump(false),
 	m_isHitFlag(false),
 	m_invincibilityTimer(0.0f),

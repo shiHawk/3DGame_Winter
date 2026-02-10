@@ -167,31 +167,67 @@ SceneBase* GameScene::Update()
 	m_pPlayer->SetFollowTargetPos(m_pCompanion->GetPos());
 	m_pCompanion->SetPlayerPos(m_pPlayer->GetPos());
 
-	// 最も近い敵の座標を取得
-	VECTOR currentBasePos = (currentControlMode == CharacterBase::ControlMode::PLAYER)
-						     ? m_pPlayer->GetPos()
-							 : m_pCompanion->GetPos();
+	// 操作キャラとAIキャラを判別
+	CharacterBase* pControlledChar = nullptr; // 操作しているキャラ
+	CharacterBase* pAIChar = nullptr;         // コンパニオン
 
-	VECTOR targetEnemyPos = GetNearestEnemyPos(currentBasePos);
-	m_pCamera->SetLockOnPosition(targetEnemyPos);
-	if (targetEnemyPos.x < 100000.0f)
+	if (currentControlMode == CharacterBase::ControlMode::PLAYER)
 	{
-		m_pPlayer->SetEnemyPos(targetEnemyPos);
-		m_pCompanion->SetEnemyPos(targetEnemyPos);
+		pControlledChar = m_pPlayer.get();
+		pAIChar = m_pCompanion.get();
 	}
 	else
 	{
+		pControlledChar = m_pCompanion.get();
+		pAIChar = m_pPlayer.get();
+	}
+
+	// まず操作キャラにとって一番近い敵を取得（除外なし）
+	VECTOR targetForMain = GetNearestEnemyPos(pControlledChar->GetPos(),kInvalidPos);
+
+	// 次にAIキャラにとって近い敵を取得（操作キャラのターゲットを除外指定）
+	VECTOR targetForAI = GetNearestEnemyPos(pAIChar->GetPos(), targetForMain);
+
+	//それぞれにセット
+	pControlledChar->SetEnemyPos(targetForMain);
+	pAIChar->SetEnemyPos(targetForAI);
+
+	// カメラのロックオンは操作キャラのターゲットに合わせる
+	m_pCamera->SetLockOnPosition(targetForMain);
+
+	// ターゲットが存在するかチェック（x座標が有効範囲内か）
+	bool isTargetValid = (targetForMain.x < 100000.0f);
+
+	if (!isTargetValid)
+	{
 		// 敵がいない（ボスが死んだ）ならロックオンを強制解除
 		m_pCamera->SetIsLockOn(false);
-		m_pCamera->SetIsBossBattle(false); // ボス戦フラグも折る
+		m_pCamera->SetIsBossBattle(false);
 	}
-	m_pPlayer->SetEnemyAttackSensingFlag(IsEnemyAttacking(m_pPlayer->GetPos()));
-	//printfDx(L"targetPosX:%f,targetPosY:%f,targetPosZ:%f\n",targetEnemyPos.x,targetEnemyPos.y,targetEnemyPos.z);
 
-	// 取得した「一番近い敵の座標」を各クラスに渡す
-	m_pPlayer->SetEnemyPos(targetEnemyPos);
-	m_pCompanion->SetEnemyPos(targetEnemyPos);
-	m_pCamera->SetLockOnPosition(targetEnemyPos); // ロックオン対象も一番近い敵にする
+	//// 最も近い敵の座標を取得
+	//VECTOR currentBasePos = (currentControlMode == CharacterBase::ControlMode::PLAYER)
+	//					     ? m_pPlayer->GetPos()
+	//						 : m_pCompanion->GetPos();
+	//VECTOR targetEnemyPos = GetNearestEnemyPos(currentBasePos,kInvalidPos);
+	//m_pCamera->SetLockOnPosition(targetEnemyPos);
+	//if (targetEnemyPos.x < 100000.0f)
+	//{
+	//	m_pPlayer->SetEnemyPos(targetEnemyPos);
+	//	m_pCompanion->SetEnemyPos(targetEnemyPos);
+	//}
+	//else
+	//{
+	//	// 敵がいない（ボスが死んだ）ならロックオンを強制解除
+	//	m_pCamera->SetIsLockOn(false);
+	//	m_pCamera->SetIsBossBattle(false); // ボス戦フラグも折る
+	//}
+	//m_pPlayer->SetEnemyAttackSensingFlag(IsEnemyAttacking(m_pPlayer->GetPos()));
+	////printfDx(L"targetPosX:%f,targetPosY:%f,targetPosZ:%f\n",targetEnemyPos.x,targetEnemyPos.y,targetEnemyPos.z);
+	//// 取得した「一番近い敵の座標」を各クラスに渡す
+	//m_pPlayer->SetEnemyPos(targetEnemyPos);
+	//m_pCompanion->SetEnemyPos(targetEnemyPos);
+	//m_pCamera->SetLockOnPosition(targetEnemyPos); // ロックオン対象も一番近い敵にする
 
 	m_pGameplayCollision->Update();
 	m_pWorldCollision->Update();
@@ -311,42 +347,81 @@ SceneID GameScene::GetSceneID() const
 	return SceneID::GameScene;
 }
 
-VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos)
+VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos, VECTOR avoidPos)
 {
-	float minDistanceSq = kEnemySearchRange * kEnemySearchRange;
-	VECTOR nearestPos = kInvalidPos; // 初期値として無効な座標を設定
-	bool found = false;
+	float minDistanceSq = kEnemySearchRange * kEnemySearchRange;     // 通常の最小距離
+	VECTOR nearestPos = kInvalidPos;                                 // 通常の最寄り敵
 
+	float minDistanceSqSub = kEnemySearchRange * kEnemySearchRange;  // 被りを避けた場合の最小距離
+	VECTOR nearestPosSub = kInvalidPos;                              // 被りを避けた場合の最寄り敵
+
+	auto CheckEnemy = [&](const auto& enemy) // 判定用ラムダ式
+		{
+			if (enemy->IsDead()) return;
+
+			VECTOR ePos = enemy->GetPos();
+			float distSq = VSquareSize(VSub(ePos, basePos));
+
+			// 1. 単純に一番近い敵を探す
+			if (distSq < minDistanceSq)
+			{
+				minDistanceSq = distSq;
+				nearestPos = ePos;
+			}
+
+			// 2. 被りを避けた敵を探す（avoidPos と座標が違う場合のみ更新）
+			if (VSquareSize(VSub(ePos, avoidPos)) > 1.0f)
+			{
+				if (distSq < minDistanceSqSub)
+				{
+					minDistanceSqSub = distSq;
+					nearestPosSub = ePos;
+				}
+			}
+		};
 	// NormalEnemiesから探す
 	for (auto& enemy : m_pNormalEnemies) 
 	{
-		if (enemy->IsDead())
-		{
-			continue;
-		}
-		float distSq = VSquareSize(VSub(enemy->GetPos(), basePos));
-		if (distSq < minDistanceSq) 
-		{
-			minDistanceSq = distSq;
-			nearestPos = enemy->GetPos();
-			found = true;
-		}
+		CheckEnemy(enemy);
+	}
+	// StrongEnemiesからも探す
+	for (auto& enemy : m_pStrongEnemies)
+	{
+		CheckEnemy(enemy);
 	}
 
-	// StrongEnemiesからも探す
-	for (auto& enemy : m_pStrongEnemies) 
-	{
-		if (enemy->IsDead())
-		{
-			continue;
-		}
-		float distSq = VSquareSize(VSub(enemy->GetPos(), basePos));
-		if (distSq < minDistanceSq) {
-			minDistanceSq = distSq;
-			nearestPos = enemy->GetPos();
-			found = true;
-		}
-	}
+	//float minDistanceSq = kEnemySearchRange * kEnemySearchRange;
+	//VECTOR nearestPos = kInvalidPos; // 初期値として無効な座標を設定
+	//bool found = false;
+	//// NormalEnemiesから探す
+	//for (auto& enemy : m_pNormalEnemies) 
+	//{
+	//	if (enemy->IsDead())
+	//	{
+	//		continue;
+	//	}
+	//	float distSq = VSquareSize(VSub(enemy->GetPos(), basePos));
+	//	if (distSq < minDistanceSq) 
+	//	{
+	//		minDistanceSq = distSq;
+	//		nearestPos = enemy->GetPos();
+	//		found = true;
+	//	}
+	//}
+	//// StrongEnemiesからも探す
+	//for (auto& enemy : m_pStrongEnemies) 
+	//{
+	//	if (enemy->IsDead())
+	//	{
+	//		continue;
+	//	}
+	//	float distSq = VSquareSize(VSub(enemy->GetPos(), basePos));
+	//	if (distSq < minDistanceSq) {
+	//		minDistanceSq = distSq;
+	//		nearestPos = enemy->GetPos();
+	//		found = true;
+	//	}
+	//}
 
 	if (m_pBossEnemy != nullptr && !m_pBossEnemy->IsDead())
 	{
@@ -355,10 +430,15 @@ VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos)
 		{
 			// ボスを優先、あるいは一番近ければ更新
 			nearestPos = m_pBossEnemy->GetPos();
-			found = true;
+			//found = true;
 		}
 	}
-
+	// もし「被りを避けた敵(Sub)」が見つかっていれば、そちらを優先して返す
+	if (nearestPosSub.x < 1000000.0f)
+	{
+		return nearestPosSub;
+	}
+	// 別の敵が見つからなかった場合は最も近い敵を返す
 	return nearestPos;
 }
 

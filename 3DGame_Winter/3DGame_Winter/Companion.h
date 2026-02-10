@@ -14,7 +14,6 @@ public:
 	void End();
 	virtual void Update()override;
 	void Draw();
-	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; };
 	void SetPlayerPos(VECTOR playerPos) { m_playerPos = playerPos; };
 	VECTOR GetPlayerDir() { return m_forwardDir; }
 	virtual void OnAttack() override;
@@ -55,7 +54,6 @@ private:
 	CompanionState m_companionState;
 	std::shared_ptr<Camera> m_pCamera;
 	VECTOR m_forwardDir;
-	VECTOR m_enemyPos;
 	VECTOR m_playerPos;
 	VECTOR m_dirToEnemy;
 	VECTOR m_dirToPlayer;

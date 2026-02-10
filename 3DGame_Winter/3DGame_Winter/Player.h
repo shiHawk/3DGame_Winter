@@ -20,7 +20,6 @@ public:
 	void OnCombFinishAttack();
 	void OnSpecialSkil();
 	void OnAvoidance();
-	void SetEnemyPos(VECTOR enemyPos) { m_enemyPos = enemyPos; } 
 	void SetControlMode(ControlMode mode) { m_controlMode = mode; }
 	ControlMode GetControlMode() { return m_controlMode; }
 	void SetFollowTargetPos(VECTOR targetPos) { m_followTargetPos = targetPos; } // AI操作時に追従する対象（＝プレイヤー）の座標をセットする
@@ -79,7 +78,6 @@ private:
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<EffectManager> m_pEffectManager;
 	float m_angleY;
-	VECTOR m_enemyPos;
 	VECTOR m_followTargetPos; // AI時に追従する対象（プレイヤー）の座標
 	AttackSphere m_attack;
 	VECTOR m_dirToEnemy; 
