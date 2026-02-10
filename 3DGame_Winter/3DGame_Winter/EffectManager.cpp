@@ -8,7 +8,7 @@
 namespace
 {
 	constexpr int kParticleMax = 8000;
-	constexpr int kHitEffectPosYOffset = 60.0f;
+	constexpr float kHitEffectPosYOffset = 60.0f;
 	constexpr float kSpecialSkilEffectSize = 100.0f;
 	constexpr float kSpecialSkilSpped = 10.0f;
 	constexpr float kPlayerHitEffectSize = 50.0f;

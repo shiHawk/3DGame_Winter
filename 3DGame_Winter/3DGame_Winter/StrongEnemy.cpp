@@ -35,6 +35,8 @@ namespace
 	constexpr float kFramesPerSecond = 60.0f; // 秒数変換
 	constexpr unsigned int kAreaColor = 0xff4500;
 	constexpr unsigned int kOutLineColor = 0xff0000;
+	constexpr unsigned int kNormalDamageColor = 0xffffff;
+	constexpr unsigned int kWeekDamageColor = 0xff2a2a;
 	constexpr int kDivNum = 32;
 	constexpr float kInvincibilityTime = 40.0f;
 	constexpr int kMaxHp = 200;
@@ -154,7 +156,7 @@ void StrongEnemy::Update()
 		break;
 	case StrongEnemy::RANGEATTACK_CHARGE:
 		m_isAttackCharge = true;
-		m_attackTimer -= 1.0f / kFramesPerSecond;
+		m_attackTimer -= 1.5f / kFramesPerSecond;
 		ChangeAnim(m_modelHandle, kRangeAttackChargeAnimNo, false, kAttackAnimIncrement);
 		if (m_attackTimer < 0.0f)
 		{
@@ -243,34 +245,36 @@ void StrongEnemy::OnDamage(int damage, bool isHatePlayer)
 	if (m_state == StrongEnemyState::DEAD || m_invincibilityTimer > 0.0f) return;
 
 	// 1. 先にダメージ計算を行う
-	//m_hp -= damage;
 	if (isHatePlayer)
 	{
-		m_hp -= damage * kCumulativeRate;
-		m_playerHate += (float)damage;
+		m_finalDamage = static_cast<float>(damage) * kCumulativeRate;
+		m_damageColor = kWeekDamageColor;
+		m_playerHate += static_cast<float>(damage);
 	}
 	else
 	{
-		m_hp -= damage * kAttenuationRate;
-		m_companionHate += (float)damage * 3;
+		m_finalDamage = static_cast<float>(damage) * kAttenuationRate;
+		m_damageColor = kNormalDamageColor;
+		m_companionHate += static_cast<float>(damage) * 3;
 	}
+	m_hp -= m_finalDamage;
 	m_enemyAttack.timer = 0.0f;
 	m_isHitFlag = true;
-	
+	DamageResult result{};
+	result.pos = m_pos;
+	result.damage = m_finalDamage;
+	result.color = m_damageColor;
+	m_damageResults.push_back(result); // ダメージの情報を表示用のリストに登録
 	// 2. 計算後のHPで死亡判定を行う
 	if (m_hp <= 0)
 	{
 		m_hp = 0;
 		m_state = StrongEnemyState::DEAD;
 		m_enemyAttack.active = false; // 攻撃判定を消す
-		m_invincibilityTimer = 0.0f;
 		// ループ再生は false にする
 		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDamageAnimIncrement);
 	}
-	else
-	{
-		m_invincibilityTimer = kInvincibilityTime;
-	}
+	m_invincibilityTimer = kInvincibilityTime;
 }
 
 float StrongEnemy::GetColRadius()

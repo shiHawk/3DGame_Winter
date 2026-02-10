@@ -25,7 +25,9 @@ m_targetPos({ 0.0f,0.0f,0.0f }),
 m_playerHate(0),
 m_companionHate(0),
 m_isAttackCharge(false),
-m_deathTimer(0.0f)
+m_deathTimer(0.0f),
+m_finalDamage(0),
+m_damageColor(0)
 {
 }
 
@@ -46,6 +48,13 @@ void Enemy::OnAttack()
 
 void Enemy::OnDamage(int damage, bool isHatePlayer)
 {
+}
+
+std::vector<DamageResult> Enemy::PopDamageResults()
+{
+	std::vector<DamageResult> res = std::move(m_damageResults);
+	m_damageResults.clear(); // ’†g‚ğ‹ó‚É‚·‚é
+	return res;
 }
 
 void Enemy::SearchTarget()

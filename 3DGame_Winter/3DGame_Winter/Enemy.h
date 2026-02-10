@@ -4,6 +4,13 @@
 #include "Companion.h"
 #include "DxLib.h"
 #include <memory>
+#include <vector>
+struct DamageResult
+{
+	VECTOR pos;
+	int damage;
+	unsigned int color;
+};
 class Enemy :public CharacterBase
 {
 public:
@@ -16,10 +23,12 @@ public:
 	virtual void OnAttack();
 	virtual void OnDamage(int damage,bool isFromPlayerDamage);
 	bool IsAttackCharge() { return m_isAttackCharge; }
+	std::vector<DamageResult> PopDamageResults();
 protected:
 	void SearchTarget();
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;
+	std::vector<DamageResult> m_damageResults; // 発生したダメージのリスト
 	// プレイヤーに向かうベクトル
 	VECTOR m_toPlayerDir;
 	float m_toPlayerDistance;
@@ -32,5 +41,7 @@ protected:
 	float m_companionHate;
 	bool m_isAttackCharge;
 	float m_deathTimer;
+	int m_finalDamage;  // ダメージの減衰や累加を計算した後実際に与えるダメージの値
+	unsigned int m_damageColor;
 };
 

@@ -4,6 +4,7 @@ namespace
 {
     constexpr float kAttackRadius = 50.0f;
     constexpr float kColRadius = 50.0f;
+    constexpr float kTurnSpeed = 0.1f; // 1フレームあたりの回転速度
     constexpr VECTOR kDefaultPos = { -5405.0f,741.0f,9199.0f };
     constexpr VECTOR kDefaultDir = { 0.0,270.0f,0.0f };
     constexpr VECTOR kDefaultTarfetPos = { 0.0,0.0f,0.0f };
@@ -42,6 +43,9 @@ namespace
     constexpr float kFramesPerSecond = 60.0f; // 秒数変換
     constexpr unsigned int kAreaColor = 0xff4500;
     constexpr unsigned int kOutLineColor = 0xff0000;
+    constexpr unsigned int kNormalDamageColor = 0xffffff;
+    constexpr unsigned int kWeekDamageColor = 0xff2a2a;
+    constexpr unsigned int kResistDamageColor = 0x1e90ff;
     constexpr int kDivNum = 32;
     constexpr float kInvincibilityTime = 30.0f;
     constexpr int kMaxHp = 1000;
@@ -57,6 +61,7 @@ BossEnemy::BossEnemy() :
     m_enemyAttack(kAttackRadius, { 0.0f,0.0f,0.0f }, false, 0.0f, { 0.0f,0.0f,0.0f }),
     m_alpha(0.0f),
     m_targetAngle(0.0f),
+    m_currentAngle(0.0f),
     m_attackTimer(kCoolDownTime),
     m_actionCheckTimer(0.0f),
     m_storngAttackTargetPos({ 0.0f,0.0f,0.0f }),
@@ -327,28 +332,40 @@ void BossEnemy::OnDamage(int damage, bool isHatePlayer)
     m_invincibilityTimer = kInvincibilityTime;
     if (isHatePlayer) // 近接キャラから攻撃を受けたとき
     {
-        m_playerHate += (float)damage;
+        m_playerHate += static_cast<float>(damage);
         if (m_state == BossEnemyState::STRONG_ATTACK_CHARGE || m_state == BossEnemyState::RANGE_ATTACK_CHARGE)
         {
-            m_hp -= damage * kAttenuationRate; // チャージ中は近距離攻撃のダメージを減らす
+            m_finalDamage = static_cast<float>(damage) * kAttenuationRate; // チャージ中は近距離攻撃のダメージを減らす
+            m_damageColor = kResistDamageColor;
         }
         else
         {
-            m_hp -= damage;
+            m_finalDamage = damage;
+            m_damageColor = kNormalDamageColor;
         }
     }
     else
     {
-        m_companionHate += (float)damage * 9;
+        m_companionHate += static_cast<float>(damage) * 9;
         if (m_state == BossEnemyState::STRONG_ATTACK_CHARGE || m_state == BossEnemyState::RANGE_ATTACK_CHARGE)
         {
-            m_hp -= damage * kCumulativeRate; // チャージ中は遠距離攻撃のダメージを増やす
+            m_finalDamage = static_cast<float>(damage) * kCumulativeRate; // チャージ中は遠距離攻撃のダメージを増やす
+            m_damageColor = kWeekDamageColor;
         }
         else
         {
-            m_hp -= damage;
+            m_finalDamage = damage;
+            m_damageColor = kNormalDamageColor;
         }
     }
+    m_hp -= m_finalDamage;
+
+    DamageResult result{};
+    result.pos = m_pos;
+    result.damage = m_finalDamage;
+    result.color = m_damageColor;
+    m_damageResults.push_back(result); // ダメージの情報を表示用のリストに登録
+
     //if (m_hp <= 0)
     //{
     //    m_enemyAttack.active = false;
@@ -394,7 +411,6 @@ void BossEnemy::UpdateDefault()
             // 溜め時間を定数と一致させる
             m_attackTimer = kChageTime;
             SetShield();
-            //m_enemyAttack.active = true; // ONにする
         }
         else
         {

@@ -7,8 +7,10 @@ namespace
 	constexpr VECTOR kDefaultDir = { 0.0,270.0f,0.0f };
 	constexpr float kSphereRadius = 90.0f;
 	constexpr int kDivNum = 8;
-	constexpr int kSphereDifColor = 0x000000;
-	constexpr int kSphereSpcColor = 0xffffff;
+	constexpr unsigned int kSphereDifColor = 0x000000;
+	constexpr unsigned int kSphereSpcColor = 0xffffff;
+	constexpr unsigned int kNormalDamageColor = 0xffffff;
+	constexpr unsigned int kWeekDamageColor = 0xff2a2a;
 	constexpr float kColRadius = 30.0f;
 	constexpr float kMoveSpeed = 5.0f;
 	constexpr float kMoveDecRate = 0.8f;
@@ -241,14 +243,17 @@ void NormalEnemy::OnDamage(int damage, bool isHatePlayer)
 	//m_hp -= damage;
 	if (isHatePlayer) 
 	{
-		m_hp -= damage*kAttenuationRate;
-		m_playerHate += (float)damage;
+		m_finalDamage = static_cast<float>(damage) *kAttenuationRate;
+		m_damageColor = kNormalDamageColor;
+		m_playerHate += static_cast<float>(damage);
 	}
 	else 
 	{
-		m_hp -= damage * kCumulativeRate;
-		m_companionHate += (float)damage*3;
+		m_finalDamage = static_cast<float>(damage) * kCumulativeRate;
+		m_damageColor = kWeekDamageColor;
+		m_companionHate += static_cast<float>(damage) *3;
 	}
+	m_hp -= m_finalDamage;
 	if (m_hp <= 0)
 	{
 		m_hp = 0;
@@ -257,6 +262,11 @@ void NormalEnemy::OnDamage(int damage, bool isHatePlayer)
 		ChangeAnim(m_modelHandle,kDeathAnimNo,false, kDeathAnimIncrement);
 	}
 	
+	DamageResult result{};
+	result.pos = m_pos;
+	result.damage = m_finalDamage;
+	result.color = m_damageColor;
+	m_damageResults.push_back(result); // ダメージの情報を表示用のリストに登録
 	m_invincibilityTimer = kInvincibilityTime;
 	//printfDx(L"m_hp:%d\n",m_hp);
 }

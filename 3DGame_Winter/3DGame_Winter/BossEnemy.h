@@ -39,6 +39,7 @@ private:
 	AttackSphere m_enemyAttack;
 	float m_alpha;
 	float m_targetAngle;
+	float m_currentAngle; // 現在のボスが向いている角度
 	float m_attackTimer;
 	float m_actionCheckTimer; // 行動抽選のクールダウンタイマー
 	VECTOR m_storngAttackTargetPos;

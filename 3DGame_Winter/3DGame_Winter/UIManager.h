@@ -18,8 +18,8 @@ public:
 	void End();
 	void Updata();
 	void Draw();
-	void DrawOperationPlayer();
 	void SetOperationChara(bool isWarriorOperation) { m_isOperationWarrior = isWarriorOperation; }
+	void ShowDamageNumber(VECTOR pos,int damage,unsigned int color);
 private:
 	void DrawHp();
 	void DrawSg();
@@ -28,19 +28,24 @@ private:
 	void DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, float height, float offsetY);
 	void DrawManualUI();
 	void DrawBuffUI();
+	void DrawOperationPlayer(); // 操作中かのアイコン描画
 	void DrawDamage(VECTOR pos);
 	struct DamageText 
 	{
-		VECTOR worldPos; // 出現した3D座標
+		VECTOR worldPos; // 出現させる3D座標
 		int damage;      // 表示する数値
 		float timer;     // 残り表示時間
 		unsigned int color; // 色
+		float alpha;
 	};
+	// HPの割合
 	float m_playerHpGaugeRate;
 	float m_companionHpGaugeRate;
+	float m_bossHpGaugeRate;
+	// SGの割合
 	float m_playerSpecialGaugeRate;
 	float m_companionSpecialGaugeRate;
-	float m_bossHpGaugeRate;
+	// HP関連の画像のハンドル
 	int m_hpGaugeFrameHandle;
 	int m_hpGaugeHandle;
 	int m_sgGaugeHandle;
@@ -48,9 +53,11 @@ private:
 	int m_bossHPGaugeFlameHandle;
 	int m_enemyHPHandle;
 	int m_enemyHPFrameHandle;
+	// アイコンの画像のハンドル
 	int m_warriorIconHandle;
 	int m_wizardIconHandle;
 	int m_fontHandle;
+	int m_damageFontHandle;
 	int m_manualFontHandle;
 	int m_aButtonHandle;
 	int m_bButtonHandle;
@@ -63,10 +70,11 @@ private:
 	int m_manualIconHandle;
 	int m_buffIconHandle;
 	int m_buffSwapIconHandle; // 交代時の一時的な攻撃力UPのバフ
-	int m_operationPlayerUI;
+	int m_operationPlayerUI; // 操作権ののアイコン
 	bool m_isDisplayManual;
 	bool m_isDisplayBossHp;
 	bool m_isOperationWarrior;
+	std::vector<DamageText> m_damageTexts;
 	std::shared_ptr<Player> m_pPlayer;
 	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;
 	std::vector<std::shared_ptr<StrongEnemy>> m_pStrongEnemies;

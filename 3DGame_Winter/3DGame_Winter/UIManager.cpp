@@ -95,9 +95,9 @@ namespace
 	constexpr unsigned int kScoreColor = 0xffdead;
 
 	constexpr int kBuffIconPosY = 590;
-	// 経過時間の位置
-	constexpr int kTimePosX = 830;
-	constexpr unsigned int kTimeColor = 0xff4500;
+	constexpr float kDamagePosOffSetY = 200.0f;
+	constexpr float kDisplayTime = 10.0f;
+	constexpr float kFloatSpeed = 0.5f;
 	constexpr int kUIPosX = 1050;
 	constexpr int kUITextPosX = 1100;
 	constexpr int kComboButtonX1 = 1015;
@@ -107,6 +107,7 @@ namespace
 	constexpr int kFontTextSize = 20;
 	constexpr int kManualFontTextSize = 10;
 	constexpr int kFontSize = 15;
+	constexpr int kDamageFontSize = 25;
 	constexpr int kFontThick = 5;
 }
 
@@ -126,6 +127,7 @@ UIManager::UIManager():
 	m_warriorIconHandle(-1),
 	m_wizardIconHandle(-1),
 	m_fontHandle(-1),
+	m_damageFontHandle(-1),
 	m_manualFontHandle(-1),
 	m_aButtonHandle(-1),
 	m_bButtonHandle(-1),
@@ -180,6 +182,7 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_manualFrameHandle = LoadGraph(L"Data/UI/frame.png");
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_manualFontHandle = CreateFontToHandle(L"游明朝 Demibold", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
+	m_damageFontHandle = CreateFontToHandle(L"Arial Black", kDamageFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 }
 
 void UIManager::End()
@@ -207,6 +210,7 @@ void UIManager::End()
 	DeleteGraph(m_operationPlayerUI);
 	DeleteFontToHandle(m_fontHandle);
 	DeleteFontToHandle(m_manualFontHandle);
+	DeleteFontToHandle(m_damageFontHandle);
 	m_isDisplayBossHp = false;
 }
 
@@ -219,6 +223,28 @@ void UIManager::Updata()
 
 	m_playerSpecialGaugeRate = static_cast<float>(m_pPlayer->GetSpecialGauge()) / 100.0f;
 	m_companionSpecialGaugeRate = static_cast<float>(m_pCompanion->GetSpecialGauge()) / 100.0f;
+
+	for (auto it = m_damageTexts.begin(); it != m_damageTexts.end();)
+	{
+		// 表示時間を減らす
+		it->timer -= 1.0f / kDisplayTime;
+		// テキストを浮上させる
+		it->worldPos.y += kFloatSpeed;
+		// テキストを徐々に透明にする
+		if (it->timer < 3.0f)
+		{
+			it->alpha = it->timer / 3.0f;
+		}
+		// 表示時間が終わったら削除
+		if (it->timer <= 0)
+		{
+			it = m_damageTexts.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
 
 	if (Pad::isTrigger(PAD_INPUT_8) && !m_isDisplayManual)
 	{
@@ -249,6 +275,20 @@ void UIManager::Draw()
 	}
 	DrawBuffUI();
 	DrawOperationPlayer();
+	for (const auto& info : m_damageTexts)
+	{
+		VECTOR screenPos = ConvWorldPosToScreenPos(info.worldPos);
+		// 透明度の設定
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255 * info.alpha));
+		// ダメージの描画
+		// 見やすいように影の描画
+		DrawFormatStringToHandle(static_cast<int>(screenPos.x + 2), static_cast<int>(screenPos.y + 2), 
+								 GetColor(0, 0, 0), m_damageFontHandle, L"%d", info.damage);
+		// 実際のダメージ表示
+		DrawFormatStringToHandle(static_cast<int>(screenPos.x), static_cast<int>(screenPos.y),
+								 info.color, m_damageFontHandle, L"%d", info.damage);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
 	/*DINPUT_JOYSTATE input;
 	int i;
 	int Color;
@@ -269,6 +309,21 @@ void UIManager::Draw()
 		DrawFormatString(64 + i % 8 * 64, 64 + i / 8 * 16, Color,
 			L"%2d:%d", i, input.Buttons[i]);
 	}*/
+}
+
+void UIManager::ShowDamageNumber(VECTOR pos, int damage, unsigned int color)
+{
+	// ダメージの情報
+	DamageText newDamageText;
+	newDamageText.damage = damage;
+	newDamageText.worldPos = pos;
+	newDamageText.worldPos.y = pos.y+ kDamagePosOffSetY;
+	newDamageText.color = color;
+	// 演出用のパラメータ
+	newDamageText.timer = kDisplayTime;
+	newDamageText.alpha = 1.0f;
+	// リストに登録
+	m_damageTexts.push_back(newDamageText);
 }
 
 void UIManager::DrawHp()

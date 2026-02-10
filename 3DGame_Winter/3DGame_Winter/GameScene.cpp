@@ -115,10 +115,18 @@ SceneBase* GameScene::Update()
 	for (auto& enemy : m_pNormalEnemies)
 	{
 		enemy->Update();
+		for (const auto& res : enemy->PopDamageResults())
+		{
+			m_pUIManager->ShowDamageNumber(res.pos, res.damage, res.color); // ボスに発生させたダメージを表示するためにUIManagerに情報を渡す
+		}
 	}
 	for (auto& enemy : m_pStrongEnemies)
 	{
 		enemy->Update();
+		for (const auto& res : enemy->PopDamageResults())
+		{
+			m_pUIManager->ShowDamageNumber(res.pos, res.damage, res.color); // ボスに発生させたダメージを表示するためにUIManagerに情報を渡す
+		}
 	}
 	m_pStage->Update();
 	if (Pad::isTrigger(PAD_INPUT_6)) // RBボタンでプレイヤーとコンパニオンの切り替え
@@ -189,11 +197,15 @@ SceneBase* GameScene::Update()
 	m_pWorldCollision->Update();
 	m_pFlyingEnemy->Update();
 	m_pBossEnemy->Update();
+	auto results = m_pBossEnemy->PopDamageResults(); // ボスに発生させたダメージを表示するためにUIManagerに情報を渡す
+	for (const auto& res : results)
+	{
+		m_pUIManager->ShowDamageNumber(res.pos, res.damage, res.color);
+	}
 	m_pSkyDome->Update();
 	m_pChest->Update();
 	m_pChest->SetBattleActiveFlag(m_pBattleAreaManager->IsBattleAreaActive());
 	//m_pStrongEnemy->Update();
-	
 	m_pEffectManager->Update();
 	
 	// 操作中のキャラクターを決定
@@ -208,7 +220,7 @@ SceneBase* GameScene::Update()
 	}
 
 	// BattleAreaManagerの更新
-	// activeCharacter を渡すことで、操作中のキャラの位置を基準にエリア判定が行われます
+	// activeCharacter を渡すことで、操作中のキャラの位置を基準にエリア判定が行われる
 	m_pBattleAreaManager->Update(activeCharacter, m_pNormalEnemies, m_pStrongEnemies);
 	m_pUIManager->Updata();
 	m_pScoreManager->Updata();
