@@ -23,9 +23,13 @@ public:
 	virtual void OnAttack();
 	virtual void OnDamage(int damage,bool isFromPlayerDamage);
 	bool IsAttackCharge() { return m_isAttackCharge; }
+	// 攻撃者別の無敵時間を取得
+	float GetInvincibilityByAttacker(bool isPlayer); 
 	std::vector<DamageResult> PopDamageResults();
 protected:
 	void SearchTarget();
+	bool CheckAndSetInvincibility(bool isPlayer);
+	void UpdateInvincibilityTimer();
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Companion> m_pCompanion;
 	std::vector<DamageResult> m_damageResults; // 発生したダメージのリスト
@@ -39,6 +43,8 @@ protected:
 	float m_AttackCoolTime;
 	float m_playerHate;
 	float m_companionHate;
+	float m_playerInvincibilityTimer;
+	float m_companionInvincibilityTimer;
 	bool m_isAttackCharge;
 	float m_deathTimer;
 	int m_finalDamage;  // ダメージの減衰や累加を計算した後実際に与えるダメージの値

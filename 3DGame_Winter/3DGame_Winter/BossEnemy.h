@@ -22,6 +22,7 @@ private:
 	void UpdateDefault();
 	void UpdateMove();
 	void SetShield();
+	void UpdateState();
 	enum BossEnemyState
 	{
 		DEFAULT,

@@ -150,7 +150,6 @@ void SoundManager::PlayWarriorAttackSE(int attackCount)
 		PlaySoundMem(m_playerThirdAttackSoundHandle, DX_PLAYTYPE_BACK);
 		break;
 	}
-	
 }
 
 void SoundManager::PlayEnemyAttackSE()
@@ -203,9 +202,18 @@ void SoundManager::SwitchToBossBGM()
 void SoundManager::PlayChestSE(int no)
 {
 	int soundHandle = -1;
-	if (no == 0) soundHandle = m_addSpecialGaugeHandle;
-	else if (no == 1) soundHandle = m_recoverHpHandle;
-	else soundHandle = m_powerUpHandle;
+	if (no == 0)
+	{
+		soundHandle = m_addSpecialGaugeHandle;
+	}
+	else if (no == 1)
+	{
+		soundHandle = m_recoverHpHandle;
+	}
+	else
+	{
+		soundHandle = m_powerUpHandle;
+	}
 
 	PlaySoundMem(soundHandle, DX_PLAYTYPE_BACK);
 }

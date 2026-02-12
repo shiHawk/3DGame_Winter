@@ -51,6 +51,7 @@ namespace
 	constexpr int kWizardSgPosY = 678;
 
 	// ボスHPゲージ
+	constexpr int kMaxDestWidth = 400;
 	constexpr int kBossMaxHp = 1000; // ボスの最大HP
 	constexpr int kBossHpFrameX1 = 274;
 	constexpr int kBossHpFrameY1 = 550;
@@ -283,7 +284,7 @@ void UIManager::Draw()
 		// ダメージの描画
 		// 見やすいように影の描画
 		DrawFormatStringToHandle(static_cast<int>(screenPos.x + 2), static_cast<int>(screenPos.y + 2), 
-								 GetColor(0, 0, 0), m_damageFontHandle, L"%d", info.damage);
+								 0x000000, m_damageFontHandle, L"%d", info.damage);
 		// 実際のダメージ表示
 		DrawFormatStringToHandle(static_cast<int>(screenPos.x), static_cast<int>(screenPos.y),
 								 info.color, m_damageFontHandle, L"%d", info.damage);
@@ -361,8 +362,7 @@ void UIManager::DrawSg()
 void UIManager::DrawBossHp()
 {
 	// バーの最大幅を少し狭くして、左右の装飾にぶつからないように調整
-	int maxDestWidth = 400; 
-	int currentDestWidth = static_cast<int>(maxDestWidth * m_bossHpGaugeRate);
+	int currentDestWidth = static_cast<int>(kMaxDestWidth * m_bossHpGaugeRate);
 
 	// 1. ボスHPフレーム（背景・装飾）を重ねて描画
 	DrawRectExtendGraph(kBossHpFrameX1, kBossHpFrameY1, kDistX2, kBossHpFrameY2, 

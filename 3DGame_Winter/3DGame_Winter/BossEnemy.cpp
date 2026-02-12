@@ -123,124 +123,10 @@ void BossEnemy::Update()
     m_targetAngle = atan2f(m_toPlayerDir.x, m_toPlayerDir.z);
 
     // 2 無敵時間とダメージ処理
-    if (m_invincibilityTimer > 0.0f)
-    {
-        m_invincibilityTimer--;
-        
-        if (m_invincibilityTimer <= 0.0f)
-        {
-            m_isHitFlag = false;
-        }
-    }
+    UpdateInvincibilityTimer();
 
     // 3 状態遷移
-    switch (m_state)
-    {
-    case BossEnemyState::DEFAULT:
-        UpdateDefault(); // 次の行動を決める
-        break;
-
-    case BossEnemyState::MOVE:
-        UpdateMove();    // プレイヤーに近づく
-        break;
-
-    case BossEnemyState::NORMAL_ATTACK:
-        // 通常攻撃（素早い攻撃）
-        m_enemyAttack.timer--;
-        ChangeAnim(m_modelHandle, kNormalAnimNo, false, kAttackAnimIncrement);
-        if (m_enemyAttack.timer <= 0)
-        {
-            m_state = BossEnemyState::COOLDOWN;
-            m_enemyAttack.active = false;
-            m_attackTimer = kCoolDownTime;
-        }
-        break;
-
-    case BossEnemyState::STRONG_ATTACK_CHARGE: // 強攻撃の溜め（予兆）
-        m_attackTimer -= 1.0f / kFramesPerSecond;
-        if (m_attackTimer > 0.2f)
-        {
-            m_storngAttackTargetPos = m_targetPos;
-        }
-        else
-        {
-            m_isAttackCharge = true;
-            VECTOR dir = VNorm(VSub(m_storngAttackTargetPos, m_pos)); // 攻撃位置を固定したらその方向を向き続ける
-            m_targetAngle = atan2f(dir.x, dir.z);
-        }
-        ChangeAnim(m_modelHandle, kChargeAnimNo, false, kChargeAnimIncrement); // ゆっくり溜めるアニメ
-        if (m_shieldEffectHandle != -1)
-        {
-            // 現在のボスの位置と向きからシールドの座標を再計算
-            VECTOR forwardDir = VGet(sinf(m_targetAngle), 0.0f, cosf(m_targetAngle));
-            VECTOR shieldPos = VAdd(m_pos, VScale(forwardDir, kShieldRange));
-            m_pEffectManager->UpdateShieldEffect(m_shieldEffectHandle, shieldPos, m_targetAngle);
-        }
-        if (m_attackTimer <= 0)
-        {
-            m_isAttackCharge = false;
-            OnStrongAttack(); // 強攻撃実行
-            m_state = BossEnemyState::STRONG_ATTACK;
-        }
-        break;
-
-    case BossEnemyState::RANGE_ATTACK_CHARGE: // 範囲攻撃の溜め（予兆）
-        m_isAttackCharge = true;
-        m_attackTimer -= 1.0f / kFramesPerSecond;
-        ChangeAnim(m_modelHandle, kChargeAnimNo, false, kChargeAnimIncrement);
-        if (m_shieldEffectHandle != -1) 
-        {
-            // 現在のボスの位置と向きからシールドの座標を再計算
-            VECTOR forwardDir = VGet(sinf(m_targetAngle), 0.0f, cosf(m_targetAngle));
-            VECTOR shieldPos = VAdd(m_pos, VScale(forwardDir, kShieldRange));
-            m_pEffectManager->UpdateShieldEffect(m_shieldEffectHandle, shieldPos, m_targetAngle);
-        }
-        if (m_attackTimer <= 0)
-        {
-            m_isAttackCharge = false;
-            OnRangeAttack(); // 範囲攻撃実行
-            m_state = BossEnemyState::RANGE_ATTACK;
-        }
-        break;
-
-    case BossEnemyState::STRONG_ATTACK:
-    {
-        // 攻撃演出中
-        m_enemyAttack.timer--;
-        VECTOR dir = VNorm(VSub(m_storngAttackTargetPos, m_pos)); // 攻撃中も攻撃位置の方向を向き続ける
-        m_targetAngle = atan2f(dir.x, dir.z);
-        ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, 1.0f);
-        if (m_enemyAttack.timer <= 0)
-        {
-            m_enemyAttack.active = false;
-            m_storngAttackTargetPos = kDefaultTarfetPos;
-            m_state = BossEnemyState::COOLDOWN;
-            m_attackTimer = kCoolDownTime; // HP半分以下で隙短縮
-        }
-        break;
-    }
-    case BossEnemyState::RANGE_ATTACK:
-        // 攻撃演出中
-        m_enemyAttack.timer--;
-        ChangeAnim(m_modelHandle, kRangeAttackAnimNo, false, kAttackAnimIncrement);
-        if (m_enemyAttack.timer <= 0)
-        {
-            m_enemyAttack.active = false;
-            m_state = BossEnemyState::COOLDOWN;
-            m_attackTimer = kCoolDownTime; // HP半分以下で隙短縮
-        }
-        break;
-
-    case BossEnemyState::COOLDOWN:
-        // 攻撃後の隙
-        m_attackTimer -= 1.0f / kFramesPerSecond;
-        ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-        if (m_attackTimer <= 0)
-        {
-            m_state = BossEnemyState::DEFAULT;
-        }
-        break;
-    }
+    UpdateState();
 
     UpdateAnim(m_modelHandle);
     MV1SetPosition(m_modelHandle, m_pos);
@@ -326,10 +212,12 @@ void BossEnemy::OnRangeAttack()
 
 void BossEnemy::OnDamage(int damage, bool isHatePlayer)
 {
-    if (m_invincibilityTimer > 0.0f || m_state == BossEnemyState::DEAD) return;
+    //if (m_invincibilityTimer > 0.0f || m_state == BossEnemyState::DEAD) return;
+    // 攻撃者に応じて無敵判定を分ける
+    CheckAndSetInvincibility(isHatePlayer);
     m_isHitFlag = true;
     //m_hp -= damage;
-    m_invincibilityTimer = kInvincibilityTime;
+    //m_invincibilityTimer = kInvincibilityTime;
     if (isHatePlayer) // 近接キャラから攻撃を受けたとき
     {
         m_playerHate += static_cast<float>(damage);
@@ -346,7 +234,7 @@ void BossEnemy::OnDamage(int damage, bool isHatePlayer)
     }
     else
     {
-        m_companionHate += static_cast<float>(damage) * 9;
+        m_companionHate += static_cast<float>(damage) * 8;
         if (m_state == BossEnemyState::STRONG_ATTACK_CHARGE || m_state == BossEnemyState::RANGE_ATTACK_CHARGE)
         {
             m_finalDamage = static_cast<float>(damage) * kCumulativeRate; // チャージ中は遠距離攻撃のダメージを増やす
@@ -374,7 +262,12 @@ void BossEnemy::OnDamage(int damage, bool isHatePlayer)
     //    ChangeAnim(m_modelHandle,kDeathAnimNo,false,0.4f);
     //    //m_pEffectManager->PlayBossDeathEffect(m_pos);
     //}
-    if (m_hp < 0) m_hp = 0;
+    if (m_hp < 0)
+    {
+        m_playerInvincibilityTimer = kInvincibilityTime;
+        m_companionInvincibilityTimer = kInvincibilityTime;
+        m_hp = 0;
+    }
 }
 
 float BossEnemy::GetColRadius()
@@ -449,4 +342,115 @@ void BossEnemy::SetShield()
     VECTOR shieldPos = VAdd(m_pos, VScale(forwardDir, kShieldRange));
     //エフェクト再生
     m_shieldEffectHandle = m_pEffectManager->PlayShieldEffect(shieldPos, m_targetAngle);
+}
+
+void BossEnemy::UpdateState()
+{
+    switch (m_state)
+    {
+    case BossEnemyState::DEFAULT:
+        UpdateDefault(); // 次の行動を決める
+        break;
+
+    case BossEnemyState::MOVE:
+        UpdateMove();    // プレイヤーに近づく
+        break;
+
+    case BossEnemyState::NORMAL_ATTACK:
+        // 通常攻撃（素早い攻撃）
+        m_enemyAttack.timer--;
+        ChangeAnim(m_modelHandle, kNormalAnimNo, false, kAttackAnimIncrement);
+        if (m_enemyAttack.timer <= 0)
+        {
+            m_state = BossEnemyState::COOLDOWN;
+            m_enemyAttack.active = false;
+            m_attackTimer = kCoolDownTime;
+        }
+        break;
+
+    case BossEnemyState::STRONG_ATTACK_CHARGE: // 強攻撃の溜め（予兆）
+        m_attackTimer -= 1.0f / kFramesPerSecond;
+        if (m_attackTimer > 0.2f)
+        {
+            m_storngAttackTargetPos = m_targetPos;
+        }
+        else
+        {
+            m_isAttackCharge = true;
+            VECTOR dir = VNorm(VSub(m_storngAttackTargetPos, m_pos)); // 攻撃位置を固定したらその方向を向き続ける
+            m_targetAngle = atan2f(dir.x, dir.z);
+        }
+        ChangeAnim(m_modelHandle, kChargeAnimNo, false, kChargeAnimIncrement); // ゆっくり溜めるアニメ
+        if (m_shieldEffectHandle != -1)
+        {
+            // 現在のボスの位置と向きからシールドの座標を再計算
+            VECTOR forwardDir = VGet(sinf(m_targetAngle), 0.0f, cosf(m_targetAngle));
+            VECTOR shieldPos = VAdd(m_pos, VScale(forwardDir, kShieldRange));
+            m_pEffectManager->UpdateShieldEffect(m_shieldEffectHandle, shieldPos, m_targetAngle);
+        }
+        if (m_attackTimer <= 0)
+        {
+            m_isAttackCharge = false;
+            OnStrongAttack(); // 強攻撃実行
+            m_state = BossEnemyState::STRONG_ATTACK;
+        }
+        break;
+
+    case BossEnemyState::RANGE_ATTACK_CHARGE: // 範囲攻撃の溜め（予兆）
+        m_isAttackCharge = true;
+        m_attackTimer -= 1.0f / kFramesPerSecond;
+        ChangeAnim(m_modelHandle, kChargeAnimNo, false, kChargeAnimIncrement);
+        if (m_shieldEffectHandle != -1)
+        {
+            // 現在のボスの位置と向きからシールドの座標を再計算
+            VECTOR forwardDir = VGet(sinf(m_targetAngle), 0.0f, cosf(m_targetAngle));
+            VECTOR shieldPos = VAdd(m_pos, VScale(forwardDir, kShieldRange));
+            m_pEffectManager->UpdateShieldEffect(m_shieldEffectHandle, shieldPos, m_targetAngle);
+        }
+        if (m_attackTimer <= 0)
+        {
+            m_isAttackCharge = false;
+            OnRangeAttack(); // 範囲攻撃実行
+            m_state = BossEnemyState::RANGE_ATTACK;
+        }
+        break;
+
+    case BossEnemyState::STRONG_ATTACK:
+    {
+        // 攻撃演出中
+        m_enemyAttack.timer--;
+        VECTOR dir = VNorm(VSub(m_storngAttackTargetPos, m_pos)); // 攻撃中も攻撃位置の方向を向き続ける
+        m_targetAngle = atan2f(dir.x, dir.z);
+        ChangeAnim(m_modelHandle, kStrongAttackAnimNo, false, 1.0f);
+        if (m_enemyAttack.timer <= 0)
+        {
+            m_enemyAttack.active = false;
+            m_storngAttackTargetPos = kDefaultTarfetPos;
+            m_state = BossEnemyState::COOLDOWN;
+            m_attackTimer = kCoolDownTime;
+        }
+        break;
+    }
+    case BossEnemyState::RANGE_ATTACK:
+        // 攻撃演出中
+        m_enemyAttack.timer--;
+        ChangeAnim(m_modelHandle, kRangeAttackAnimNo, false, kAttackAnimIncrement);
+        if (m_enemyAttack.timer <= 0)
+        {
+            m_enemyAttack.active = false;
+            m_state = BossEnemyState::COOLDOWN;
+            m_attackTimer = kCoolDownTime;
+        }
+        break;
+
+    case BossEnemyState::COOLDOWN:
+        // 攻撃後の隙
+        m_attackTimer -= 1.5f / kFramesPerSecond;
+        ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+        if (m_attackTimer <= 0)
+        {
+            m_state = BossEnemyState::DEFAULT;
+        }
+        break;
+    }
 }

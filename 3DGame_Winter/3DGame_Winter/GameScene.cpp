@@ -194,7 +194,7 @@ SceneBase* GameScene::Update()
 
 	// カメラのロックオンは操作キャラのターゲットに合わせる
 	m_pCamera->SetLockOnPosition(targetForMain);
-
+	m_pPlayer->SetEnemyAttackSensingFlag(IsEnemyAttacking(m_pPlayer->GetPos()));
 	// ターゲットが存在するかチェック（x座標が有効範囲内か）
 	bool isTargetValid = (targetForMain.x < 100000.0f);
 

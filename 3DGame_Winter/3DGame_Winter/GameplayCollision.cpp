@@ -4,6 +4,7 @@ namespace
 	constexpr float kKnockbackPower = 5.0f;
 	constexpr float kHitBoxScale = 0.001f;
 	constexpr float kPushRate = 0.1f;
+	constexpr int kSpecialGaugeIncrement = 5;
 }
 GameplayCollision::GameplayCollision():
 	m_overLapData({ 0.0f,0.0f,0.0f },0.0f, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f },0.0f)
@@ -93,7 +94,7 @@ void GameplayCollision::CheckPlayerAttack()
 	// 敵の当たり判定情報を取得
 	for (auto& enemy : m_pNormalEnemies)
 	{
-		if (enemy->IsDead() || enemy->GetInvincibilityTimer() > 0.0f) continue;
+		if (enemy->IsDead() || enemy->GetInvincibilityByAttacker(true) > 0.0f) continue;
 		float enemyColRadius = enemy->GetColRadius();
 		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pPlayer->GetAttackPos());
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
@@ -104,7 +105,7 @@ void GameplayCollision::CheckPlayerAttack()
 			m_hitPositions.push_back(hitPos); // リストに保存
 
 			enemy->OnDamage(m_pPlayer->GetAttackPower(),true);
-			m_pPlayer->AddSpecialGauge(5);
+			m_pPlayer->AddSpecialGauge(kSpecialGaugeIncrement);
 			if (m_pPlayer->IsComboFinish())
 			{
 				// 敵を吹き飛ばすベクトルと強さを計算し、敵に適用する
@@ -117,7 +118,7 @@ void GameplayCollision::CheckPlayerAttack()
 
 	for (auto& enemy : m_pStrongEnemies)
 	{
-		if (enemy->IsDead() || enemy->GetInvincibilityTimer() > 0.0f) continue;
+		if (enemy->IsDead() || enemy->GetInvincibilityByAttacker(true) > 0.0f) continue;
 		float enemyColRadius = enemy->GetColRadius();
 		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pPlayer->GetAttackPos());
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
@@ -127,11 +128,11 @@ void GameplayCollision::CheckPlayerAttack()
 			VECTOR hitPos = VAdd(m_pPlayer->GetAttackPos(), VScale(normVec, playerAttackRadius));
 			m_hitPositions.push_back(hitPos); // リストに保存
 			enemy->OnDamage(m_pPlayer->GetAttackPower(),true);
-			m_pPlayer->AddSpecialGauge(5);
+			m_pPlayer->AddSpecialGauge(kSpecialGaugeIncrement);
 		}
 	}
 
-	if (!m_pBossEnemy->IsDead() && m_pBossEnemy->GetInvincibilityTimer() <= 0.0f)
+	if (!m_pBossEnemy->IsDead() && m_pBossEnemy->GetInvincibilityByAttacker(true) <= 0.0f)
 	{
 		float bossEnemyColRadius = m_pBossEnemy->GetColRadius();
 		hitInfo.m_deltaVector = VSub(m_pBossEnemy->GetPos(), m_pPlayer->GetAttackPos());
@@ -143,7 +144,7 @@ void GameplayCollision::CheckPlayerAttack()
 			VECTOR hitPos = VAdd(m_pPlayer->GetAttackPos(), VScale(normVec, playerAttackRadius));
 			m_hitPositions.push_back(hitPos); // リストに保存
 			m_pBossEnemy->OnDamage(m_pPlayer->GetAttackPower(),true);
-			m_pPlayer->AddSpecialGauge(5);
+			m_pPlayer->AddSpecialGauge(kSpecialGaugeIncrement);
 		}
 	}
 
@@ -176,7 +177,7 @@ void GameplayCollision::CheckCompanionAttack()
 	// 敵の当たり判定情報を取得
 	for (auto& enemy : m_pNormalEnemies)
 	{
-		if (enemy->IsDead() || enemy->GetInvincibilityTimer() > 0.0f) continue;
+		if (enemy->IsDead() || enemy->GetInvincibilityByAttacker(false) > 0.0f) continue;
 		float enemyColRadius = enemy->GetColRadius();
 		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pCompanion->GetAttackPos());
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
@@ -186,13 +187,13 @@ void GameplayCollision::CheckCompanionAttack()
 			VECTOR hitPos = VAdd(m_pCompanion->GetAttackPos(), VScale(normVec, companionAttackRadius));
 			m_hitPositions.push_back(hitPos); // リストに保存
 			enemy->OnDamage(m_pCompanion->GetAttackPower(),false);
-			m_pCompanion->AddSpecialGauge(5);
+			m_pCompanion->AddSpecialGauge(kSpecialGaugeIncrement);
 		}
 	}
 
 	for (auto& enemy : m_pStrongEnemies)
 	{
-		if (enemy->IsDead() || enemy->GetInvincibilityTimer() > 0.0f) continue;
+		if (enemy->IsDead() || enemy->GetInvincibilityByAttacker(false) > 0.0f) continue;
 		float enemyColRadius = enemy->GetColRadius();
 		hitInfo.m_deltaVector = VSub(enemy->GetPos(), m_pCompanion->GetAttackPos());
 		hitInfo.m_distance = VSize(hitInfo.m_deltaVector);
@@ -202,11 +203,11 @@ void GameplayCollision::CheckCompanionAttack()
 			VECTOR hitPos = VAdd(m_pCompanion->GetAttackPos(), VScale(normVec, companionAttackRadius));
 			m_hitPositions.push_back(hitPos); // リストに保存
 			enemy->OnDamage(m_pCompanion->GetAttackPower(),false);
-			m_pCompanion->AddSpecialGauge(5);
+			m_pCompanion->AddSpecialGauge(kSpecialGaugeIncrement);
 		}
 	}
 
-	if (!m_pBossEnemy->IsDead() && m_pBossEnemy->GetInvincibilityTimer() <= 0.0f)
+	if (!m_pBossEnemy->IsDead() && m_pBossEnemy->GetInvincibilityByAttacker(false) <= 0.0f)
 	{
 		float bossEnemyColRadius = m_pBossEnemy->GetColRadius();
 
@@ -219,7 +220,7 @@ void GameplayCollision::CheckCompanionAttack()
 			VECTOR hitPos = VAdd(m_pCompanion->GetAttackPos(), VScale(normVec, companionAttackRadius));
 			m_hitPositions.push_back(hitPos); // リストに保存
 			m_pBossEnemy->OnDamage(m_pCompanion->GetAttackPower(),false);
-			m_pCompanion->AddSpecialGauge(5);
+			m_pCompanion->AddSpecialGauge(kSpecialGaugeIncrement);
 		}
 	}
 

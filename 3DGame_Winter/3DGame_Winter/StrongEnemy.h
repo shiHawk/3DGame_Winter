@@ -20,6 +20,7 @@ public:
 	int GetAttackPos();
 	int GetMaxHp();
 private:
+	void UpdateState();
 	enum StrongEnemyState
 	{
 		DEFAULT,

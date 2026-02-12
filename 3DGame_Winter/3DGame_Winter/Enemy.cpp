@@ -11,6 +11,7 @@ namespace
 	constexpr float kMoveDecRate = 0.8f;
 	constexpr float kHateDecayRate = 0.99f;
 	constexpr float kDistanceWeight = 1000.0f;
+	constexpr float kInvincibilityTime = 30.0f;
 	constexpr float kMaxDistanceBonus = 200.0f; // 距離によるヘイトの最大加算値
 	constexpr float kAffectRadius = 1000.0f;    // 距離ボーナスが発生する最大半径
 }
@@ -21,6 +22,8 @@ m_toPlayerDistance(0.0f),
 m_toCompanionDir({ 0.0f,0.0f,0.0f }),
 m_toCompanionDistance(0.0f),
 m_AttackCoolTime(0.0f),
+m_playerInvincibilityTimer(0.0f),
+m_companionInvincibilityTimer(0.0f),
 m_targetPos({ 0.0f,0.0f,0.0f }),
 m_playerHate(0),
 m_companionHate(0),
@@ -48,6 +51,11 @@ void Enemy::OnAttack()
 
 void Enemy::OnDamage(int damage, bool isHatePlayer)
 {
+}
+
+float Enemy::GetInvincibilityByAttacker(bool isPlayer)
+{
+	return isPlayer ? m_playerInvincibilityTimer : m_companionInvincibilityTimer;
 }
 
 std::vector<DamageResult> Enemy::PopDamageResults()
@@ -92,5 +100,45 @@ void Enemy::SearchTarget()
 	if (m_pPlayer->IsDead() && m_pCompanion->IsDead())
 	{
 		m_targetPos = kInvalidValuePos;
+	}
+}
+
+bool Enemy::CheckAndSetInvincibility(bool isPlayer)
+{
+	// 既に死んでいる場合はダメージを受けない
+	if (m_hp <= 0) return false;
+
+	if (isPlayer)
+	{
+		if (m_playerInvincibilityTimer > 0.0f) return false;
+		m_playerInvincibilityTimer = kInvincibilityTime;
+	}
+	else
+	{
+		if (m_companionInvincibilityTimer > 0.0f) return false;
+		m_companionInvincibilityTimer = kInvincibilityTime;
+	}
+	return true;
+}
+
+void Enemy::UpdateInvincibilityTimer()
+{
+	if (m_playerInvincibilityTimer > 0.0f)
+	{
+		m_playerInvincibilityTimer--;
+
+		if (m_playerInvincibilityTimer <= 0.0f)
+		{
+			m_isHitFlag = false;
+		}
+	}
+	if (m_companionInvincibilityTimer)
+	{
+		m_companionInvincibilityTimer--;
+
+		if (m_companionInvincibilityTimer <= 0.0f)
+		{
+			m_isHitFlag = false;
+		}
 	}
 }

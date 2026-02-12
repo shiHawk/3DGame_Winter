@@ -183,17 +183,18 @@ void Stage::Init()
 		// ベースモデルから新しいモデルを複製
 		int handle = MV1DuplicateModel(baseHandle);
 		// 当たり判定用のモデルは描画しない
-		if (data.typeId == 13 || data.typeId == 14 || data.typeId == 15)
+		if (data.hasCollision == 1)
 		{
-			MV1SetVisible(handle,false);
+			MV1SetVisible(handle, false);
 		}
+		
+		// 座標を設定
 		VECTOR scaledPos;
 		scaledPos.x = data.position.x * kPositionScale;
 		scaledPos.y = data.position.y * kPositionScale;
 		scaledPos.z = data.position.z * kPositionScale;
-		// 座標を設定
-		//MV1SetPosition(handle, scaledPos);
 
+		// スケールを設定
 		VECTOR finalScale = data.scale;
 		// もし補正マップに登録されているIDなら、その倍率を掛ける
 		if (modelScaleFix.count(data.typeId) > 0)
@@ -203,9 +204,6 @@ void Stage::Init()
 			finalScale.y *= fixRate;
 			finalScale.z *= fixRate;
 		}
-
-		// スケールを設定
-		//MV1SetScale(handle, finalScale);
 
 		// 1. クォータニオンから回転行列を取得
 		MATRIX rotationMatrix = data.quaternion.GetMatrix();
@@ -225,7 +223,7 @@ void Stage::Init()
 		finalMatrix.m[3][2] = scaledPos.z;
 		MV1SetMatrix(handle, finalMatrix);
 
-		if (data.typeId == 13 || data.typeId == 14 || data.typeId == 15)
+		if (data.hasCollision == 1)
 		{
 			MV1SetupCollInfo(handle, -1);
 			if (data.typeId == 13 || data.typeId == 14)

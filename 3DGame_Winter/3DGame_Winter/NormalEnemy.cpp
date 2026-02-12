@@ -107,6 +107,7 @@ void NormalEnemy::Update()
 	}
 	else
 	{
+		UpdateInvincibilityTimer();
 		// 移動ベクトル(m_vec)をリセット 
 		m_vec.x = 0.0f;
 		m_vec.z = 0.0f;
@@ -133,21 +134,13 @@ void NormalEnemy::Update()
 			// 待機アニメーションを継続 
 			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
 		}
-		else if (m_invincibilityTimer > 0.0f)
+		else if (GetInvincibilityByAttacker(true) > 0.0f || GetInvincibilityByAttacker(false) > 0.0f)
 		{
 			// 無敵時間タイマーを減らす
 			//printfDx(L"m_invincibilityTimer:%f\n", m_invincibilityTimer);
 			m_invincibilityTimer--;
 			ChangeAnim(m_modelHandle, kDamageAnimNo, false, kDamageAnimIncrement);
 			MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 0.6f, 0.6f, 1.0f));
-			if (m_invincibilityTimer <= 0.0f)
-			{
-				m_invincibilityTimer = 0.0f;
-				m_isHitFlag = false;
-				MV1SetDifColorScale(m_modelHandle, GetColorF(1.0f, 1.0f, 1.0f, m_alpha));
-				// 無敵時間が終わったら、強制的に待機アニメーションに戻す
-				ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-			}
 		}
 		else
 		{
@@ -236,7 +229,8 @@ void NormalEnemy::OnAttack()
 
 void NormalEnemy::OnDamage(int damage, bool isHatePlayer)
 {
-	if (m_invincibilityTimer > 0.0f) return;
+	if (!CheckAndSetInvincibility(isHatePlayer)) return;
+	//CheckAndSetInvincibility(isHatePlayer);
 	m_enemyAttack.active = false;
 	m_enemyAttack.timer = 0.0f;
 	m_isHitFlag = true;
@@ -259,6 +253,8 @@ void NormalEnemy::OnDamage(int damage, bool isHatePlayer)
 		m_hp = 0;
 		m_vec.x = 0.0f;
 		m_vec.z = 0.0f;
+		m_playerInvincibilityTimer = kInvincibilityTime;
+		m_companionInvincibilityTimer = kInvincibilityTime;
 		ChangeAnim(m_modelHandle,kDeathAnimNo,false, kDeathAnimIncrement);
 	}
 	
@@ -267,7 +263,7 @@ void NormalEnemy::OnDamage(int damage, bool isHatePlayer)
 	result.damage = m_finalDamage;
 	result.color = m_damageColor;
 	m_damageResults.push_back(result); // ダメージの情報を表示用のリストに登録
-	m_invincibilityTimer = kInvincibilityTime;
+	//m_invincibilityTimer = kInvincibilityTime;
 	//printfDx(L"m_hp:%d\n",m_hp);
 }
 

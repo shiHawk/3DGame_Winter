@@ -81,6 +81,7 @@ void StrongEnemy::End()
 
 void StrongEnemy::Update()
 {
+	UpdateInvincibilityTimer();
 	SearchTarget();
 	m_toPlayerDistance = VSize(VSub(m_targetPos, m_pos));
 	m_toPlayerDir = VNorm(VSub(m_targetPos, m_pos));
@@ -91,9 +92,8 @@ void StrongEnemy::Update()
 	}
 	if (m_state != StrongEnemyState::DEAD)
 	{
-		if (m_invincibilityTimer > 0.0f)
+		if (GetInvincibilityByAttacker(true) > 0.0f || GetInvincibilityByAttacker(false) > 0.0f)
 		{
-			m_invincibilityTimer--;
 			if (kMaxHp * 0.5f >= m_hp)
 			{
 				// HPÇ™îºï™à»â∫Ç»ÇÁãØÇﬁ(É_ÉÅÅ[ÉWÉäÉAÉNÉVÉáÉìÇÇ∆ÇÈ)
@@ -107,94 +107,7 @@ void StrongEnemy::Update()
 		}
 	}
 	
-	switch (m_state)
-	{
-	case StrongEnemy::DEFAULT:
-		// îÕàÕçUåÇÇÃîªíf çUåÇîºåaÇÊÇËâìÇ≠ÅAîÕàÕçUåÇÇÃç≈ëÂîºåaÇ…ãﬂÇ¢ãóó£ÇÃèÍçá
-		if (m_toPlayerDistance > kAttackRadius + 10.0f && m_toPlayerDistance < kRangeAttackRadius * 0.8f) 
-		{
-			int rand = GetRand(kRandMax);
-			//printfDx(L"rand:%d\n", rand);
-			if (rand < kRangeAttackProbability)
-			{
-				m_state = StrongEnemyState::RANGEATTACK_CHARGE;
-				m_attackTimer = kChageTime;
-				break;
-			}
-		}
-		// í èÌçUåÇÇÃîªíf(ÉLÉÉÉâÉNÉ^Å[ÇÃè’ìÀîºåaÇÃÇ∑ÇÆäOë§Ç≠ÇÁÇ¢)
-		if (m_toPlayerDistance <= kAttackRadius + kColRadius)
-		{
-			OnAttack();
-			m_state = StrongEnemyState::NORMALATTACK;
-			break;
-		}
-
-		// à⁄ìÆ
-		if (m_toPlayerDistance > kColRadius && m_toPlayerDistance < kTrackingRange)
-		{
-			if (!m_pPlayer->IsDead() || !m_pCompanion->IsDead())
-			{
-				m_pos.x += m_toPlayerDir.x * kMoveSpeed;
-				m_pos.z += m_toPlayerDir.z * kMoveSpeed;
-				ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
-			}
-		}
-		else 
-		{
-			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
-		}
-		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
-		break;
-	case StrongEnemy::NORMALATTACK:
-		m_enemyAttack.timer--;
-		ChangeAnim(m_modelHandle, kAttackAnimNo, false, kAttackAnimIncrement);
-		if (m_enemyAttack.timer < 0.0f)
-		{
-			m_state = StrongEnemyState::DEFAULT;
-		}
-		break;
-	case StrongEnemy::RANGEATTACK_CHARGE:
-		m_isAttackCharge = true;
-		m_attackTimer -= 1.5f / kFramesPerSecond;
-		ChangeAnim(m_modelHandle, kRangeAttackChargeAnimNo, false, kAttackAnimIncrement);
-		if (m_attackTimer < 0.0f)
-		{
-			m_isAttackCharge = false;
-			OnRangeAttack();
-			m_state = StrongEnemyState::RANGEATTACK;
-		}
-		break;
-	case StrongEnemy::RANGEATTACK:
-		m_enemyAttack.timer--;
-		ChangeAnim(m_modelHandle,kRangeAttackAnimNo,false,kAttackAnimIncrement);
-		if (m_enemyAttack.timer < 0.0f)
-		{
-			m_state = StrongEnemyState::COOLDOWN;
-			m_attackTimer = kCoolDownTime;
-			m_enemyAttack.active = false;
-		}
-		break;
-	case StrongEnemy::COOLDOWN:
-		m_attackTimer -= 1.0f / kFramesPerSecond;
-		ChangeAnim(m_modelHandle, kIdleAnimNo, false, kAttackAnimIncrement);
-		if (m_attackTimer < 0.0f)
-		{
-			m_state = StrongEnemyState::DEFAULT;
-		}
-		break;
-	case StrongEnemy::DEAD:
-		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDamageAnimIncrement);
-		m_vec = { 0.0f,0.0f,0.0f };
-		m_deathTimer += 1.0f / kFramesPerSecond;
-		if (GetIsAnimEnd() || m_deathTimer > 3.0f)
-		{
-			End();
-			m_isDead = true;
-			return;
-		}
-		break;
-	}
+	UpdateState();
 	
 	if (!m_isDead)
 	{
@@ -242,7 +155,8 @@ void StrongEnemy::OnRangeAttack()
 void StrongEnemy::OnDamage(int damage, bool isHatePlayer)
 {
 	// Ç∑Ç≈Ç…éÄÇÒÇ≈Ç¢ÇÈÅAÇ‹ÇΩÇÕñ≥ìGÇ»ÇÁñ≥éã
-	if (m_state == StrongEnemyState::DEAD || m_invincibilityTimer > 0.0f) return;
+	//if (m_state == StrongEnemyState::DEAD || m_invincibilityTimer > 0.0f) return;
+	if (!CheckAndSetInvincibility(isHatePlayer)) return;
 
 	// 1. êÊÇ…É_ÉÅÅ[ÉWåvéZÇçsÇ§
 	if (isHatePlayer)
@@ -269,12 +183,14 @@ void StrongEnemy::OnDamage(int damage, bool isHatePlayer)
 	if (m_hp <= 0)
 	{
 		m_hp = 0;
+		m_playerInvincibilityTimer = kInvincibilityTime;
+		m_companionInvincibilityTimer = kInvincibilityTime;
 		m_state = StrongEnemyState::DEAD;
 		m_enemyAttack.active = false; // çUåÇîªíËÇè¡Ç∑
 		// ÉãÅ[Évçƒê∂ÇÕ false Ç…Ç∑ÇÈ
 		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDamageAnimIncrement);
 	}
-	m_invincibilityTimer = kInvincibilityTime;
+	//m_invincibilityTimer = kInvincibilityTime;
 }
 
 float StrongEnemy::GetColRadius()
@@ -295,4 +211,91 @@ int StrongEnemy::GetAttackPos()
 int StrongEnemy::GetMaxHp()
 {
 	return kMaxHp;
+}
+
+void StrongEnemy::UpdateState()
+{
+	switch (m_state)
+	{
+	case StrongEnemy::DEFAULT:
+		// í èÌçUåÇÇÃîªíf(ÉLÉÉÉâÉNÉ^Å[ÇÃè’ìÀîºåaÇÃÇ∑ÇÆäOë§Ç≠ÇÁÇ¢)
+		if (m_toPlayerDistance <= kAttackRadius + kColRadius)
+		{
+			OnAttack();
+			m_state = StrongEnemyState::NORMALATTACK;
+			break;
+		}
+		// îÕàÕçUåÇÇÃîªíf çUåÇîºåaÇÊÇËâìÇ≠ÅAîÕàÕçUåÇÇÃç≈ëÂîºåaÇ…ãﬂÇ¢ãóó£ÇÃèÍçá
+		if (m_toPlayerDistance > kAttackRadius + 10.0f && m_toPlayerDistance < kRangeAttackRadius * 0.8f)
+		{
+			m_state = StrongEnemyState::RANGEATTACK_CHARGE;
+			m_attackTimer = kChageTime;
+			break;
+		}
+
+		// à⁄ìÆ
+		if (m_toPlayerDistance > kColRadius && m_toPlayerDistance < kTrackingRange)
+		{
+			if (!m_pPlayer->IsDead() || !m_pCompanion->IsDead())
+			{
+				m_pos.x += m_toPlayerDir.x * kMoveSpeed;
+				m_pos.z += m_toPlayerDir.z * kMoveSpeed;
+				ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
+			}
+		}
+		else
+		{
+			ChangeAnim(m_modelHandle, kIdleAnimNo, true, kIdleAnimIncrement);
+		}
+		MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_targetAngle + DX_PI_F, 0.0f));
+		break;
+	case StrongEnemy::NORMALATTACK:
+		m_enemyAttack.timer--;
+		ChangeAnim(m_modelHandle, kAttackAnimNo, false, kAttackAnimIncrement);
+		if (m_enemyAttack.timer < 0.0f)
+		{
+			m_state = StrongEnemyState::DEFAULT;
+		}
+		break;
+	case StrongEnemy::RANGEATTACK_CHARGE:
+		m_isAttackCharge = true;
+		m_attackTimer -= 1.5f / kFramesPerSecond;
+		ChangeAnim(m_modelHandle, kRangeAttackChargeAnimNo, false, kAttackAnimIncrement);
+		if (m_attackTimer < 0.0f)
+		{
+			m_isAttackCharge = false;
+			OnRangeAttack();
+			m_state = StrongEnemyState::RANGEATTACK;
+		}
+		break;
+	case StrongEnemy::RANGEATTACK:
+		m_enemyAttack.timer--;
+		ChangeAnim(m_modelHandle, kRangeAttackAnimNo, false, kAttackAnimIncrement);
+		if (m_enemyAttack.timer < 0.0f)
+		{
+			m_state = StrongEnemyState::COOLDOWN;
+			m_attackTimer = kCoolDownTime;
+			m_enemyAttack.active = false;
+		}
+		break;
+	case StrongEnemy::COOLDOWN:
+		m_attackTimer -= 1.0f / kFramesPerSecond;
+		ChangeAnim(m_modelHandle, kIdleAnimNo, false, kAttackAnimIncrement);
+		if (m_attackTimer < 0.0f)
+		{
+			m_state = StrongEnemyState::DEFAULT;
+		}
+		break;
+	case StrongEnemy::DEAD:
+		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDamageAnimIncrement);
+		m_vec = { 0.0f,0.0f,0.0f };
+		m_deathTimer += 1.0f / kFramesPerSecond;
+		if (GetIsAnimEnd() || m_deathTimer > 3.0f)
+		{
+			End();
+			m_isDead = true;
+			return;
+		}
+		break;
+	}
 }

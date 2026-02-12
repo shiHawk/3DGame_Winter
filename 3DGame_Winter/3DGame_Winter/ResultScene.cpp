@@ -34,6 +34,8 @@ namespace
 	constexpr int kRankPosX = 950;
 	constexpr int kRankPosY = 220;
 
+	constinit int kShadowOffSet = 2;
+
 	// 背景の位置
 	constexpr int kBGPosX = -350;
 	constexpr int kBGPosY = -150;
@@ -187,10 +189,12 @@ void ResultScene::Draw()
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンドモードを解除
 	if (!m_gameoverFlag)
 	{
+		DrawFormatStringToHandle(kScorePosX + kShadowOffSet, kScorePosY + kShadowOffSet, 0x000000, m_fontHandle, L"GameClear!");
 		DrawFormatStringToHandle(kScorePosX, kScorePosY, 0xff8c00, m_fontHandle, L"GameClear!");
 	}
 	else
 	{
+		DrawFormatStringToHandle(kScorePosX + kShadowOffSet, kScorePosY + kShadowOffSet, 0x5A189A, m_fontHandle, L"GameOver");
 		DrawFormatStringToHandle(kScorePosX, kScorePosY, 0x5A189A, m_fontHandle, L"GameOver");
 	}
 	DrawFormatStringToHandle(kTimeScorePosX,kTimeScorePosY,0x87cefa,m_fontHandle,L"TimeScore:%d", m_drawTimeScore);

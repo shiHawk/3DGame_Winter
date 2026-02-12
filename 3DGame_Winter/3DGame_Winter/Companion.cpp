@@ -64,7 +64,7 @@ namespace
 	constexpr float kAutoTurnDistance = 300.0f;
 
 	constexpr float kStopDistance = 160.0f; // ƒvƒŒƒCƒ„[‚â“G‚Ö‚Ì’ÇÕ‚ğ~‚ß‚é‹——£
-	constexpr float kLongRangeAttackDistance = 480.0f;
+	constexpr float kLongRangeAttackDistance = 500.0f;
 	constexpr float kCloseRangeAttackDistance = 200.0f; // ‹ß‹——£UŒ‚‚Ì‚İ‚ğs‚¤‹——£
 	constexpr float kEnemyLeashDistance = 600.0f; // “G‚Ö‚Ì’ÇÕ‚ğ’ú‚ß‚é‹——£
 	constexpr float kWarpDistance = 900.0f;
@@ -736,6 +736,9 @@ void Companion::OnDamage(int damage)
 
 	// HPŒ¸­
 	m_hp -= damage;
+	// –³“GŠÔ‚Ìİ’è
+	m_isHitFlag = true;
+	m_invincibilityTimer = kInvincibleDuration;
 	if (m_hp <= 0)
 	{
 		m_hp = 0;
@@ -748,10 +751,6 @@ void Companion::OnDamage(int damage)
 	// ƒ_ƒ[ƒWó‘Ô‚Ö‘JˆÚ
 	m_companionState = CompanionState::DAMAGE;
 	m_damageTimer = kDamageDuration;
-
-	// –³“GŠÔ‚Ìİ’è
-	m_isHitFlag = true;
-	m_invincibilityTimer = kInvincibleDuration;
 
 	// UŒ‚’†‚¾‚Á‚½ê‡‚ÍUŒ‚”»’è‚ğÁ‚·
 	m_attack.active = false;

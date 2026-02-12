@@ -422,9 +422,9 @@ void Player::OnDamage(int enemyPower)
     else
     {
         m_isHitFlag = true;
-        m_invincibilityTimer = kInvincibilityTime;
         m_playerState = PlayerState::DAMAGE;
     }
+    m_invincibilityTimer = kInvincibilityTime;
 }
 
 int Player::GetMaxHp()
@@ -480,7 +480,7 @@ VECTOR Player::HandleInput()
         // “G‚ªŽË’öŠO‚¾‚ª’ÇÕ‰Â”\‚È‹——£‚É‚¢‚éê‡
         else if (m_distanceToEnemy > kNearAttackDistance)
         {
-            return VNorm(m_dirToEnemy);
+            return VNorm(m_dirToEnemy); // “G‚Ì•ûŒü‚ÉˆÚ“®
         }
         else
         {

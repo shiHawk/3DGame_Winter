@@ -242,7 +242,7 @@ void EffectManager::EnemyStrongAttackEffect(VECTOR pos)
 
 void EffectManager::EnemyStrongAttackChargeEffect(VECTOR pos)
 {
-	// 攻撃用エフェクトを再生
+	// チャージ用エフェクトを再生
 	int handle = PlayEffekseer3DEffect(m_enemyStrongAttackChargeHandle);
 
 	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y + kPlayerAttack2OffsetY, pos.z);
@@ -339,7 +339,7 @@ int EffectManager::PlayShieldEffect(VECTOR pos, float angleY)
 	int handle = PlayEffekseer3DEffect(m_shieldHandle);
 	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y, pos.z);
 	SetRotationPlayingEffekseer3DEffect(handle, 0.0f, angleY, 0.0f);
-	SetScalePlayingEffekseer3DEffect(handle, kBossChargeShieldEffectSize, kBossChargeShieldEffectSize, kBossChargeShieldEffectSize);
+	SetScalePlayingEffekseer3DEffect(handle, kBossChargeShieldEffectSize, kBossChargeShieldEffectSize*0.5f, kBossChargeShieldEffectSize);
 	return handle;
 }
 
