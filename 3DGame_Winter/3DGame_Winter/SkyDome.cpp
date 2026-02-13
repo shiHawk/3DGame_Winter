@@ -23,6 +23,8 @@ void SkyDome::Init()
 {
 	m_handle = MV1LoadModel(L"Data/skyDome/Dome.mv1");
 	MV1SetScale(m_handle,kSkyDomeScale);
+	// スカイドームがZバッファを更新しないようにする
+	MV1SetWriteZBuffer(m_handle, FALSE);
 }
 
 void SkyDome::End()

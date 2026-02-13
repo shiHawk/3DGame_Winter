@@ -19,7 +19,8 @@ public:
 	void Updata();
 	void Draw();
 	void SetOperationChara(bool isWarriorOperation) { m_isOperationWarrior = isWarriorOperation; }
-	void ShowDamageNumber(VECTOR pos,int damage,unsigned int color);
+	// 敵のダメージの情報をm_damageTextsに登録する
+	void RegisterDamageUI(VECTOR pos,int damage,unsigned int color);
 private:
 	void DrawHp();
 	void DrawSg();
@@ -29,7 +30,7 @@ private:
 	void DrawManualUI();
 	void DrawBuffUI();
 	void DrawOperationPlayer(); // 操作中かのアイコン描画
-	void DrawDamage(VECTOR pos);
+	void DrawDestination();
 	struct DamageText 
 	{
 		VECTOR worldPos; // 出現させる3D座標
@@ -70,7 +71,8 @@ private:
 	int m_manualIconHandle;
 	int m_buffIconHandle;
 	int m_buffSwapIconHandle; // 交代時の一時的な攻撃力UPのバフ
-	int m_operationPlayerUI; // 操作権ののアイコン
+	int m_operationPlayerUI; // 操作権のアイコン
+	int m_destinationIconHandle;
 	bool m_isDisplayManual;
 	bool m_isDisplayBossHp;
 	bool m_isOperationWarrior;

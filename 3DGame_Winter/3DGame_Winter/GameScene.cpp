@@ -117,7 +117,7 @@ SceneBase* GameScene::Update()
 		enemy->Update();
 		for (const auto& res : enemy->PopDamageResults())
 		{
-			m_pUIManager->ShowDamageNumber(res.pos, res.damage, res.color); // ボスに発生させたダメージを表示するためにUIManagerに情報を渡す
+			m_pUIManager->RegisterDamageUI(res.pos, res.damage, res.color); // ボスに発生させたダメージを表示するためにUIManagerに情報を渡す
 		}
 	}
 	for (auto& enemy : m_pStrongEnemies)
@@ -125,7 +125,7 @@ SceneBase* GameScene::Update()
 		enemy->Update();
 		for (const auto& res : enemy->PopDamageResults())
 		{
-			m_pUIManager->ShowDamageNumber(res.pos, res.damage, res.color); // ボスに発生させたダメージを表示するためにUIManagerに情報を渡す
+			m_pUIManager->RegisterDamageUI(res.pos, res.damage, res.color); // ボスに発生させたダメージを表示するためにUIManagerに情報を渡す
 		}
 	}
 	m_pStage->Update();
@@ -236,7 +236,7 @@ SceneBase* GameScene::Update()
 	auto results = m_pBossEnemy->PopDamageResults(); // ボスに発生させたダメージを表示するためにUIManagerに情報を渡す
 	for (const auto& res : results)
 	{
-		m_pUIManager->ShowDamageNumber(res.pos, res.damage, res.color);
+		m_pUIManager->RegisterDamageUI(res.pos, res.damage, res.color);
 	}
 	m_pSkyDome->Update();
 	m_pChest->Update();
@@ -362,14 +362,14 @@ VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos, VECTOR avoidPos)
 			VECTOR ePos = enemy->GetPos();
 			float distSq = VSquareSize(VSub(ePos, basePos));
 
-			// 1. 単純に一番近い敵を探す
+			// 1 単純に一番近い敵を探す
 			if (distSq < minDistanceSq)
 			{
 				minDistanceSq = distSq;
 				nearestPos = ePos;
 			}
 
-			// 2. 被りを避けた敵を探す（avoidPos と座標が違う場合のみ更新）
+			// 2 被りを避けた敵を探す（avoidPos と座標が違う場合のみ更新）
 			if (VSquareSize(VSub(ePos, avoidPos)) > 1.0f)
 			{
 				if (distSq < minDistanceSqSub)
@@ -429,6 +429,7 @@ VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos, VECTOR avoidPos)
 		if (m_pCamera->IsBossBattle() || distSq < minDistanceSq)
 		{
 			// ボスを優先、あるいは一番近ければ更新
+			minDistanceSq = distSq;
 			nearestPos = m_pBossEnemy->GetPos();
 			//found = true;
 		}
@@ -436,6 +437,14 @@ VECTOR GameScene::GetNearestEnemyPos(VECTOR basePos, VECTOR avoidPos)
 	// もし「被りを避けた敵(Sub)」が見つかっていれば、そちらを優先して返す
 	if (nearestPosSub.x < 1000000.0f)
 	{
+		//printfDx(L"nearestPosSub.x:%f\nnearestPosSub.y:%f\nnearestPosSub.z:%f\n\n", nearestPosSub.x, nearestPosSub.y, nearestPosSub.z);
+		// 被りを避けた敵が最も近い敵から著しく遠い場合は無理にターゲットを分散させずに最も近い敵を狙う
+		// 最も近い敵と被りを避けた敵の距離が1.5倍以上離れているなら最も近い敵を狙う 距離の2乗で比較するため、1.5倍の距離なら 2.25倍の数値で比較
+		if (minDistanceSqSub > minDistanceSq * 2.25f)
+		{
+			// 被りを避けた敵が遠すぎるので、一番近い敵（被りあり）を返す
+			return nearestPos;
+		}
 		return nearestPosSub;
 	}
 	// 別の敵が見つからなかった場合は最も近い敵を返す

@@ -106,13 +106,6 @@ void GameplayCollision::CheckPlayerAttack()
 
 			enemy->OnDamage(m_pPlayer->GetAttackPower(),true);
 			m_pPlayer->AddSpecialGauge(kSpecialGaugeIncrement);
-			if (m_pPlayer->IsComboFinish())
-			{
-				// “G‚ð‚«”ò‚Î‚·ƒxƒNƒgƒ‹‚Æ‹­‚³‚ðŒvŽZ‚µA“G‚É“K—p‚·‚é
-				VECTOR pushDirection = VNorm(hitInfo.m_deltaVector); // UŒ‚‚Ì’†S‚©‚ç“G‚Ö‚Ì•ûŒü
-				//m_pNormalEnemy->ApplyKnockback(pushDirection, kKnockbackPower);
-				enemy->SetIsKnockbackFlag(true);
-			}
 		}
 	}
 

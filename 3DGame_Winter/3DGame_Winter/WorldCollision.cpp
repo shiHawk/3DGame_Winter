@@ -20,7 +20,6 @@ namespace
 	constexpr float kLeftLimit = -1000.0f;  // ステージ左
 	constexpr float kRightLimit = 1000.0f;  // ステージ右
 	constexpr float kWallOffset = 0.001f;
-	constexpr float kCollisionThresholdSq = (kCharacterRadius + kWallOffset) * (kCharacterRadius + kWallOffset);
 	constexpr int kMaxIterations = 4;
 }
 WorldCollision::WorldCollision():

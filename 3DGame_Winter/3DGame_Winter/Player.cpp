@@ -58,7 +58,7 @@ namespace
     constexpr float kInvincibilityTime = 100.0f; // 被弾後の無敵時間
     constexpr float kAvoidanceInvincibilityTime = 30.0f; // 回避の無敵時間
     constexpr float kCurrentAvoidSpeed = 12.0f; // 回避時の移動速度
-    constexpr float kAutoAvoidanceFrame = 22.0f; // 回避時間
+    constexpr float kAutoAvoidanceFrame = 18.0f; // 回避時間
     constexpr float kAIAvoidSpeed = 20.0f;
     constexpr float kAvoidCooltime = 60.0f; // 自動回避のクールタイム
     constexpr float kAutoAvoidDistance = 190.0f; // 今すぐ回避アクションをとる判断をする範囲
