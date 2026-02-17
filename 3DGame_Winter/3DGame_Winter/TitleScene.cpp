@@ -314,7 +314,7 @@ void TitleScene::SetStage()
 	}
 
 	m_wallPos.x = kStartTilePos.x - kWallOffset; // -800 - 200 = -1000
-
+	
 	for (int i = 0; i < kWallNumPerSide; i++)
 	{
 		m_wallPos.z = kStartTilePos.z - (kTileSize * i); // 800, 400, 0, -400, -800

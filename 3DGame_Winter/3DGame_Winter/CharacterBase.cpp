@@ -50,9 +50,3 @@ float CharacterBase::GetColRadius()
 {
 	return m_colRadius;
 }
-
-void CharacterBase::ApplyMovement()
-{
-	m_prevPos = m_pos;           // © ˆÚ“®‘O
-	m_pos = VAdd(m_pos, m_vec);  // © ˆÚ“®
-}

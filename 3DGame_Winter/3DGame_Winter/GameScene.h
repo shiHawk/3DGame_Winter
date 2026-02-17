@@ -60,5 +60,6 @@ private:
 	bool m_isNextScene;
 	bool m_isGameover;
 	float m_powerUpTime;
+	int m_shadowMapHandle; //シャドウマップハンドル 
 };
 

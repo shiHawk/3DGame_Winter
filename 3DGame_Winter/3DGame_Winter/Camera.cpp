@@ -74,6 +74,7 @@ void Camera::Init()
 	SetLightSpcColor(GetColorF(kRed, kGreen, kBlue, 0.0f));
 	SetLightDifColor(GetColorF(kRed, kGreen, kBlue, 0.0f));
 	m_lightHandle = CreateDirLightHandle(kSecondLight);
+	SetGlobalAmbientLight(GetColorF(kRed, kGreen, kBlue,0.0f));
 
 	// カメラの位置の初期化を行う
 	// カメラ(始点)の位置
@@ -101,7 +102,9 @@ void Camera::End()
 	// カメラの位置、注視点をリセットする
 	m_cameraPos = kDefaultCameraPos;
 	m_cameraTarget = kCameraTarget;
+	// ライトハンドルやグローバルアンビエントカラーをリセットする
 	DeleteLightHandle(m_lightHandle);
+	SetGlobalAmbientLight(GetColorF(0.0f, 0.0f, 0.0f, 0.0f));
 	DeleteGraph(m_lockOnHandle);
 }
 

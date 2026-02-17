@@ -121,7 +121,8 @@ namespace
 	constexpr int kCharaTextPosY = 20;
 	constexpr int kCharaPosY = 45;
 	constexpr unsigned int kScoreColor = 0xffdead;
-
+	constexpr float kDisplayEnemyHp = 800.0f;
+	constexpr float kDisplayBossEnemyHp = 1000.0f;
 	constexpr int kBuffIconPosY = 590;
 	constexpr float kDamagePosOffSetY = 200.0f;
 	constexpr float kDisplayTime = 10.0f;
@@ -297,7 +298,7 @@ void UIManager::Draw()
 	{
 		DrawManualUI();
 	}
-	if (VSize(VSub(m_pPlayer->GetPos(), m_pBossEnemy->GetPos())) <= 1000.0f)
+	if (VSize(VSub(m_pPlayer->GetPos(), m_pBossEnemy->GetPos())) <= kDisplayBossEnemyHp)
 	{
 		m_isDisplayBossHp = true;
 	}
@@ -413,7 +414,7 @@ void UIManager::DrawEnemyHP()
 		// “G‚ª¶‚«‚Ä‚¢‚ê‚Î•`‰æ
 		if (enemy->IsDead()) continue;
 		// ˆê’è‹——£ˆÈ‰º‚É‚È‚Á‚½‚ç•`‰æ
-		if (VSize(VSub(enemy->GetPos(), m_pPlayer->GetPos())) <= 800.0f || VSize(VSub(enemy->GetPos(), m_pCompanion->GetPos())) <= 800.0f)
+		if (VSize(VSub(enemy->GetPos(), m_pPlayer->GetPos())) <= 800.0f || VSize(VSub(enemy->GetPos(), m_pCompanion->GetPos())) <= kDisplayEnemyHp)
 		{
 			DrawSingleEnemyBar(enemy->GetPos(), enemy->GetHp(), enemy->GetMaxHp(),
 				kEnemyBarWidth, kEnemyBarHeight, kNormalEnemyOffsetY);
@@ -424,7 +425,7 @@ void UIManager::DrawEnemyHP()
 	for (const auto& enemy : m_pStrongEnemies)
 	{
 		if (enemy->IsDead()) continue;
-		if (VSize(VSub(enemy->GetPos(), m_pPlayer->GetPos())) <= 800.0f || VSize(VSub(enemy->GetPos(), m_pCompanion->GetPos())) <= 800.0f)
+		if (VSize(VSub(enemy->GetPos(), m_pPlayer->GetPos())) <= 800.0f || VSize(VSub(enemy->GetPos(), m_pCompanion->GetPos())) <= kDisplayEnemyHp)
 		{
 			DrawSingleEnemyBar(enemy->GetPos(), enemy->GetHp(), enemy->GetMaxHp(),
 				kEnemyBarWidth, kEnemyBarHeight, kStrongEnemyOffsetY);

@@ -16,6 +16,7 @@ namespace
 	constexpr int kGridColor = 0xffffff;    // グリッドの色
 	constexpr float kEnemySearchRange = 800.0f; // 敵を探す最大範囲
 	constexpr VECTOR kInvalidPos = { 1000000.0f, 1000000.0f, 1000000.0f }; // 無効な座標（超遠方）
+	constexpr float kShadowMapRange = 2000.0f;
 	constexpr float kSkyDomeScale = 120.0f;
 	constexpr float kSensingRange = 300.0f;
 	constexpr float kBattleAreaSize = 150.0f;
@@ -26,7 +27,8 @@ namespace
 GameScene::GameScene():
 	m_isNextScene(false),
 	m_isGameover(false),
-	m_powerUpTime(0.0f)
+	m_powerUpTime(0.0f),
+	m_shadowMapHandle(-1)
 {
 }
 
@@ -71,6 +73,7 @@ void GameScene::Init()
 	m_pSkyDome->SetScale(kSkyDomeScale);
 	m_pChest->Init(m_pPlayer, m_pCompanion,m_pEffectManager,m_pScoreManager);
 	SoundManager::GetInstance()->PlayBGM();
+	m_shadowMapHandle = MakeShadowMap(1024, 1024);
 }
 
 void GameScene::End()
@@ -97,6 +100,7 @@ void GameScene::End()
 	m_pSkyDome->End();
 	m_pChest->End();
 	SoundManager::GetInstance()->StopBGM();
+	DeleteShadowMap(m_shadowMapHandle);
 }
 
 SceneBase* GameScene::Update()
@@ -319,18 +323,38 @@ SceneBase* GameScene::Update()
 
 void GameScene::Draw()
 {
-	m_pSkyDome->Draw();
+	// シャドウマップ作成
+	SetShadowMapLightDirection(m_shadowMapHandle, VGet(0.5f, -0.5f, 0.5f));
+	SetShadowMapDrawArea(m_shadowMapHandle,VSub(m_pPlayer->GetPos(),VGet(kShadowMapRange,10.0f, kShadowMapRange)),
+						 VAdd(m_pPlayer->GetPos(), VGet(kShadowMapRange, 10.0f, kShadowMapRange)));
+	// シャドウマップへの書き込み
+	ShadowMap_DrawSetup(m_shadowMapHandle);
 	m_pStage->Draw();
 	m_pPlayer->Draw();
 	m_pCompanion->Draw();
-	//m_pNormalEnemy->Draw();
 	for (auto& enemy : m_pNormalEnemies)
 	{
 		enemy->Draw();
 	}
-	m_pEffectManager->Draw();
-	//m_pFlyingEnemy->Draw();
-	//m_pStrongEnemy->Draw();
+	for (auto& enemy : m_pStrongEnemies)
+	{
+		enemy->Draw();
+	}
+	m_pBossEnemy->Draw();
+	m_pChest->Draw();
+	ShadowMap_DrawEnd();
+	// 実際の画面への描画パス
+	ClearDrawScreen(); // 通常の描画開始
+	m_pSkyDome->Draw();
+	// シャドウマップの適応
+	SetUseShadowMap(0, m_shadowMapHandle);
+	m_pStage->Draw();
+	m_pPlayer->Draw();
+	m_pCompanion->Draw();
+	for (auto& enemy : m_pNormalEnemies)
+	{
+		enemy->Draw();
+	}
 	for (auto& enemy : m_pStrongEnemies)
 	{
 		enemy->Draw();
@@ -338,6 +362,13 @@ void GameScene::Draw()
 	m_pBossEnemy->Draw();
 	m_pChest->Draw();
 	m_pCamera->Draw();
+	SetUseShadowMap(0, -1); // シャドウマップの使用を終了
+	// チャージの円はシャドウマップの影響を受けてほしくないのでシャドウマップ使用後に描画
+	for (auto& enemy : m_pStrongEnemies)
+	{
+		enemy->DrawChargeEffect();
+	}
+	m_pEffectManager->Draw();
 	m_pUIManager->Draw();
 	DrawFade();
 }

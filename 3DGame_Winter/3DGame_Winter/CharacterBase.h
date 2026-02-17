@@ -43,7 +43,6 @@ public:
 	bool GetIsGrounded() const { return m_isGrounded; }
 protected:
 	virtual void OnAttack() abstract;
-	void ApplyMovement();
 	VECTOR m_pos;
 	VECTOR m_vec;
 	VECTOR m_moveInput;

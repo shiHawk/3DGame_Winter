@@ -119,17 +119,17 @@ void StrongEnemy::Update()
 void StrongEnemy::Draw()
 {
 	MV1DrawModel(m_modelHandle);
-	if (m_state == StrongEnemyState::RANGEATTACK_CHARGE)
-	{
-		float progress = 1.0f - (m_attackTimer / kChageTime);
-		float currentRadius = kRangeAttackRadius * progress; // åªç›ÇÃîºåaÇåvéZ(ç≈ëÂîºåa*êiçsó¶)
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-		VECTOR drawPos = VAdd(m_pos, VGet(0.0f, 1.0f, 0.0f));
-		DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.1f, 0.0f)), drawPos, currentRadius, kDivNum, kAreaColor, kAreaColor, true);
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
-		DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.2f, 0.0f)), drawPos, kRangeAttackRadius, kDivNum, kOutLineColor, kOutLineColor, true);
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	}
+	//if (m_state == StrongEnemyState::RANGEATTACK_CHARGE)
+	//{
+	//	float progress = 1.0f - (m_attackTimer / kChageTime);
+	//	float currentRadius = kRangeAttackRadius * progress; // åªç›ÇÃîºåaÇåvéZ(ç≈ëÂîºåa*êiçsó¶)
+	//	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+	//	VECTOR drawPos = VAdd(m_pos, VGet(0.0f, 1.0f, 0.0f));
+	//	DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.1f, 0.0f)), drawPos, currentRadius, kDivNum, kAreaColor, kAreaColor, true);
+	//	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+	//	DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.2f, 0.0f)), drawPos, kRangeAttackRadius, kDivNum, kOutLineColor, kOutLineColor, true);
+	//	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	//}
 }
 
 void StrongEnemy::OnAttack()
@@ -191,6 +191,21 @@ void StrongEnemy::OnDamage(int damage, bool isHatePlayer)
 		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDamageAnimIncrement);
 	}
 	//m_invincibilityTimer = kInvincibilityTime;
+}
+
+void StrongEnemy::DrawChargeEffect()
+{
+	if (m_state == StrongEnemyState::RANGEATTACK_CHARGE)
+	{
+		float progress = 1.0f - (m_attackTimer / kChageTime);
+		float currentRadius = kRangeAttackRadius * progress; // åªç›ÇÃîºåaÇåvéZ(ç≈ëÂîºåa*êiçsó¶)
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+		VECTOR drawPos = VAdd(m_pos, VGet(0.0f, 1.0f, 0.0f));
+		DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.1f, 0.0f)), drawPos, currentRadius, kDivNum, kAreaColor, kAreaColor, true);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+		DrawCone3D(VAdd(drawPos, VGet(0.0f, 0.2f, 0.0f)), drawPos, kRangeAttackRadius, kDivNum, kOutLineColor, kOutLineColor, true);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
 }
 
 float StrongEnemy::GetColRadius()

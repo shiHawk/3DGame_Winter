@@ -13,6 +13,7 @@ public:
 	virtual void OnAttack() override;
 	void OnRangeAttack();
 	virtual void OnDamage(int damage, bool isHatePlayer)override;
+	void DrawChargeEffect();
 	float GetColRadius();
 	virtual VECTOR GetDir() override;
 	AttackSphere GetAttackInfo() { return m_enemyAttack; }

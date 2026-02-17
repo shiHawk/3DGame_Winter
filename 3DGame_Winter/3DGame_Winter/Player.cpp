@@ -280,12 +280,6 @@ void Player::Update()
 void Player::Draw()
 {
     MV1SetPosition(m_modelHandle, m_pos);
-    // 向きに合わせて線分を描画
-    m_forwardDir.x = sinf(m_angleY+DX_PI_F) * kForwardLineLength;
-    m_forwardDir.y = 0.0f;
-    m_forwardDir.z = cosf(m_angleY+DX_PI_F) * kForwardLineLength;
-    VECTOR lineStart = VGet(m_pos.x, m_pos.y + kSphereRadius / 2, m_pos.z);
-    VECTOR lineEnd = VAdd(lineStart, m_forwardDir);
 
     MV1DrawModel(m_modelHandle);
 #ifdef _DEBUG
@@ -301,7 +295,7 @@ void Player::Draw()
 
 void Player::OnAttack()
 {
-    m_attackPower = kAttackPower+m_powerUpBonus+m_changePowerUpBonus;
+    m_attackPower = kAttackPower+m_powerUpBonus+m_changePowerUpBonus; // 攻撃力+バフ2種
     m_attack.radius = kAttackRadius;
     m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
@@ -317,7 +311,7 @@ void Player::OnAttack()
 
 void Player::OnAttack2()
 {
-    m_attackPower = kStrongAttackPower + m_powerUpBonus + m_changePowerUpBonus;
+    m_attackPower = kStrongAttackPower + m_powerUpBonus + m_changePowerUpBonus;// 攻撃力+バフ2種
     m_attack.radius = kStrongAttackRadius;
     m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
@@ -333,7 +327,7 @@ void Player::OnAttack2()
 
 void Player::OnCombFinishAttack()
 {
-    m_attackPower = kComboFinishAttackPower + m_powerUpBonus + m_changePowerUpBonus;
+    m_attackPower = kComboFinishAttackPower + m_powerUpBonus + m_changePowerUpBonus;// 攻撃力+バフ2種
     m_attack.radius = kComboFinishAttackRadius;
     m_attack.dir = VNorm(VGet(sinf(m_angleY + DX_PI_F), 0.0f, cosf(m_angleY + DX_PI_F)));
     m_attack.active = true;
@@ -345,7 +339,7 @@ void Player::OnCombFinishAttack()
 
 void Player::OnSpecialSkil()
 {
-    m_attackPower = kSpecialSkilPower + m_powerUpBonus + m_changePowerUpBonus;
+    m_attackPower = kSpecialSkilPower + m_powerUpBonus + m_changePowerUpBonus;// 攻撃力+バフ2種
     m_attack.radius = kSpecialSkilRadius;
     m_attack.active = true;
     m_attack.pos = m_pos;

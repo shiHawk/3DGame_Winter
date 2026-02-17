@@ -82,8 +82,12 @@ void Chest::Update()
 		{
 			if (chest.alpha > 0.0f) 
 			{
-				chest.alpha -= 0.02f; 
-				if (chest.alpha < 0.0f) chest.alpha = 0.0f;
+				chest.alpha -= 0.02f; // 不透明を下げて徐々に透明にする
+				if (chest.alpha < 0.0f)
+				{
+					chest.alpha = 0.0f;
+					MV1DeleteModel(chest.modelHandle);
+				}
 
 				// 不透明度を更新
 				MV1SetOpacityRate(chest.modelHandle, chest.alpha);
