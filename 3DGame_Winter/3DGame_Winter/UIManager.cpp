@@ -171,6 +171,7 @@ UIManager::UIManager():
 	m_buffSwapIconHandle(-1),
 	m_operationPlayerUI(-1),
 	m_destinationIconHandle(-1),
+	m_manualCloaseHandel(-1),
 	m_isDisplayManual(true),
 	m_isDisplayBossHp(false),
 	m_isOperationWarrior(true)
@@ -211,6 +212,7 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_operationPlayerUI = LoadGraph(L"Data/UI/OperationUI.png");
 	m_manualFrameHandle = LoadGraph(L"Data/UI/frame.png");
 	m_destinationIconHandle = LoadGraph(L"Data/UI/Destination.png");
+	m_manualCloaseHandel = LoadGraph(L"Data/UI/Close.png");
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_manualFontHandle = CreateFontToHandle(L"游明朝 Demibold", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_damageFontHandle = CreateFontToHandle(L"Arial Black", kDamageFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
@@ -240,6 +242,7 @@ void UIManager::End()
 	DeleteGraph(m_buffSwapIconHandle);
 	DeleteGraph(m_operationPlayerUI);
 	DeleteGraph(m_destinationIconHandle);
+	DeleteGraph(m_manualCloaseHandel);
 	DeleteFontToHandle(m_fontHandle);
 	DeleteFontToHandle(m_manualFontHandle);
 	DeleteFontToHandle(m_damageFontHandle);
@@ -293,7 +296,7 @@ void UIManager::Draw()
 	DrawHp();
 	DrawSg();
 	DrawEnemyHP();
-	DrawDestination();
+	
 	if (m_isDisplayManual)
 	{
 		DrawManualUI();
@@ -306,8 +309,13 @@ void UIManager::Draw()
 	{
 		DrawBossHp();
 	}
-	DrawBuffUI();
+	else
+	{
+		DrawDestination();
+	}
 	DrawOperationPlayer();
+	DrawBuffUI();
+	
 	for (const auto& info : m_damageTexts)
 	{
 		VECTOR screenPos = ConvWorldPosToScreenPos(info.worldPos);
@@ -475,22 +483,22 @@ void UIManager::DrawManualUI()
 	DrawRectExtendGraph(kManualFrameX1, kManualFrameY1, kManualFrameX2, kManualFrameY2, 
 					    kManualFrameSrcX, kManualFrameSrcY, kManualFrameSrcW, kManualFrameSrcH,m_manualFrameHandle,true);
 	// Aボタン　ジャンプ
-	DrawGraph(kUIPosX, kManualItemStartY, m_aButtonHandle, true);
-	DrawFormatStringToHandle(kUITextPosX, kManualItemStartY + kTextOffsetV, 0xffffff, m_manualFontHandle, L"ジャンプ");
+	DrawGraph(1120, 130, m_aButtonHandle, true); 
+	DrawFormatStringToHandle(1155, 140, 0xffffff, m_manualFontHandle, L"ジャンプ");
 	// Bボタン　回避
-	DrawGraph(kUIPosX, kManualItemStartY + kManualItemOffsetV, m_bButtonHandle, true);
-	DrawFormatStringToHandle(kUITextPosX, kManualItemStartY + kManualItemOffsetV + kTextOffsetV, 0xffffff, m_manualFontHandle, L"回避");
+	DrawGraph(1155, 94, m_bButtonHandle, true); 
+	DrawFormatStringToHandle(1195, 105, 0xffffff, m_manualFontHandle, L"回避");
 	// Xボタン　弱攻撃
-	DrawGraph(kUIPosX, kManualItemStartY + kManualItemOffsetV * 2, m_xButtonHandle, true);
-	DrawFormatStringToHandle(kUITextPosX, kManualItemStartY + kManualItemOffsetV * 2 + kTextOffsetV, 0xffffff, m_manualFontHandle, L"弱攻撃");
+	DrawGraph(1085, 95, m_xButtonHandle, true); 
+	DrawFormatStringToHandle(1015, 105, 0xffffff, m_manualFontHandle, L"弱攻撃");
 	// Yボタン　強攻撃
-	DrawGraph(kUIPosX, kManualItemStartY + kManualItemOffsetV * 3, m_yButtonHandle, true);
-	DrawFormatStringToHandle(kUITextPosX, kManualItemStartY + kManualItemOffsetV * 3 + kTextOffsetV, 0xffffff, m_manualFontHandle, L"強攻撃");
-	// フィニッシュ
+	DrawGraph(1120, 60, m_yButtonHandle, true); 
+	DrawFormatStringToHandle(1155, 70, 0xffffff, m_manualFontHandle, L"強攻撃");
+	// コンボ
 	DrawGraph(kComboButtonX1, kButtonPosY, m_xButtonHandle, true);
 	DrawGraph(kComboButtonX2, kButtonPosY, m_yButtonHandle, true);
 	DrawGraph(kComboButtonX3, kButtonPosY, m_yButtonHandle, true);
-	DrawFormatStringToHandle(kFinishTextPosX, kFinishTextPosY, 0xffffff, m_manualFontHandle, L"フィニッシュ");
+	DrawFormatStringToHandle(kFinishTextPosX, kFinishTextPosY, 0xffffff, m_manualFontHandle, L"コンボ");
 	// RBボタン　キャラチェンジ
 	DrawRectExtendGraph(kUIPosX, kRbButtonPosY, kUIPosX + kSpecialButtonWidth, kRbButtonPosY + kSpecialButtonHeight,
 		kSpecialButtonSrcX, kSpecialButtonSrcY, kSpecialButtonSrcW, kSpecialButtonSrcH, m_rbButtonHandle, true);
@@ -505,7 +513,9 @@ void UIManager::DrawManualUI()
 	DrawFormatStringToHandle(kUITextPosX, kStickText1PosY, 0xffffff, m_manualFontHandle, L"ロックオン");
 	DrawFormatStringToHandle(kUITextPosX, kStickText2PosY, 0xffffff, m_manualFontHandle, L"ロックオン解除");
 	// START　操作説明を閉じる
-	DrawFormatStringToHandle(kUIPosX, kCloseTextPosY, 0xff4500, m_manualFontHandle, L"START　 閉じる");
+	DrawGraph(1210,440, m_manualCloaseHandel,true);
+	//DrawFormatStringToHandle(kUIPosX, kCloseTextPosY, 0xff4500, m_manualFontHandle, L"START");
+	DrawString(1230, kCloseTextPosY, L"START", 0xffffff);
 }
 
 void UIManager::DrawBuffUI()
@@ -528,7 +538,13 @@ void UIManager::DrawBuffUI()
 
 void UIManager::DrawDestination()
 {
-	DrawBillboard3D(kDestinationPos,0.5f,0.5f, kDestionScale,0.0f,m_destinationIconHandle,true);
+	float angle = (GetNowCount() % 2000) / 2000.0f * DX_PI_F * 2.0f;
+	int alpha = (int)((cos(angle) * 0.5f + 0.5f) * 255);
+	DrawBillboard3D(VGet(kDestinationPos.x, kDestinationPos.y+ alpha, kDestinationPos.z), 0.5f, 0.5f, kDestionScale, 0.0f, m_destinationIconHandle, true);
+	
+	SetDrawBlendMode(DX_BLENDMODE_ADD, alpha);
+	DrawBillboard3D(VGet(kDestinationPos.x, kDestinationPos.y + alpha, kDestinationPos.z), 0.5f, 0.5f, kDestionScale, 0.0f, m_destinationIconHandle, true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND,0);
 }
 
 void UIManager::DrawOperationPlayer()

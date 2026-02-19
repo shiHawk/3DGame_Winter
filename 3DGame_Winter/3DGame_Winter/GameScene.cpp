@@ -73,7 +73,7 @@ void GameScene::Init()
 	m_pSkyDome->SetScale(kSkyDomeScale);
 	m_pChest->Init(m_pPlayer, m_pCompanion,m_pEffectManager,m_pScoreManager);
 	SoundManager::GetInstance()->PlayBGM();
-	m_shadowMapHandle = MakeShadowMap(1024, 1024);
+	m_shadowMapHandle = MakeShadowMap(2048, 2048);
 }
 
 void GameScene::End()
@@ -121,7 +121,7 @@ SceneBase* GameScene::Update()
 		enemy->Update();
 		for (const auto& res : enemy->PopDamageResults())
 		{
-			m_pUIManager->RegisterDamageUI(res.pos, res.damage, res.color); // ボスに発生させたダメージを表示するためにUIManagerに情報を渡す
+			m_pUIManager->RegisterDamageUI(res.pos, res.damage, res.color); // ダメージを表示するためにUIManagerに情報を渡す
 		}
 	}
 	for (auto& enemy : m_pStrongEnemies)
@@ -129,11 +129,11 @@ SceneBase* GameScene::Update()
 		enemy->Update();
 		for (const auto& res : enemy->PopDamageResults())
 		{
-			m_pUIManager->RegisterDamageUI(res.pos, res.damage, res.color); // ボスに発生させたダメージを表示するためにUIManagerに情報を渡す
+			m_pUIManager->RegisterDamageUI(res.pos, res.damage, res.color); // ダメージを表示するためにUIManagerに情報を渡す
 		}
 	}
 	m_pStage->Update();
-	if (Pad::isTrigger(PAD_INPUT_6)) // RBボタンでプレイヤーとコンパニオンの切り替え
+	if (Pad::isTrigger(PAD_INPUT_6 | PAD_INPUT_RT)) // RBボタンかRTボタンでプレイヤーとコンパニオンの切り替え
 	{
 		ChangeControl();
 	}
@@ -324,8 +324,8 @@ SceneBase* GameScene::Update()
 void GameScene::Draw()
 {
 	// シャドウマップ作成
-	SetShadowMapLightDirection(m_shadowMapHandle, VGet(0.5f, -0.5f, 0.5f));
-	SetShadowMapDrawArea(m_shadowMapHandle,VSub(m_pPlayer->GetPos(),VGet(kShadowMapRange,10.0f, kShadowMapRange)),
+	SetShadowMapLightDirection(m_shadowMapHandle, VGet(0.5f, -1.0f, 0.5f));
+	SetShadowMapDrawArea(m_shadowMapHandle,VSub(m_pPlayer->GetPos(),VGet(kShadowMapRange,60.0f, kShadowMapRange)),
 						 VAdd(m_pPlayer->GetPos(), VGet(kShadowMapRange, 10.0f, kShadowMapRange)));
 	// シャドウマップへの書き込み
 	ShadowMap_DrawSetup(m_shadowMapHandle);

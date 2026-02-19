@@ -159,6 +159,8 @@ void Player::End()
 
 void Player::Update()
 {
+    DINPUT_JOYSTATE input;
+    GetJoypadDirectInputState(DX_INPUT_PAD1, &input);
     if (m_invincibilityTimer > 0.0f)
     {
         m_invincibilityTimer--;
@@ -178,7 +180,7 @@ void Player::Update()
             m_invincibilityTimer = kAvoidanceInvincibilityTime;
             m_isAvoidanceFlag = true;
         }
-        if (m_specialGauge >= kGaugeConsumption && Pad::isTrigger(PAD_INPUT_5))
+        if (m_specialGauge >= kGaugeConsumption && Pad::isTrigger(PAD_INPUT_5 | PAD_INPUT_LT)) // LBまたはLTボタンのいずれかが押された瞬間かを判定(ビット和で入力を統合)
         {
             m_specialGauge -= kGaugeConsumption;
             OnSpecialSkil();
@@ -674,7 +676,7 @@ void Player::HandleStateNormal(bool aiWantsToAttack)
         return; // ジャンプしたフレームはこれ以上の攻撃判定などは行わない
     }
     // プレイヤーの弱攻撃入力
-    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_3) && !m_attack.active)
+    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_3) && !m_attack.active && !m_isJump)
     {
         m_comboStep = 1;
         TryStartAttack(&Player::OnAttack, PlayerState::ROTATING_TO_ATTACK, PlayerState::ATTACKING);
@@ -688,7 +690,7 @@ void Player::HandleStateNormal(bool aiWantsToAttack)
     }
 
     // プレイヤーの単発強攻撃入力 (弱攻撃とは独立して判定)
-    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_4) && !m_attack.active)
+    if (m_controlMode == ControlMode::PLAYER && Pad::isTrigger(PAD_INPUT_4) && !m_attack.active && !m_isJump)
     {
         m_comboStep = 0; // 単発
         TryStartAttack(&Player::OnAttack2, PlayerState::ROTATING_TO_ATTACK2, PlayerState::ATTACKING2);

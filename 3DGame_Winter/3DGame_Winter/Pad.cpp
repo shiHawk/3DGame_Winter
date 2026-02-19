@@ -13,7 +13,18 @@ void Pad::Update()
 {
 	// 現在のパッドの状態を取得
 	int padState = GetJoypadInputState(DX_INPUT_KEY_PAD1);
-
+	DINPUT_JOYSTATE dinput;
+	if (GetJoypadDirectInputState(DX_INPUT_PAD1, &dinput) == 0)
+	{
+		if (dinput.Z < -50)
+		{
+			padState |= PAD_INPUT_RT; // RTボタンの状態を追加する
+		}
+		if (dinput.Z > 50)
+		{
+			padState |= PAD_INPUT_LT; // LTボタンの状態を追加する
+		}
+	}
 	// ログの更新
 	for (int i = kLogNum - 1; i >= 1; i--)
 	{

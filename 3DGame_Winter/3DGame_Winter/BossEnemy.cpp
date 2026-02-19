@@ -111,6 +111,7 @@ void BossEnemy::Update()
         
         if (GetIsAnimEnd())
         {
+            m_pEffectManager->StopBossDeathEffect();
             m_isDead = true;
             End(); // ƒ‚ƒfƒ‹‚ğíœ
         }

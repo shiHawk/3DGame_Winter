@@ -59,7 +59,7 @@ StrongEnemy::~StrongEnemy()
 {
 }
 
-void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager, VECTOR pos)
+void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager, VECTOR pos, int hp)
 {
 	Enemy::Init(pPlayer, pCompanion);
 	m_pEffectManager = pEffectManager;
@@ -67,7 +67,7 @@ void StrongEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companio
 	AttachAnim(m_modelHandle, kIdleAnimNo);
 	MV1SetScale(m_modelHandle,VGet(kModelScale, kModelScale, kModelScale));
 	m_pos = pos;
-	m_hp = kMaxHp;
+	m_hp = hp;
 	m_attackPower = kAttackPower;
 	m_colRadius = kColRadius;
 	MV1SetPosition(m_modelHandle,m_pos);

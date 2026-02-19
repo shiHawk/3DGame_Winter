@@ -6,7 +6,7 @@ class StrongEnemy :public Enemy
 public:
 	StrongEnemy();
 	~StrongEnemy();
-	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager,VECTOR pos);
+	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, std::shared_ptr<EffectManager> pEffectManager,VECTOR pos, int hp);
 	void End();
 	void Update() override;
 	void Draw() override;

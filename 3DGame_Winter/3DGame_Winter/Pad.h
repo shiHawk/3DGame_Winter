@@ -1,4 +1,7 @@
 #pragma once
+// パッドの他の割り当ててある値とかぶらない値
+#define PAD_INPUT_RT (1 << 30)
+#define PAD_INPUT_LT (1 << 29)
 // コントローラーの入力状態を取得する
 namespace Pad
 {

@@ -8,7 +8,7 @@ class NormalEnemy :public Enemy
 public:
 	NormalEnemy();
 	~NormalEnemy();
-	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion,VECTOR pos, float startAngle);
+	void Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion,VECTOR pos, float startAngle,int hp);
 	void End();
 	void Update() override;
 	void Draw() override;

@@ -66,10 +66,10 @@ NormalEnemy::~NormalEnemy()
 {
 }
 
-void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, VECTOR pos, float startAngle)
+void NormalEnemy::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, VECTOR pos, float startAngle, int hp)
 {
 	Enemy::Init(pPlayer, pCompanion);
-	m_hp = kMaxHp;
+	m_hp = hp;
 	m_attackPower = kAttackPower;
 	m_pos = pos;
 	m_colRadius = kColRadius;

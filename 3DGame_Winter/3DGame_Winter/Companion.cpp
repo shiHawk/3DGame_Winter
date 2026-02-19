@@ -573,7 +573,7 @@ void Companion::UpdatePlayerControlState()
 					m_attackCoolTimer = kAttackCoolTime;
 				}
 			}
-			else if (Pad::isTrigger(PAD_INPUT_5) && m_specialGauge >= 100)
+			else if (Pad::isTrigger(PAD_INPUT_5 | PAD_INPUT_LT) && m_specialGauge >= 100) // LBまたは LTボタンのいずれかが押された瞬間かを判定(ビット和で入力を統合)
 			{
 				if (m_distanceToEnemy > 0.0f) // 敵がいる場合のみ回転
 				{

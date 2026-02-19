@@ -29,7 +29,8 @@ private:
 	void DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, float height, float offsetY);
 	void DrawManualUI();
 	void DrawBuffUI();
-	void DrawOperationPlayer(); // 操作中かのアイコン描画
+	// 操作中かのアイコン描画
+	void DrawOperationPlayer();
 	void DrawDestination();
 	struct DamageText 
 	{
@@ -73,6 +74,7 @@ private:
 	int m_buffSwapIconHandle; // 交代時の一時的な攻撃力UPのバフ
 	int m_operationPlayerUI; // 操作権のアイコン
 	int m_destinationIconHandle;
+	int m_manualCloaseHandel;
 	bool m_isDisplayManual;
 	bool m_isDisplayBossHp;
 	bool m_isOperationWarrior;
