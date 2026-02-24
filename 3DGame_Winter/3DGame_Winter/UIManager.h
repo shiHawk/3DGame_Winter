@@ -61,12 +61,14 @@ private:
 	int m_fontHandle;
 	int m_damageFontHandle;
 	int m_manualFontHandle;
+	int m_smallManualFontHandle;
 	int m_aButtonHandle;
 	int m_bButtonHandle;
 	int m_xButtonHandle;
 	int m_yButtonHandle;
 	int m_rbButtonHandle;
 	int m_lbButtonHandle;
+	int m_triggerButtonHandle;
 	int m_stickHandle;
 	int m_manualFrameHandle;
 	int m_manualIconHandle;

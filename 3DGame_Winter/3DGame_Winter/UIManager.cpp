@@ -78,8 +78,8 @@ namespace
 	constexpr int kManualFrameSrcH = 778;
 	// コンボ・フィニッシュ関連
 	constexpr int kFinishTextPosX = 1120;
-	constexpr int kFinishTextPosY = 230;
-	constexpr int kButtonPosY = 220;
+	constexpr int kFinishTextPosY = 390;
+	constexpr int kButtonPosY = 380;
 
 	// 特殊ボタン（RB/LB/Stick）の描画サイズと切り出し
 	constexpr int kSpecialButtonWidth = 40;  // 1090 - 1050
@@ -91,8 +91,8 @@ namespace
 	// 特殊ボタン（RB/LB/Stick）の各Y座標
 	constexpr int kRbButtonPosY = 270;
 	constexpr int kLbButtonPosY = 320;
-	constexpr int kStickPosY = 370;
-	constexpr int kStickPosX = 1040;
+	constexpr int kStickPosY = 300;
+	constexpr int kStickPosX = 1020;
 	constexpr int kStickWidth = 110; // 1150 - 1040
 	constexpr int kStickHeight = 40; // 410 - 370
 
@@ -104,8 +104,8 @@ namespace
 
 	// テキスト個別の微調整
 	constexpr int kSpecialTextOffsetV = 5;       // RB/LB用
-	constexpr int kStickText1PosY = 365;         // ロックオン
-	constexpr int kStickText2PosY = 395;         // 解除
+	constexpr int kStickText1PosY = 295;         // ロックオン
+	constexpr int kStickText2PosY = 325;         // 解除
 	constexpr int kCloseTextPosY = 428;          // 閉じる
 	// 目的地アイコン
 	constexpr VECTOR kDestinationPos = { -5405.0f,2741.0f,9199.0f };
@@ -136,8 +136,10 @@ namespace
 	constexpr int kFontTextSize = 20;
 	constexpr int kManualFontTextSize = 10;
 	constexpr int kFontSize = 15;
+	constexpr int kFontSmallSize = 10;
 	constexpr int kDamageFontSize = 25;
 	constexpr int kFontThick = 5;
+	constexpr int kFontSmallThick = 10;
 }
 
 UIManager::UIManager():
@@ -158,12 +160,14 @@ UIManager::UIManager():
 	m_fontHandle(-1),
 	m_damageFontHandle(-1),
 	m_manualFontHandle(-1),
+	m_smallManualFontHandle(-1),
 	m_aButtonHandle(-1),
 	m_bButtonHandle(-1),
 	m_xButtonHandle(-1),
 	m_yButtonHandle(-1),
 	m_rbButtonHandle(-1),
 	m_lbButtonHandle(-1),
+	m_triggerButtonHandle(-1),
 	m_stickHandle(-1),
 	m_manualFrameHandle(-1),
 	m_manualIconHandle(-1),
@@ -205,6 +209,7 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_yButtonHandle = LoadGraph(L"Data/UI/YButton.png");
 	m_rbButtonHandle = LoadGraph(L"Data/UI/RBButton.png");
 	m_lbButtonHandle = LoadGraph(L"Data/UI/LBButton.png");
+	m_triggerButtonHandle = LoadGraph(L"Data/UI/TriggeButton.png");
 	m_manualIconHandle = LoadGraph(L"Data/UI/StartButton.png");
 	m_stickHandle = LoadGraph(L"Data/UI/stick.png");
 	m_buffIconHandle = LoadGraph(L"Data/UI/powerUpIcon.png");
@@ -215,6 +220,7 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_manualCloaseHandel = LoadGraph(L"Data/UI/Close.png");
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_manualFontHandle = CreateFontToHandle(L"游明朝 Demibold", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
+	m_smallManualFontHandle = CreateFontToHandle(L"游明朝 Demibold", kFontSmallSize, kFontSmallThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_damageFontHandle = CreateFontToHandle(L"Arial Black", kDamageFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 }
 
@@ -235,6 +241,7 @@ void UIManager::End()
 	DeleteGraph(m_yButtonHandle);
 	DeleteGraph(m_rbButtonHandle);
 	DeleteGraph(m_lbButtonHandle);
+	DeleteGraph(m_triggerButtonHandle);
 	DeleteGraph(m_stickHandle);
 	DeleteGraph(m_manualFrameHandle);
 	DeleteGraph(m_manualIconHandle);
@@ -245,6 +252,7 @@ void UIManager::End()
 	DeleteGraph(m_manualCloaseHandel);
 	DeleteFontToHandle(m_fontHandle);
 	DeleteFontToHandle(m_manualFontHandle);
+	DeleteFontToHandle(m_smallManualFontHandle);
 	DeleteFontToHandle(m_damageFontHandle);
 	m_isDisplayBossHp = false;
 }
@@ -424,8 +432,7 @@ void UIManager::DrawEnemyHP()
 		// 一定距離以下になったら描画
 		if (VSize(VSub(enemy->GetPos(), m_pPlayer->GetPos())) <= 800.0f || VSize(VSub(enemy->GetPos(), m_pCompanion->GetPos())) <= kDisplayEnemyHp)
 		{
-			DrawSingleEnemyBar(enemy->GetPos(), enemy->GetHp(), enemy->GetMaxHp(),
-				kEnemyBarWidth, kEnemyBarHeight, kNormalEnemyOffsetY);
+			DrawSingleEnemyBar(enemy->GetPos(), enemy->GetHp(), enemy->GetMaxHp(),kEnemyBarWidth, kEnemyBarHeight, kNormalEnemyOffsetY);
 		}
 	}
 
@@ -494,24 +501,32 @@ void UIManager::DrawManualUI()
 	// Yボタン　強攻撃
 	DrawGraph(1120, 60, m_yButtonHandle, true); 
 	DrawFormatStringToHandle(1155, 70, 0xffffff, m_manualFontHandle, L"強攻撃");
-	// コンボ
-	DrawGraph(kComboButtonX1, kButtonPosY, m_xButtonHandle, true);
-	DrawGraph(kComboButtonX2, kButtonPosY, m_yButtonHandle, true);
-	DrawGraph(kComboButtonX3, kButtonPosY, m_yButtonHandle, true);
-	DrawFormatStringToHandle(kFinishTextPosX, kFinishTextPosY, 0xffffff, m_manualFontHandle, L"コンボ");
-	// RBボタン　キャラチェンジ
-	DrawRectExtendGraph(kUIPosX, kRbButtonPosY, kUIPosX + kSpecialButtonWidth, kRbButtonPosY + kSpecialButtonHeight,
-		kSpecialButtonSrcX, kSpecialButtonSrcY, kSpecialButtonSrcW, kSpecialButtonSrcH, m_rbButtonHandle, true);
-	DrawFormatStringToHandle(kUITextPosX, kRbButtonPosY + kSpecialTextOffsetV, 0xffffff, m_manualFontHandle, L"キャラチェンジ");
-	// LBボタン　必殺技
-	DrawRectExtendGraph(kUIPosX, kLbButtonPosY, kUIPosX + kSpecialButtonWidth, kLbButtonPosY + kSpecialButtonHeight,
-		kSpecialButtonSrcX, kSpecialButtonSrcY, kSpecialButtonSrcW, kSpecialButtonSrcH, m_lbButtonHandle, true);
-	DrawFormatStringToHandle(kUITextPosX, kLbButtonPosY + kSpecialTextOffsetV, 0xffffff, m_manualFontHandle, L"必殺技");
+	
+	DrawGraph(1040,140,m_triggerButtonHandle,true);
+	DrawFormatStringToHandle(1195, 217, 0xffffff, m_manualFontHandle, L"}");
+	DrawFormatStringToHandle(1200, 212, 0xffffff, m_smallManualFontHandle, L"キャラ");
+	DrawFormatStringToHandle(1200, 230, 0xffffff, m_smallManualFontHandle, L"チェンジ");
+	DrawFormatStringToHandle(1075, 217, 0xffffff, m_manualFontHandle, L"{");
+	DrawFormatStringToHandle(1025, 218, 0xffffff, m_smallManualFontHandle, L"必殺技");
+	//// RBボタン　キャラチェンジ
+	//DrawRectExtendGraph(kUIPosX, kRbButtonPosY, kUIPosX + kSpecialButtonWidth, kRbButtonPosY + kSpecialButtonHeight,
+	//	kSpecialButtonSrcX, kSpecialButtonSrcY, kSpecialButtonSrcW, kSpecialButtonSrcH, m_rbButtonHandle, true);
+	//DrawFormatStringToHandle(kUITextPosX, kRbButtonPosY + kSpecialTextOffsetV, 0xffffff, m_manualFontHandle, L"キャラチェンジ");
+	//// LBボタン　必殺技
+	//DrawRectExtendGraph(kUIPosX, kLbButtonPosY, kUIPosX + kSpecialButtonWidth, kLbButtonPosY + kSpecialButtonHeight,
+	//	kSpecialButtonSrcX, kSpecialButtonSrcY, kSpecialButtonSrcW, kSpecialButtonSrcH, m_lbButtonHandle, true);
+	//DrawFormatStringToHandle(kUITextPosX, kLbButtonPosY + kSpecialTextOffsetV, 0xffffff, m_manualFontHandle, L"必殺技");
+	
 	// 右スティック押し込み　ロックオン
 	DrawRectExtendGraph(kStickPosX, kStickPosY, kStickPosX + kStickWidth, kStickPosY + kStickHeight,
 		kStickSrcX, kStickSrcY, kStickSrcW, kStickSrcH, m_stickHandle, true);
 	DrawFormatStringToHandle(kUITextPosX, kStickText1PosY, 0xffffff, m_manualFontHandle, L"ロックオン");
 	DrawFormatStringToHandle(kUITextPosX, kStickText2PosY, 0xffffff, m_manualFontHandle, L"ロックオン解除");
+	// コンボ
+	DrawGraph(kComboButtonX1, kButtonPosY+2, m_xButtonHandle, true);
+	DrawGraph(kComboButtonX2, kButtonPosY, m_yButtonHandle, true);
+	DrawGraph(kComboButtonX3, kButtonPosY, m_yButtonHandle, true);
+	DrawFormatStringToHandle(kFinishTextPosX, kFinishTextPosY, 0xffffff, m_manualFontHandle, L"コンボ");
 	// START　操作説明を閉じる
 	DrawGraph(1210,440, m_manualCloaseHandel,true);
 	//DrawFormatStringToHandle(kUIPosX, kCloseTextPosY, 0xff4500, m_manualFontHandle, L"START");
