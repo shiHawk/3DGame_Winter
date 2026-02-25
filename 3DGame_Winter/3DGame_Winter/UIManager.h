@@ -21,6 +21,8 @@ public:
 	void SetOperationChara(bool isWarriorOperation) { m_isOperationWarrior = isWarriorOperation; }
 	// 敵のダメージの情報をm_damageTextsに登録する
 	void RegisterDamageUI(VECTOR pos,int damage,unsigned int color);
+	// アイコンの表示位置を設定する
+	void RegisterSgUpUI(VECTOR pos);
 private:
 	void DrawHp();
 	void DrawSg();
@@ -39,6 +41,12 @@ private:
 		float timer;     // 残り表示時間
 		unsigned int color; // 色
 		float alpha;
+	};
+	struct PopUpIcon {
+		VECTOR worldPos;
+		float timer;
+		float alpha;
+		bool isVisible; // 表示中フラグ
 	};
 	// HPの割合
 	float m_playerHpGaugeRate;
@@ -80,6 +88,8 @@ private:
 	bool m_isDisplayManual;
 	bool m_isDisplayBossHp;
 	bool m_isOperationWarrior;
+	int m_sgUpIconHandle; // SG UPの画像
+	PopUpIcon m_sgUpPopUp;
 	std::vector<DamageText> m_damageTexts;
 	std::shared_ptr<Player> m_pPlayer;
 	std::vector<std::shared_ptr<NormalEnemy>> m_pNormalEnemies;

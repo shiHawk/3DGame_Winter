@@ -15,6 +15,7 @@ namespace
     constexpr float kStrongAttackRadius = 105.0f;
     constexpr float kRangeAttackDuration = 60.0f;
     constexpr float kStrongAttackDuration = 100.0f;
+    constexpr float kBossRangeAttackStartDistance = 350.0f;
     constexpr float kTrackingRange = 1000.0f;
     constexpr float kShieldRange = 150.0f;
     constexpr float kActionCheckInterval = 0.5f; // 抽選頻度
@@ -288,7 +289,7 @@ void BossEnemy::UpdateDefault()
         OnAttack();
         m_state = BossEnemyState::NORMAL_ATTACK;
     }
-    else if (m_toPlayerDistance < kRangeAttackRadius)
+    else if (m_toPlayerDistance < kBossRangeAttackStartDistance)
     {
         int rand = GetRand(100);
         if (rand < 50)
@@ -297,12 +298,11 @@ void BossEnemy::UpdateDefault()
             m_attackTimer = kChageTime; // 基準の溜め時間
             m_pEffectManager->EnemyStrongAttackChargeEffect(m_pos);
             SetShield();
-            //m_enemyAttack.active = true; // 描画を開始するためにここでONにする
         }
         else if (rand < 70)
         {
             m_state = BossEnemyState::RANGE_ATTACK_CHARGE;
-            // 溜め時間を定数と一致させる
+            // 基準の溜め時間
             m_attackTimer = kChageTime;
             SetShield();
         }
@@ -320,15 +320,15 @@ void BossEnemy::UpdateDefault()
 
 void BossEnemy::UpdateMove()
 {
+    // 移動中もプレイヤーが射程圏内に入ったら即座に攻撃へ
+    if (m_toPlayerDistance < kBossRangeAttackStartDistance)
+    {
+        m_state = BossEnemyState::DEFAULT; // DEFAULTに戻して次フレームで攻撃抽選
+        return;
+    }
     // プレイヤーの方へ移動
     m_pos = VAdd(m_pos, VScale(m_toPlayerDir, kMoveSpeed));
     ChangeAnim(m_modelHandle, kWalkAnimNo, true, kWalkAnimIncrement);
-
-    // 攻撃圏内に入ったら思考ルーチンに戻す
-    if (m_toPlayerDistance < kRangeAttackRadius * 0.8f) 
-    {
-        m_state = BossEnemyState::DEFAULT;
-    }
 }
 
 void BossEnemy::SetShield()

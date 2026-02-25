@@ -543,7 +543,7 @@ void Companion::UpdatePlayerControlState()
 		return;
 	}
 	// AI用のステートはプレイヤー操作時はNORMALとして扱う
-	if (m_companionState == CompanionState::FOLLOW_PLAYER || m_companionState == CompanionState::TRACK_ENEMY)
+	if (m_companionState == CompanionState::FOLLOW_PLAYER || m_companionState == CompanionState::TRACK_ENEMY || m_companionState == CompanionState::PREPARE_STRONG_ATTACK)
 	{
 		m_companionState = CompanionState::NORMAL;
 	}
@@ -721,6 +721,11 @@ void Companion::AddSpecialGauge(int increment)
 
 float Companion::GetColRadius()
 {
+	// 死亡状態、または死亡フラグが立っている場合は当たり判定を消失させる
+	if (m_companionState == CompanionState::DEATH || m_isDead)
+	{
+		return 0.0f;
+	}
 	return kColRadius;
 }
 
@@ -743,14 +748,17 @@ void Companion::OnDamage(int damage)
 	{
 		m_hp = 0;
 		m_attack.active = false;
+		m_damageTimer = kDamageDuration;
 		m_companionState = CompanionState::DEATH;
 		ChangeAnim(m_modelHandle, kDeathAnimNo, false, kDeathAnimIncrement);
 		return;
 	}
-
-	// ダメージ状態へ遷移
-	m_companionState = CompanionState::DAMAGE;
-	m_damageTimer = kDamageDuration;
+	else
+	{
+		// ダメージ状態へ遷移
+		m_companionState = CompanionState::DAMAGE;
+		m_damageTimer = kDamageDuration;
+	}
 
 	// 攻撃中だった場合は攻撃判定を消す
 	m_attack.active = false;

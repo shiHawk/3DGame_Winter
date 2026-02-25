@@ -12,7 +12,8 @@ namespace
 SceneBase::SceneBase():
 	m_fadeBright(0),
 	m_fadeColor(0),
-	m_fadeSpeed(0)
+	m_fadeSpeed(0),
+	m_shadowMapHandle(-1)
 {
 }
 

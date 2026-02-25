@@ -60,6 +60,7 @@ private:
 	bool m_isNextScene;
 	bool m_isGameover;
 	float m_powerUpTime;
-	int m_shadowMapHandle; //シャドウマップハンドル 
+	// 影の基準位置
+	VECTOR m_shadowReferencePosition;
 };
 

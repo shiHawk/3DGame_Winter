@@ -131,11 +131,19 @@ void Camera::Update()
 	if (m_isLockOn)
 	{
 		VECTOR vToTarget = VSub(m_lockOnCameraPos, m_playerPos);
-		// ボスの方角を向くための水平角度を算出 (Atan2を使用)
+		// 対象の方向を向くための水平角度を算出 (Atan2を使用)
 		float targetH = atan2f(vToTarget.x, vToTarget.z);
+		// XZ平面（高さ y を無視した）での距離の平方を計算
+		float distSqXZ = vToTarget.x * vToTarget.x + vToTarget.z * vToTarget.z;
 
 		// 現在の角度を目標の角度へじわじわ近づける(Lerp)
-		m_targetAngleHorizontal = targetH;
+		// 一定距離以上離れているときだけ角度を更新する
+	    // これにより、真上を通り過ぎる瞬間の急激な角度変化を無視できる
+		if (distSqXZ > 100.0f * 100.0f)
+		{
+			float targetH = atan2f(vToTarget.x, vToTarget.z);
+			m_targetAngleHorizontal = targetH;
+		}
 
 		// 垂直角度も必要に応じて固定
 		m_targetAngleVertical = 0.2f;
@@ -191,7 +199,6 @@ void Camera::Update()
 	while (diffH >= DX_PI_F)  diffH -= DX_TWO_PI_F;
 	while (diffH < -DX_PI_F) diffH += DX_TWO_PI_F;
 
-	// 補正した差分に対して Lerp（的な処理）を適用
 	m_cameraAngleHorizontal += diffH * kLerpSpeed;
 
 	float diffV = m_targetAngleVertical - m_cameraAngleVertical;

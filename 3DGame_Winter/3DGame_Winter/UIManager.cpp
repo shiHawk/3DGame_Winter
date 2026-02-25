@@ -6,14 +6,14 @@ namespace
 	constexpr int kHpGaugeWidth = 370;
 	constexpr int kPlayerHpGaugeLeft = 150;
 	constexpr int kCompanionHpGaugeLeft = 750;
-	constexpr int kHpGaugeTop = 650;
+	constexpr int kHpGaugeTop = 640;
 	// Specialゲージ
 	constexpr int kSpecialGaugeWidth = 370;
 	constexpr int kPlayerSpecialGaugeLeft = 150;
 	constexpr int kCompanionSpecialGaugeLeft = 750;
 	constexpr int kSpecialGaugeTop = 680;
 
-	constexpr int kHpTextPosY = 14;
+	constexpr int kBarHeight = 25;
 	constexpr int kSrcX = 462; // 切り出し位置(X)
 	constexpr int kSrcY = 293; // 切り出し位置(Y)
 	constexpr int kSrcWidth = 150;
@@ -41,9 +41,9 @@ namespace
 	constexpr int kWizardIconPosY = 620;
 
 	constexpr int kWarriorHpPosX = 151;
-	constexpr int kWarriorHpPosY = 648;
+	constexpr int kWarriorHpPosY = 639;
 	constexpr int kWizardHpPosX = 751;
-	constexpr int kWizardHpPosY = 648;
+	constexpr int kWizardHpPosY = 639;
 
 	constexpr int kWarriorSgPosX = 151;
 	constexpr int kWarriorSgPosY = 678;
@@ -123,7 +123,7 @@ namespace
 	constexpr unsigned int kScoreColor = 0xffdead;
 	constexpr float kDisplayEnemyHp = 800.0f;
 	constexpr float kDisplayBossEnemyHp = 1000.0f;
-	constexpr int kBuffIconPosY = 590;
+	constexpr int kBuffIconPosY = 580;
 	constexpr float kDamagePosOffSetY = 200.0f;
 	constexpr float kDisplayTime = 10.0f;
 	constexpr float kFloatSpeed = 0.5f;
@@ -178,7 +178,9 @@ UIManager::UIManager():
 	m_manualCloaseHandel(-1),
 	m_isDisplayManual(true),
 	m_isDisplayBossHp(false),
-	m_isOperationWarrior(true)
+	m_isOperationWarrior(true),
+	m_sgUpIconHandle(-1),
+	m_sgUpPopUp({ {0.0f,0.0f,0.0f}, 0.0f, 0.0f, false })
 {
 }
 
@@ -218,6 +220,7 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_manualFrameHandle = LoadGraph(L"Data/UI/frame.png");
 	m_destinationIconHandle = LoadGraph(L"Data/UI/Destination.png");
 	m_manualCloaseHandel = LoadGraph(L"Data/UI/Close.png");
+	m_sgUpIconHandle = LoadGraph(L"Data/UI/SGUP.png");
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_manualFontHandle = CreateFontToHandle(L"游明朝 Demibold", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_smallManualFontHandle = CreateFontToHandle(L"游明朝 Demibold", kFontSmallSize, kFontSmallThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
@@ -250,6 +253,7 @@ void UIManager::End()
 	DeleteGraph(m_operationPlayerUI);
 	DeleteGraph(m_destinationIconHandle);
 	DeleteGraph(m_manualCloaseHandel);
+	DeleteGraph(m_sgUpIconHandle);
 	DeleteFontToHandle(m_fontHandle);
 	DeleteFontToHandle(m_manualFontHandle);
 	DeleteFontToHandle(m_smallManualFontHandle);
@@ -286,6 +290,23 @@ void UIManager::Updata()
 		else
 		{
 			it++;
+		}
+	}
+
+	// SG UPアイコンの更新
+	if (m_sgUpPopUp.isVisible)
+	{
+		m_sgUpPopUp.timer -= 1.0f / kDisplayTime;
+		m_sgUpPopUp.worldPos.y += kFloatSpeed;
+
+		if (m_sgUpPopUp.timer < 3.0f)
+		{
+			m_sgUpPopUp.alpha = m_sgUpPopUp.timer / 3.0f;
+		}
+
+		if (m_sgUpPopUp.timer <= 0)
+		{
+			m_sgUpPopUp.isVisible = false; // 時間切れで非表示にする
 		}
 	}
 
@@ -338,6 +359,18 @@ void UIManager::Draw()
 								 info.color, m_damageFontHandle, L"%d", info.damage);
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	}
+	if (m_sgUpPopUp.isVisible)
+	{
+		VECTOR screenPos = ConvWorldPosToScreenPos(m_sgUpPopUp.worldPos); // スクリーン座標に変換
+		if (screenPos.z >= 0.0f && screenPos.z <= 1.0f)
+		{
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255 * m_sgUpPopUp.alpha)); // 透明度の適応
+			// 画像のサイズに合わせてDrawRotaGraphを使う
+			DrawRotaGraph(static_cast<int>(screenPos.x), static_cast<int>(screenPos.y),
+				1.0, 0.0, m_sgUpIconHandle, TRUE);
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+		}
+	}
 	/*DINPUT_JOYSTATE input;
 	int i;
 	int Color;
@@ -375,19 +408,28 @@ void UIManager::RegisterDamageUI(VECTOR pos, int damage, unsigned int color)
 	m_damageTexts.push_back(newDamageText);
 }
 
+void UIManager::RegisterSgUpUI(VECTOR pos)
+{
+	m_sgUpPopUp.worldPos = pos;
+	m_sgUpPopUp.worldPos.y += kDamagePosOffSetY;
+	m_sgUpPopUp.timer = kDisplayTime;
+	m_sgUpPopUp.alpha = 1.0f;
+	m_sgUpPopUp.isVisible = true;
+}
+
 void UIManager::DrawHp()
 {
 	// プレイヤーのHPバーの描画
-	DrawRectGraph(kPlayerHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
+	DrawRectGraph(kPlayerHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, kHpGaugeFrameWidth, kBarHeight, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(kPlayerHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_playerHpGaugeRate),
-				  kHpTextPosY, m_hpGaugeHandle, true); 
+				  kBarHeight, m_hpGaugeHandle, true); 
 	DrawGraph(kWarriorIconPosX,kWarriorIconPosY,m_warriorIconHandle,true);
 	DrawFormatStringToHandle(kWarriorHpPosX, kWarriorHpPosY, 0x66cbaa, m_fontHandle, L"HP");
 
 	// コンパニオンのHPバーの描画
-	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, kHpGaugeFrameWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
+	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, kHpGaugeFrameWidth, kBarHeight, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(kCompanionHpGaugeLeft, kHpGaugeTop, kSrcX, kSrcY, static_cast<int>(kHpGaugeWidth * m_companionHpGaugeRate),
-				  kHpTextPosY, m_hpGaugeHandle, true);
+				  kBarHeight, m_hpGaugeHandle, true);
 	DrawGraph(kWizardIconPosX, kWizardIconPosY, m_wizardIconHandle, true);
 	DrawFormatStringToHandle(kWizardHpPosX, kWizardHpPosY, 0x66cbaa, m_fontHandle, L"HP");
 }
@@ -395,15 +437,15 @@ void UIManager::DrawHp()
 void UIManager::DrawSg()
 {
 	// プレイヤーのSpecialゲージの描画
-	DrawRectGraph(kPlayerSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
+	DrawRectGraph(kPlayerSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kBarHeight, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(kPlayerSpecialGaugeLeft, kSpecialGaugeTop, kSgSrcX, kSgSrcY, static_cast<int>(kHpGaugeWidth * m_playerSpecialGaugeRate),
-				  kHpTextPosY, m_sgGaugeHandle, true);
+				  kBarHeight, m_sgGaugeHandle, true);
 	DrawFormatStringToHandle(kWarriorSgPosX, kWarriorSgPosY, 0xffb770, m_fontHandle, L"SG");
 
 	// コンパニオンのSpecialゲージの描画
-	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kHpTextPosY, m_hpGaugeFrameHandle, true);
+	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSrcX, kSrcY, kSpecialGaugeWidth, kBarHeight, m_hpGaugeFrameHandle, true);
 	DrawRectGraph(kCompanionSpecialGaugeLeft, kSpecialGaugeTop, kSgSrcX, kSgSrcY, static_cast<int>(kHpGaugeWidth * m_companionSpecialGaugeRate),
-				  kHpTextPosY, m_sgGaugeHandle, true);
+				  kBarHeight, m_sgGaugeHandle, true);
 	DrawFormatStringToHandle(kWizardSgPosX, kWizardSgPosY, 0xffb770, m_fontHandle, L"SG");
 }
 
@@ -508,14 +550,6 @@ void UIManager::DrawManualUI()
 	DrawFormatStringToHandle(1200, 230, 0xffffff, m_smallManualFontHandle, L"チェンジ");
 	DrawFormatStringToHandle(1075, 217, 0xffffff, m_manualFontHandle, L"{");
 	DrawFormatStringToHandle(1025, 218, 0xffffff, m_smallManualFontHandle, L"必殺技");
-	//// RBボタン　キャラチェンジ
-	//DrawRectExtendGraph(kUIPosX, kRbButtonPosY, kUIPosX + kSpecialButtonWidth, kRbButtonPosY + kSpecialButtonHeight,
-	//	kSpecialButtonSrcX, kSpecialButtonSrcY, kSpecialButtonSrcW, kSpecialButtonSrcH, m_rbButtonHandle, true);
-	//DrawFormatStringToHandle(kUITextPosX, kRbButtonPosY + kSpecialTextOffsetV, 0xffffff, m_manualFontHandle, L"キャラチェンジ");
-	//// LBボタン　必殺技
-	//DrawRectExtendGraph(kUIPosX, kLbButtonPosY, kUIPosX + kSpecialButtonWidth, kLbButtonPosY + kSpecialButtonHeight,
-	//	kSpecialButtonSrcX, kSpecialButtonSrcY, kSpecialButtonSrcW, kSpecialButtonSrcH, m_lbButtonHandle, true);
-	//DrawFormatStringToHandle(kUITextPosX, kLbButtonPosY + kSpecialTextOffsetV, 0xffffff, m_manualFontHandle, L"必殺技");
 	
 	// 右スティック押し込み　ロックオン
 	DrawRectExtendGraph(kStickPosX, kStickPosY, kStickPosX + kStickWidth, kStickPosY + kStickHeight,
@@ -537,8 +571,14 @@ void UIManager::DrawBuffUI()
 {
 	if (m_pPlayer->GetPowerUpBonus() > 0)
 	{
-		DrawGraph(kWarriorBuffUIPosX, kBuffIconPosY, m_buffIconHandle, true);
-		DrawGraph(kWizardBuffUIPosX, kBuffIconPosY, m_buffIconHandle, true);
+		if (!m_pPlayer->IsDead())
+		{
+			DrawGraph(kWarriorBuffUIPosX, kBuffIconPosY, m_buffIconHandle, true);
+		}
+		if (!m_pCompanion->IsDead())
+		{
+			DrawGraph(kWizardBuffUIPosX, kBuffIconPosY, m_buffIconHandle, true);
+		}
 	}
 	
 	if (m_pPlayer->GetChangePowerUpBonus() > 0)

@@ -28,7 +28,7 @@ GameScene::GameScene():
 	m_isNextScene(false),
 	m_isGameover(false),
 	m_powerUpTime(0.0f),
-	m_shadowMapHandle(-1)
+	m_shadowReferencePosition({0.0f,0.0f,0.0f})
 {
 }
 
@@ -71,7 +71,7 @@ void GameScene::Init()
 	m_pScoreManager->Init();
 	m_pSkyDome->Init();
 	m_pSkyDome->SetScale(kSkyDomeScale);
-	m_pChest->Init(m_pPlayer, m_pCompanion,m_pEffectManager,m_pScoreManager);
+	m_pChest->Init(m_pPlayer, m_pCompanion,m_pEffectManager,m_pScoreManager,m_pUIManager.get());
 	SoundManager::GetInstance()->PlayBGM();
 	m_shadowMapHandle = MakeShadowMap(2048, 2048);
 }
@@ -95,10 +95,10 @@ void GameScene::End()
 	m_pFlyingEnemy->End();
 	m_pBossEnemy->End();
 	//m_pStrongEnemy->End();
+	m_pChest->End();
 	m_pStage->End();
 	m_pUIManager->End();
 	m_pSkyDome->End();
-	m_pChest->End();
 	SoundManager::GetInstance()->StopBGM();
 	DeleteShadowMap(m_shadowMapHandle);
 }
@@ -133,7 +133,7 @@ SceneBase* GameScene::Update()
 		}
 	}
 	m_pStage->Update();
-	if (Pad::isTrigger(PAD_INPUT_6 | PAD_INPUT_RT)) // RBボタンかRTボタンでプレイヤーとコンパニオンの切り替え
+	if (Pad::isTrigger(PAD_INPUT_6 | PAD_INPUT_RT) && (!m_pPlayer->IsDead() && !m_pCompanion->IsDead())) // RBボタンかRTボタンでプレイヤーとコンパニオンの切り替え
 	{
 		ChangeControl();
 	}
@@ -178,11 +178,13 @@ SceneBase* GameScene::Update()
 	if (currentControlMode == CharacterBase::ControlMode::PLAYER)
 	{
 		pControlledChar = m_pPlayer.get();
+		m_shadowReferencePosition = m_pPlayer->GetPos();
 		pAIChar = m_pCompanion.get();
 	}
 	else
 	{
 		pControlledChar = m_pCompanion.get();
+		m_shadowReferencePosition = m_pCompanion->GetPos();
 		pAIChar = m_pPlayer.get();
 	}
 
@@ -325,8 +327,8 @@ void GameScene::Draw()
 {
 	// シャドウマップ作成
 	SetShadowMapLightDirection(m_shadowMapHandle, VGet(0.5f, -1.0f, 0.5f));
-	SetShadowMapDrawArea(m_shadowMapHandle,VSub(m_pPlayer->GetPos(),VGet(kShadowMapRange,60.0f, kShadowMapRange)),
-						 VAdd(m_pPlayer->GetPos(), VGet(kShadowMapRange, 10.0f, kShadowMapRange)));
+	SetShadowMapDrawArea(m_shadowMapHandle,VSub(m_shadowReferencePosition,VGet(kShadowMapRange,60.0f, kShadowMapRange)),
+						 VAdd(m_shadowReferencePosition, VGet(kShadowMapRange, 10.0f, kShadowMapRange)));
 	// シャドウマップへの書き込み
 	ShadowMap_DrawSetup(m_shadowMapHandle);
 	m_pStage->Draw();

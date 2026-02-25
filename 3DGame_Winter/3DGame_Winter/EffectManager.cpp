@@ -306,14 +306,19 @@ void EffectManager::PlayChestEffect(int no)
 	if (effectHandle == -1) return;
 
 	// プレイヤーの位置にエフェクトを発生 
-	int handleP = PlayEffekseer3DEffect(effectHandle);
-	SetPosPlayingEffekseer3DEffect(handleP, m_pPlayer->GetPos().x, m_pPlayer->GetPos().y + 40.0f, m_pPlayer->GetPos().z);
-	SetScalePlayingEffekseer3DEffect(handleP, kChestEffectSize, kChestEffectSize, kChestEffectSize);
-
+	if (!m_pPlayer->IsDead())
+	{
+		int handleP = PlayEffekseer3DEffect(effectHandle);
+		SetPosPlayingEffekseer3DEffect(handleP, m_pPlayer->GetPos().x, m_pPlayer->GetPos().y + 40.0f, m_pPlayer->GetPos().z);
+		SetScalePlayingEffekseer3DEffect(handleP, kChestEffectSize, kChestEffectSize, kChestEffectSize);
+	}
 	// コンパニオンの位置にエフェクトを発生
-	int handleC = PlayEffekseer3DEffect(effectHandle);
-	SetPosPlayingEffekseer3DEffect(handleC, m_pCompanion->GetPos().x, m_pCompanion->GetPos().y + 40.0f, m_pCompanion->GetPos().z);
-	SetScalePlayingEffekseer3DEffect(handleC, kChestEffectSize, kChestEffectSize, kChestEffectSize);
+	if (!m_pCompanion->IsDead())
+	{
+		int handleC = PlayEffekseer3DEffect(effectHandle);
+		SetPosPlayingEffekseer3DEffect(handleC, m_pCompanion->GetPos().x, m_pCompanion->GetPos().y + 40.0f, m_pCompanion->GetPos().z);
+		SetScalePlayingEffekseer3DEffect(handleC, kChestEffectSize, kChestEffectSize, kChestEffectSize);
+	}
 }
 
 void EffectManager::PlayBossDeathEffect(VECTOR pos)

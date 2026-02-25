@@ -1,9 +1,11 @@
 #include "Chest.h"
+#include "CharacterBase.h"
 #include "Player.h"
 #include "Companion.h"
 #include "EffectManager.h"
 #include "SoundManager.h"
 #include "ScoreManager.h"
+#include "UIManager.h"
 namespace
 {
 	constexpr float kModelScale = 0.75f;
@@ -30,12 +32,13 @@ Chest::Chest():
 }
 
 void Chest::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion> pCompanion, 
-				 std::shared_ptr<EffectManager> pEffectManager,std::shared_ptr<ScoreManager> pScoreManager)
+				 std::shared_ptr<EffectManager> pEffectManager,std::shared_ptr<ScoreManager> pScoreManager, UIManager* pUIManager)
 {
 	m_pPlayer = pPlayer;
 	m_pCompanion = pCompanion;
 	m_pEffectManager = pEffectManager;
 	m_pScoreManager = pScoreManager;
+	m_pUIManager = pUIManager;
 	m_chestHandle = MV1LoadModel(L"Data/model/chest.mv1");
 	for (auto& chest : m_chests)
 	{
@@ -130,28 +133,43 @@ void Chest::Update()
 			{
 				continue;
 			}
-			else
-			{
-				chest.isOpened = true;
-				m_pScoreManager->AddTreasureCount();
-				SoundManager::GetInstance()->PlayChestSE(chest.chestNo);
-			}
+			chest.isOpened = true;
+			m_pScoreManager->AddTreasureCount();
+			SoundManager::GetInstance()->PlayChestSE(chest.chestNo);
+			// 生存しているキャラだけ取得
+			auto aliveChars = GetAliveCharacters();
 			if (chest.type == ChestType::SG && chest.isOpened)
 			{
-				m_pPlayer->AddSg(kChestAddSgAmount);
-				m_pCompanion->AddSg(kChestAddSgAmount);
+				for (auto& ch : aliveChars)
+				{
+					ch->AddSg(kChestAddSgAmount); // ループで適用
+				}
+				/*m_pPlayer->AddSg(kChestAddSgAmount);
+				m_pCompanion->AddSg(kChestAddSgAmount);*/
 				m_pEffectManager->PlayChestEffect(0);
+				if (m_pUIManager)
+				{
+					m_pUIManager->RegisterSgUpUI(chest.pos);
+				}
 			}
 			if (chest.type == ChestType::HP)
 			{
-				m_pPlayer->AddHp(kRecoverHP);
-				m_pCompanion->AddHp(kRecoverHP);
+				for (auto& ch : aliveChars)
+				{
+					ch->AddHp(kRecoverHP);
+				}
+				/*m_pPlayer->AddHp(kRecoverHP);
+				m_pCompanion->AddHp(kRecoverHP);*/
 				m_pEffectManager->PlayChestEffect(1);
 			}
 			if (chest.type == ChestType::BUFF)
 			{
-				m_pPlayer->PowerUp(kChestAttackUpValue);
-				m_pCompanion->PowerUp(kChestAttackUpValue);
+				for (auto& ch : aliveChars)
+				{
+					ch->PowerUp(kChestAttackUpValue);
+				}
+				/*m_pPlayer->PowerUp(kChestAttackUpValue);
+				m_pCompanion->PowerUp(kChestAttackUpValue);*/
 				m_pEffectManager->PlayChestEffect(2);
 			}
 		}
@@ -165,4 +183,13 @@ void Chest::Draw()
 	{
 		MV1DrawModel(chest.modelHandle);
 	}
+}
+
+std::vector<std::shared_ptr<CharacterBase>> Chest::GetAliveCharacters()
+{
+	// 生存しているキャラを集める一時的なリスト
+	std::vector<std::shared_ptr<CharacterBase>> alives;
+	if (m_pPlayer && !m_pPlayer->IsDead()) alives.push_back(m_pPlayer);
+	if (m_pCompanion && !m_pCompanion->IsDead()) alives.push_back(m_pCompanion);
+	return alives;
 }

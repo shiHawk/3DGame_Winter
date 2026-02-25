@@ -211,7 +211,7 @@ void ResultScene::Draw()
 		{
 			DrawGraph(kRankPosX, kRankPosY, m_rankAHandle, true);
 		}
-		else
+		else if(m_totalScore > 0)
 		{
 			DrawGraph(kRankPosX, kRankPosY, m_rankBHandle, true);
 		}

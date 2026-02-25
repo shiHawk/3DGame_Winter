@@ -33,5 +33,7 @@ protected:
 	int m_fadeColor;
 	int m_fadeBright;
 	int m_fadeSpeed;
+	// シャドウマップ
+	int m_shadowMapHandle;
 };
 
