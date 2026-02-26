@@ -2,6 +2,7 @@
 #include "DxLib.h"
 #include "GameScene.h"
 #include "TitleScene.h"
+#include "SoundManager.h"
 #include "Pad.h"
 
 SceneManager::SceneManager()
@@ -33,7 +34,7 @@ void SceneManager::Update()
 		// 前のシーンの終了処理
 		m_pScene->End();
 		delete m_pScene;
-
+		SoundManager::GetInstance()->StopAllSE();
 		m_pScene = pScene;
 		m_pScene->Init();
 	}

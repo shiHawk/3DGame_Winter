@@ -30,6 +30,8 @@ public:
 	void PlayChestSE(int no);
 	void PlayGameStart();
 	void PlayDramroll(bool finFlag);
+	// SE‚Ì–Â‚è‚Á‚Ï‚È‚µŒ»Û‚ğ‹N‚±‚³‚¹‚È‚¢‚½‚ß‚ÉƒV[ƒ“‚ÌØ‚è‘Ö‚í‚è‚ÅSE‚Í~‚ß‚é
+	void StopAllSE();
 	bool IsPlayingFinishSE();
 private:
 	SoundManager();

@@ -52,7 +52,7 @@ namespace
 
 	// ボスHPゲージ
 	constexpr int kMaxDestWidth = 400;
-	constexpr int kBossMaxHp = 1000; // ボスの最大HP
+	constexpr int kBossMaxHp = 2000; // ボスの最大HP
 	constexpr int kBossHpFrameX1 = 274;
 	constexpr int kBossHpFrameY1 = 550;
 	constexpr int kBossHpFrameX2 = 1006; // kDistX2と同じ

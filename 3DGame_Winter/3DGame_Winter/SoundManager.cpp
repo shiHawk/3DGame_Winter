@@ -239,6 +239,23 @@ void SoundManager::PlayDramroll(bool finFlag)
 	}
 }
 
+void SoundManager::StopAllSE()
+{
+	StopSoundMem(m_playerFirstAttackSoundHandle);
+	StopSoundMem(m_playerSecondAttackSoundHandle);
+	StopSoundMem(m_playerThirdAttackSoundHandle);
+	StopSoundMem(m_enemyAttackSoundHandle);
+	StopSoundMem(m_wizardAttackSound);
+	StopSoundMem(m_companionSpecialSkilSoundHandle);
+	StopSoundMem(m_playerSpecialSkilSoundHandle);
+	StopSoundMem(m_recoverHpHandle);
+	StopSoundMem(m_addSpecialGaugeHandle);
+	StopSoundMem(m_powerUpHandle);
+	StopSoundMem(m_gameStartHandle);
+	StopSoundMem(m_dramrollHandle);
+	StopSoundMem(m_dramrollEndHandle);
+}
+
 bool SoundManager::IsPlayingFinishSE()
 {
 	return CheckSoundMem(m_dramrollEndHandle) == 1;

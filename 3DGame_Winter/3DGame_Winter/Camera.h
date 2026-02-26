@@ -21,8 +21,6 @@ public:
 private:
 	// 度数をラジアンに変換する
 	void RadianTranslation(); 
-	// カメラの移動距離を制限(カメラとステージの当たり判定の仮実装)
-	void ResolveCollisionWithStage(); 
 	int m_lightHandle;
 	// カメラの位置
 	VECTOR m_cameraPos;

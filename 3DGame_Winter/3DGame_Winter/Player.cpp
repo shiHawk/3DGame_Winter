@@ -135,7 +135,7 @@ void Player::Init(std::shared_ptr<Camera> pCamera, std::shared_ptr<EffectManager
     m_pEffectManager = pEffectManager;
 	m_pos = kDefaultPos;
 	m_vec = kDefaultVec;
-    m_angleY = 0.0f;
+    m_angleY = DX_PI_F;
     m_isJump = false;
     m_attackPower = kAttackPower;
     m_hp = kMaxHp;
@@ -147,7 +147,7 @@ void Player::Init(std::shared_ptr<Camera> pCamera, std::shared_ptr<EffectManager
     m_colRadius = kColRadius;
     m_modelHandle = MV1LoadModel(L"Data/model/Barbarian.mv1");
     MV1SetScale(m_modelHandle, VGet(kModelScale, kModelScale, kModelScale));
-    MV1SetRotationXYZ(m_modelHandle, kRightDir);
+    MV1SetRotationXYZ(m_modelHandle, VGet(0.0f, m_angleY, 0.0f));
     AttachAnim(m_modelHandle, kIdleAnimNo);
     SRand(GetTickCount64());
 }

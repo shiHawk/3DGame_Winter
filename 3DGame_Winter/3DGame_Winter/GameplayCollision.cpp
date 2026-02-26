@@ -41,37 +41,47 @@ void GameplayCollision::Update()
 	CheckStrongEnemyRangeAttack();
 	CheckBossEnemyAttack();
 
-	for (auto& enemy : m_pNormalEnemies) {
-		if (!enemy->IsDead()) {
+	for (auto& enemy : m_pNormalEnemies) 
+	{
+		if (!enemy->IsDead()) 
+		{
 			PushBackCharacter(m_pPlayer.get(), enemy.get());
 		}
 	}
 	// Strong Enemy
-	for (auto& enemy : m_pStrongEnemies) {
-		if (!enemy->IsDead()) {
+	for (auto& enemy : m_pStrongEnemies) 
+	{
+		if (!enemy->IsDead()) 
+		{
 			PushBackCharacter(m_pPlayer.get(), enemy.get());
 		}
 	}
 	// Boss Enemy
-	if (m_pBossEnemy && !m_pBossEnemy->IsDead()) {
+	if (m_pBossEnemy && !m_pBossEnemy->IsDead()) 
+	{
 		PushBackCharacter(m_pPlayer.get(), m_pBossEnemy.get());
 	}
 
 	// 2. コンパニオン vs 全エネミー
 	// Normal Enemy
-	for (auto& enemy : m_pNormalEnemies) {
-		if (!enemy->IsDead()) {
+	for (auto& enemy : m_pNormalEnemies) 
+	{
+		if (!enemy->IsDead()) 
+		{
 			PushBackCharacter(m_pCompanion.get(), enemy.get());
 		}
 	}
 	// Strong Enemy
-	for (auto& enemy : m_pStrongEnemies) {
-		if (!enemy->IsDead()) {
+	for (auto& enemy : m_pStrongEnemies)
+	{
+		if (!enemy->IsDead()) 
+		{
 			PushBackCharacter(m_pCompanion.get(), enemy.get());
 		}
 	}
 	// Boss Enemy
-	if (m_pBossEnemy && !m_pBossEnemy->IsDead()) {
+	if (m_pBossEnemy && !m_pBossEnemy->IsDead())
+	{
 		PushBackCharacter(m_pCompanion.get(), m_pBossEnemy.get());
 	}
 	PushBackCharacter(m_pPlayer.get(),m_pCompanion.get());

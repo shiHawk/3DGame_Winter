@@ -24,7 +24,6 @@ namespace
 	constexpr float kBlue = 1.0f;
 	// ƒJƒƒ‰‚Ìù‰ñ
 	constexpr float kCameraAngleSpeed = 0.03f;
-	//constexpr float kCameraToPlayerLength = 540.0f;
 	constexpr float kCameraToPlayerLength = 500.0f;
 	constexpr float kAngleLimitVertical = 0.6f;
 	constexpr float kCameraPitchDownLimit = -0.3f;
@@ -255,29 +254,6 @@ void Camera::SetLockOnPosition(VECTOR lockOnPos)
 void Camera::RadianTranslation()
 {
 	m_viewRadianAngle = kViewAngle * (DX_PI_F / kDegreesPerCircle);
-}
-
-void Camera::ResolveCollisionWithStage()
-{
-	// X•ûŒü‚Ì•Ç”»’è
-	if (m_cameraPos.x < kStageMinX + kCameraRadius) 
-	{
-		m_cameraPos.x = kStageMinX + kCameraRadius;
-	}
-	else if (m_cameraPos.x > kStageMaxX - kCameraRadius) 
-	{
-		m_cameraPos.x = kStageMaxX - kCameraRadius;
-	}
-
-	// Z•ûŒü‚Ì•Ç”»’è
-	if (m_cameraPos.z < kStageMinZ + kCameraRadius) 
-	{
-		m_cameraPos.z = kStageMinZ + kCameraRadius;
-	}
-	else if (m_cameraPos.z > kStageMaxZ - kCameraRadius) 
-	{
-		m_cameraPos.z = kStageMaxZ - kCameraRadius;
-	}
 }
 
 

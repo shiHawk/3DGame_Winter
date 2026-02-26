@@ -49,7 +49,7 @@ namespace
     constexpr unsigned int kResistDamageColor = 0x1e90ff;
     constexpr int kDivNum = 32;
     constexpr float kInvincibilityTime = 30.0f;
-    constexpr int kMaxHp = 1000;
+    constexpr int kMaxHp = 2000;
     constexpr int kAttackPower = 75;
     constexpr int kStrongAttackPower = 80;
     constexpr int kRangeAttackPower = 100;
@@ -279,6 +279,7 @@ float BossEnemy::GetColRadius()
 
 void BossEnemy::UpdateDefault()
 {
+    ChangeAnim(m_modelHandle,kIdleAnimNo,true,kIdleAnimIncrement);
     // ˆê’èŠÔŠu‚ÅŸ‚Ìs“®‚ğ’Š‘I
     m_actionCheckTimer -= 1.0f / kFramesPerSecond;
     if (m_actionCheckTimer > 0) return;
