@@ -195,81 +195,6 @@ void EffectManager::PlayChangeEffect(VECTOR pos)
 	SetScalePlayingEffekseer3DEffect(handle, kChangeEffectSize, kChangeEffectSize, kChangeEffectSize);
 }
 
-void EffectManager::PlayPlayerAttack1Effect(VECTOR pos, float angleY)
-{
-	// 攻撃用エフェクトを再生
-	int handle = PlayEffekseer3DEffect(m_playerAttack1Handle);
-
-	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y+kChangeEffectOffsetY, pos.z);
-
-	SetRotationPlayingEffekseer3DEffect(handle, 0.0f, angleY, -DX_PI_F);
-	SetScalePlayingEffekseer3DEffect(handle, kPlayerAttack1Size, kPlayerAttack1Size, kPlayerAttack1Size);
-}
-
-void EffectManager::PlayPlayerAttack2Effect(VECTOR pos, float angleY)
-{
-	// 攻撃用エフェクトを再生
-	int handle = PlayEffekseer3DEffect(m_playerAttack2Handle);
-
-	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y + kPlayerAttack2OffsetY, pos.z);
-
-	SetRotationPlayingEffekseer3DEffect(handle, 0.0f, angleY+ DX_PI_F, 0.0f);
-
-	SetScalePlayingEffekseer3DEffect(handle, kPlayerAttack2Size, kPlayerAttack2Size, kPlayerAttack2Size);
-}
-
-void EffectManager::PlayPlayerCombFinishAttackEffect(VECTOR pos, float angleY)
-{
-	// 攻撃用エフェクトを再生
-	int handle = PlayEffekseer3DEffect(m_playerCombFinishAttackHandle);
-
-	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y + kPlayerAttack2OffsetY, pos.z);
-
-	SetRotationPlayingEffekseer3DEffect(handle, 0.0f, angleY, 0.0f);
-
-	SetScalePlayingEffekseer3DEffect(handle, kPlayerAttack2Size, kPlayerAttack2Size, kPlayerAttack2Size);
-}
-
-void EffectManager::EnemyStrongAttackEffect(VECTOR pos)
-{
-	// 攻撃用エフェクトを再生
-	int handle = PlayEffekseer3DEffect(m_enemyStrongAttackHandle);
-
-	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y + kPlayerAttack2OffsetY, pos.z);
-
-	SetScalePlayingEffekseer3DEffect(handle, kEnemyStrongAttackSize, kEnemyStrongAttackSize, kEnemyStrongAttackSize);
-}
-
-void EffectManager::EnemyStrongAttackChargeEffect(VECTOR pos)
-{
-	// チャージ用エフェクトを再生
-	int handle = PlayEffekseer3DEffect(m_enemyStrongAttackChargeHandle);
-
-	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y + kPlayerAttack2OffsetY, pos.z);
-
-	SetScalePlayingEffekseer3DEffect(handle, kEnemyStrongAttackChargeSize, kEnemyStrongAttackSize, kEnemyStrongAttackChargeSize);
-}
-
-void EffectManager::StrongEnemyRangeAttackEffect(VECTOR pos)
-{
-	// 攻撃用エフェクトを再生
-	int handle = PlayEffekseer3DEffect(m_StrongEnemyRangeAttackHandle);
-
-	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y+ kStrongEnemyRangeAttackOffsetY, pos.z);
-
-	SetScalePlayingEffekseer3DEffect(handle, kStrongEnemyRangeAttackSize, kStrongEnemyRangeAttackSize, kStrongEnemyRangeAttackSize);
-}
-
-void EffectManager::BossEnemyRangeAttackEffect(VECTOR pos)
-{
-	// 攻撃用エフェクトを再生
-	int handle = PlayEffekseer3DEffect(m_BossEnemyRangeAttackHandle);
-
-	SetPosPlayingEffekseer3DEffect(handle, pos.x, pos.y + kBossEnemyRangeAttackOffsetY, pos.z);
-
-	SetScalePlayingEffekseer3DEffect(handle, kBossEnemyRangeAttackSize, kBossEnemyRangeAttackSize, kBossEnemyRangeAttackSize);
-}
-
 void EffectManager::BattleAreaEffect(VECTOR pos, float scale)
 {
 	if (m_playingBattleAreaHandle != -1)
@@ -357,6 +282,79 @@ void EffectManager::UpdateShieldEffect(int handle, VECTOR pos, float angleY)
 void EffectManager::StopShieldEffect(int handle)
 {
 	StopEffekseer3DEffect(handle);
+}
+
+void EffectManager::PlayAttackEffect(EffectType type, VECTOR pos, float angleY)
+{
+	int handle = -1;
+	float offsetY = 0.0f;
+	VECTOR scale = VGet(1.0f, 1.0f, 1.0f);;
+	bool hasRotation = false;
+	VECTOR rot = VGet(0.0f, 0.0f, 0.0f);
+
+	switch (type)
+	{
+	case EffectManager::EffectType::PlayerAttack1:
+		handle = m_playerAttack1Handle;
+		offsetY = kChangeEffectOffsetY;
+		rot = VGet(0.0f, angleY, -DX_PI_F);
+		scale = VGet(kPlayerAttack1Size, kPlayerAttack1Size, kPlayerAttack1Size);
+		hasRotation = true;
+		break;
+	case EffectManager::EffectType::PlayerAttack2:
+		handle = m_playerAttack2Handle;
+		offsetY = kPlayerAttack2OffsetY;
+		rot = VGet(0.0f, angleY + DX_PI_F, 0.0f);
+		scale = VGet(kPlayerAttack2Size, kPlayerAttack2Size, kPlayerAttack2Size);
+		hasRotation = true;
+		break;
+	case EffectManager::EffectType::PlayerCombFinish:
+		handle = m_playerCombFinishAttackHandle;
+		offsetY = kPlayerAttack2OffsetY;
+		scale = VGet(kPlayerAttack2Size, kPlayerAttack2Size, kPlayerAttack2Size);
+		hasRotation = true;
+		break;
+	case EffectManager::EffectType::EnemyStrongAttack:
+		handle = m_enemyStrongAttackHandle;
+		offsetY = kPlayerAttack2OffsetY;
+		scale = VGet(kEnemyStrongAttackSize, kEnemyStrongAttackSize, kEnemyStrongAttackSize);
+		hasRotation = false;
+		break;
+	case EffectManager::EffectType::EnemyStrongAttackCharge:
+		handle = m_enemyStrongAttackChargeHandle;
+		offsetY = kPlayerAttack2OffsetY;
+		scale = VGet(kEnemyStrongAttackChargeSize, kEnemyStrongAttackSize, kEnemyStrongAttackChargeSize);
+		hasRotation = false;
+		break;
+	case EffectManager::EffectType::StrongEnemyRangeAttack:
+		handle = m_StrongEnemyRangeAttackHandle;
+		offsetY = kStrongEnemyRangeAttackOffsetY;
+		scale = VGet(kStrongEnemyRangeAttackSize, kStrongEnemyRangeAttackSize, kStrongEnemyRangeAttackSize);
+		hasRotation = false;
+		break;
+	case EffectManager::EffectType::BossEnemyRangeAttack:
+		handle = m_BossEnemyRangeAttackHandle;
+		offsetY = kBossEnemyRangeAttackOffsetY;
+		scale = VGet(kBossEnemyRangeAttackSize, kBossEnemyRangeAttackSize, kBossEnemyRangeAttackSize);
+		hasRotation = false;
+		break;
+	default:
+		break;
+	}
+
+	if (handle != -1)
+	{
+		int playHandle = PlayEffekseer3DEffect(handle);
+		SetPosPlayingEffekseer3DEffect(playHandle, pos.x, pos.y + offsetY, pos.z);
+
+		if (hasRotation)
+		{
+			SetRotationPlayingEffekseer3DEffect(playHandle, rot.x, rot.y, rot.z);
+		}
+
+		// VECTORの各成分を渡す
+		SetScalePlayingEffekseer3DEffect(playHandle, scale.x, scale.y, scale.z);
+	}
 }
 
 void EffectManager::SetEffectPos(float x, float y, float z)

@@ -138,7 +138,7 @@ void StrongEnemy::OnRangeAttack()
 	m_enemyAttack.radius = kRangeAttackRadius;
 	VECTOR playerPos = m_pPlayer->GetPos();
 	float distance = VSize(VSub(playerPos,m_enemyAttack.pos));
-	m_pEffectManager->StrongEnemyRangeAttackEffect(m_enemyAttack.pos);
+	m_pEffectManager->PlayAttackEffect(EffectManager::EffectType::StrongEnemyRangeAttack, m_pos);
 }
 
 void StrongEnemy::OnDamage(int damage, bool isHatePlayer)

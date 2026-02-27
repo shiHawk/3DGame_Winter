@@ -16,7 +16,7 @@ namespace
 	constexpr float kMoveDecRate = 0.8f;
 	constexpr float kModelScale = 60.0f; // モデルのスケール
 	constexpr float kMoveThreshold = 0.1f; // 移動とみなす閾値
-	constexpr float kTrackingRange = 800.0f;
+	constexpr float kTrackingRange = 500.0f;
 
 	constexpr float kAttackRadius = 30.0f;
 	constexpr float kAttackRange = 90.0f;

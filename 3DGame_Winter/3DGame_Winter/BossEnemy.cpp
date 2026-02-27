@@ -198,7 +198,7 @@ void BossEnemy::OnStrongAttack()
     m_enemyAttack.dir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
     m_enemyAttack.timer = kStrongAttackDuration;
     m_enemyAttack.radius = kStrongAttackRadius;
-    m_pEffectManager->EnemyStrongAttackEffect(m_enemyAttack.pos);
+    m_pEffectManager->PlayAttackEffect(EffectManager::EffectType::EnemyStrongAttack, m_enemyAttack.pos);
 }
 
 void BossEnemy::OnRangeAttack()
@@ -209,7 +209,7 @@ void BossEnemy::OnRangeAttack()
     m_enemyAttack.dir = VNorm(VSub(m_pPlayer->GetPos(), m_pos));
     m_enemyAttack.timer = kRangeAttackDuration;
     m_enemyAttack.radius = kRangeAttackRadius;
-    m_pEffectManager->BossEnemyRangeAttackEffect(m_enemyAttack.pos);
+    m_pEffectManager->PlayAttackEffect(EffectManager::EffectType::BossEnemyRangeAttack, m_enemyAttack.pos);
 }
 
 void BossEnemy::OnDamage(int damage, bool isHatePlayer)
@@ -297,7 +297,7 @@ void BossEnemy::UpdateDefault()
         {
             m_state = BossEnemyState::STRONG_ATTACK_CHARGE;
             m_attackTimer = kChageTime; // Šî€‚Ì—­‚ßŽžŠÔ
-            m_pEffectManager->EnemyStrongAttackChargeEffect(m_pos);
+            m_pEffectManager->PlayAttackEffect(EffectManager::EffectType::EnemyStrongAttackCharge, m_pos);
             SetShield();
         }
         else if (rand < 70)

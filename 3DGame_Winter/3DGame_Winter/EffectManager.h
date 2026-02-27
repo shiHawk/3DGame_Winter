@@ -17,13 +17,6 @@ public:
 	void Update();
 	void Draw();
 	void PlayChangeEffect(VECTOR pos);
-	void PlayPlayerAttack1Effect(VECTOR pos, float angleY);
-	void PlayPlayerAttack2Effect(VECTOR pos, float angleY);
-	void PlayPlayerCombFinishAttackEffect(VECTOR pos, float angleY);
-	void EnemyStrongAttackEffect(VECTOR pos);
-	void EnemyStrongAttackChargeEffect(VECTOR pos);
-	void StrongEnemyRangeAttackEffect(VECTOR pos);
-	void BossEnemyRangeAttackEffect(VECTOR pos);
 	void BattleAreaEffect(VECTOR pos, float scale);
 	void StopBattleAreaEffect();
 	void PlayChestEffect(int no);
@@ -32,6 +25,17 @@ public:
 	int PlayShieldEffect(VECTOR pos, float angleY);
 	void UpdateShieldEffect(int handle, VECTOR pos, float angleY); // エフェクトの向きの更新
 	void StopShieldEffect(int handle); // 主に二重呼び出しを止める
+	enum class EffectType
+	{
+		PlayerAttack1,
+		PlayerAttack2,
+		PlayerCombFinish,
+		EnemyStrongAttack,
+		EnemyStrongAttackCharge,
+		StrongEnemyRangeAttack,
+		BossEnemyRangeAttack
+	};
+	void PlayAttackEffect(EffectType type,VECTOR pos,float angleY = 0.0f);
 private:
 	void SetEffectPos(float x, float y, float z);
 	int m_meleeSpecialEffectHandle; // 近接キャラの必殺技エフェクト

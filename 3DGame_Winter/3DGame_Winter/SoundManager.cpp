@@ -4,7 +4,7 @@
 namespace
 {
 	// BGM‚Í­‚µT‚¦‚ßi70%’ö“xj‚Éİ’è
-	constexpr int kBgmMasterVol = 140;
+	constexpr int kBgmMasterVol = 200;
 	// SE‚Í‚Í‚Á‚«‚è•·‚±‚¦‚é‚æ‚¤‚É‘å‚«‚­İ’è
 	constexpr int kSeMasterVol = 255;
 	constexpr int kMaxVol = 255;

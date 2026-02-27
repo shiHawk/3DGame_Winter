@@ -304,7 +304,7 @@ void Player::OnAttack()
     m_attack.pos = VAdd(m_pos,VScale(m_attack.dir,kAttackRange));
     m_attack.timer = kAttackDuration;
     SoundManager::GetInstance()->PlayWarriorAttackSE(0);
-    m_pEffectManager->PlayPlayerAttack1Effect(m_attack.pos,m_angleY);
+    m_pEffectManager->PlayAttackEffect(EffectManager::EffectType::PlayerAttack1, m_attack.pos, m_angleY);
     if (m_pos.y > 0.0f)
     {
         m_vec.y = 0.0f; // ‚’¼‘¬“x‚ðƒ[ƒ‚É‚µAã¸E‰º~‚ð’âŽ~
@@ -320,7 +320,7 @@ void Player::OnAttack2()
     m_attack.pos = VAdd(m_pos, VScale(m_attack.dir, kAttackRange));
     m_attack.timer = kStrongAttackDuration;
     SoundManager::GetInstance()->PlayWarriorAttackSE(1);
-    m_pEffectManager->PlayPlayerAttack2Effect(m_attack.pos, m_angleY);
+    m_pEffectManager->PlayAttackEffect(EffectManager::EffectType::PlayerAttack2, m_attack.pos, m_angleY);
     if (m_pos.y > 0.0f)
     {
         m_vec.y = 0.0f; // ‚’¼‘¬“x‚ðƒ[ƒ‚É‚µAã¸E‰º~‚ð’âŽ~
@@ -336,7 +336,7 @@ void Player::OnCombFinishAttack()
     m_attack.pos = VAdd(m_pos, VScale(m_attack.dir, kAttackRange));
     m_attack.timer = kComboFinishAttackDuration;
     SoundManager::GetInstance()->PlayWarriorAttackSE(2);
-    m_pEffectManager->PlayPlayerCombFinishAttackEffect(m_attack.pos, m_angleY);
+    m_pEffectManager->PlayAttackEffect(EffectManager::EffectType::PlayerCombFinish, m_attack.pos, m_angleY);
 }
 
 void Player::OnSpecialSkil()
