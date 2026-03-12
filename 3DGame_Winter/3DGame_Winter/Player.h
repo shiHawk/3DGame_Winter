@@ -74,7 +74,6 @@ private:
 	VECTOR HandleInput();
 	void UpdateMovement(const VECTOR& moveDir);
 	void UpdatePlayerState();
-	void UpdateJumpState();
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<EffectManager> m_pEffectManager;
 	float m_angleY;
@@ -112,6 +111,7 @@ private:
 	void RotatingToAttackAndAttack(void (Player::* attackFunc)(), PlayerState nextState);
 	// 攻撃開始の共通処理（ヘルパー関数）
 	void TryStartAttack(void(Player::* onAttackFunc)(), PlayerState rotationState, PlayerState attackState);
+	// 攻撃持続時間のや攻撃アニメーションの更新、次の攻撃ステートへの移行を行う
 	void UpdateAttackState(AttackSphere& attackData, int animNo, float animInc, PlayerState nextState);
 };
 

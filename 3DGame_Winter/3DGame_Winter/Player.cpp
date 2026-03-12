@@ -188,9 +188,10 @@ void Player::Update()
     }
     else
     {
-        m_distanceToFollowTarget = VSize(VSub(m_followTargetPos, m_pos));
+        m_distanceToFollowTarget = VSize(VSub(m_followTargetPos, m_pos)); // 操作キャラへの距離を測定
         //printfDx(L"m_distanceToFollowTarget:%f\n", m_distanceToFollowTarget);
-        if (m_distanceToFollowTarget > kWarpDistance && VSize(VSub(m_enemyPos, m_pos)) > 500.0f)
+        // 一定以上操作キャラと離れたら近くにワープ
+        if (m_distanceToFollowTarget > kWarpDistance && VSize(VSub(m_enemyPos, m_pos)) > kEnemyLeashDistance)
         {
             m_pos = VGet(m_followTargetPos.x, m_followTargetPos.y, m_followTargetPos.z - kPostWarpPosZ);
         }
@@ -455,9 +456,9 @@ VECTOR Player::HandleInput()
             m_postAvoidWaitTimer -= 1.0f;
             return VGet(0.0f, 0.0f, 0.0f); // 何もしない
         }
-        if (m_isEnemyAttackSensing)
+        if (m_isEnemyAttackSensing) // 敵が攻撃中なら
         {
-            return VGet(0.0f, 0.0f, 0.0f);
+            return VGet(0.0f, 0.0f, 0.0f); // 何もしない
         }
 
         // 敵が検索範囲外（非常に遠い）の場合
@@ -657,11 +658,6 @@ void Player::UpdatePlayerState()
         HandleStateDeath();
         break;
     }
-}
-
-void Player::UpdateJumpState()
-{
-
 }
 
 void Player::HandleStateNormal(bool aiWantsToAttack)
@@ -924,7 +920,7 @@ void Player::UpdateAttackState(AttackSphere& attackData, int animNo, float animI
         ChangeAnim(m_modelHandle, animNo, false, animInc);
         float animTotalTime = MV1GetAnimTotalTime(m_modelHandle, animNo);
         //printfDx(L"playTime:%f\n", GetPlayTime());
-        if (animTotalTime-kCancelFrames <= GetPlayTime())
+        if (animTotalTime - kCancelFrames <= GetPlayTime())
         {
             attackData.active = false;
             m_playerState = nextState;

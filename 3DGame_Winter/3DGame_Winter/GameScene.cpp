@@ -154,19 +154,16 @@ SceneBase* GameScene::Update()
 			ChangeControl();
 		}
 	}
-	// モードに応じてカメラに渡す位置を決定
+	// モードに応じてカメラに渡す位置の情報を決定
 	if (currentControlMode == CharacterBase::ControlMode::PLAYER)
 	{
 		// プレイヤーが操作モードの場合、プレイヤーの位置をカメラに渡す
 		m_pCamera->SetControlledCharacterPosition(m_pPlayer->GetPos());
-		// プレイヤーの向きをカメラに渡す
-		m_pCamera->SetPlayerDir(m_pPlayer->GetDir());
 	}
 	else if (currentControlMode == CharacterBase::ControlMode::COMPANION)
 	{
 		// コンパニオンが操作モードの場合、コンパニオンの位置をカメラに渡す
 		m_pCamera->SetControlledCharacterPosition(m_pCompanion->GetPos());
-		m_pCamera->SetPlayerDir(m_pCompanion->GetPlayerDir());
 	}
 	m_pPlayer->SetFollowTargetPos(m_pCompanion->GetPos());
 	m_pCompanion->SetPlayerPos(m_pPlayer->GetPos());
@@ -550,6 +547,7 @@ void GameScene::ChangeControl()
 	}
 	CharacterBase::ControlMode currentMode = m_pPlayer->GetControlMode(); // 現在のモード
 	CharacterBase::ControlMode playerNewMode; // 次のプレイヤーのモード
+	// 切り替えボタンを押すと現在のモードとは別のモードに変更
 	if (currentMode == CharacterBase::ControlMode::PLAYER)
 	{
 		playerNewMode = CharacterBase::ControlMode::COMPANION;
@@ -564,7 +562,8 @@ void GameScene::ChangeControl()
 	}
 	m_pPlayer->SetControlMode(playerNewMode);
 
-	CharacterBase::ControlMode companionNewMode; // コンパニオンのモード
+	CharacterBase::ControlMode companionNewMode; // 次のコンパニオンのモード
+	// 切り替えボタンを押すと現在のモードとは別のモードに変更
 	if (playerNewMode == CharacterBase::ControlMode::PLAYER)
 	{
 		companionNewMode = CharacterBase::ControlMode::COMPANION;

@@ -150,13 +150,13 @@ void StrongEnemy::OnDamage(int damage, bool isHatePlayer)
 	// 1. 先にダメージ計算を行う
 	if (isHatePlayer)
 	{
-		m_finalDamage = static_cast<float>(damage) * kCumulativeRate;
+		m_finalDamage = static_cast<int>(damage) * kCumulativeRate;
 		m_damageColor = kWeekDamageColor;
 		m_playerHate += static_cast<float>(damage);
 	}
 	else
 	{
-		m_finalDamage = static_cast<float>(damage) * kAttenuationRate;
+		m_finalDamage = static_cast<int>(damage) * kAttenuationRate;
 		m_damageColor = kNormalDamageColor;
 		m_companionHate += static_cast<float>(damage) * 3;
 	}

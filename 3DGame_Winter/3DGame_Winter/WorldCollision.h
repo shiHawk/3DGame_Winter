@@ -17,7 +17,6 @@ public:
 		std::vector<std::shared_ptr<NormalEnemy>> pNormalEnemies, std::vector<std::shared_ptr<StrongEnemy>> pStrongEnemies);
 	void End();
 	void Update();
-	void Draw();
 private:
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Stage> m_pStage;

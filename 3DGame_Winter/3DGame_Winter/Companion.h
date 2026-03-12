@@ -20,7 +20,8 @@ public:
 	void OnStrongAttack();
 	void OnSpecialSkil();
 	void UpdateAIState();
-	void UpdatePlayerControlState(); // プレイヤー時のステート
+	// プレイヤー時のステート
+	void UpdatePlayerControlState(); 
 	void SetControlMode(ControlMode mode) { m_controlMode = mode; }
 	ControlMode GetControlMode() { return m_controlMode; }
 	float GetAttackRadius() { return m_attack.radius; }

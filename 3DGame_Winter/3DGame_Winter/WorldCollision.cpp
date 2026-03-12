@@ -20,7 +20,7 @@ namespace
 	constexpr float kLeftLimit = -1000.0f;  // ステージ左
 	constexpr float kRightLimit = 1000.0f;  // ステージ右
 	constexpr float kWallOffset = 0.001f;
-	constexpr int kMaxIterations = 4;
+	constexpr int kMaxIterations = 4; // // 複数の壁に挟まれた際の補正回数（1回だと角などでめり込むため）
 }
 WorldCollision::WorldCollision():
 	m_lastGroundY(0.0f)
@@ -75,16 +75,12 @@ void WorldCollision::Update()
 	}
 }
 
-void WorldCollision::Draw()
-{
-}
-
 void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 {
 	// 必要な情報の取得
 	VECTOR playerPos = pTargetCharacter->GetPos(); // プレイヤーの現在の座標
 	VECTOR nextPos = VAdd(playerPos, pTargetCharacter->GetVec()); // 次のフレームの予想位置
-	const auto& tileHandles = m_pStage->GetGroundCollisionModelHandles(); // ステージの全タイル
+	const auto& tileHandles = m_pStage->GetGroundCollisionModelHandles(); // ステージのタイル
 	// レイを定義
 	VECTOR rayStart = nextPos;
 	rayStart.y += kGroundCheckRayOffsetY;
@@ -94,7 +90,7 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 	bool isGrounded = false;
 	float highestGroundY = -99999.0f;
 	VECTOR highestGroundNormal = VGet(0.0f, 1.0f, 0.0f);
-	// ステージの全タイルとレイの当たり判定を実行
+	// ステージのタイルとレイの当たり判定を実行
 	for (int handle : tileHandles)
 	{
 		if (handle == -1) continue;
@@ -111,18 +107,12 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 			}
 		}
 	}
-	//printfDx(L"highestGroundY:%f\n", highestGroundY);
-	// プレイヤーの現在のY軸速度を取得
-	float playerVecY = pTargetCharacter->GetVec().y;
+
 	if (isGrounded && highestGroundY > -99999.0f)
 	{
 		m_lastGroundY = highestGroundY;
 	}
-	//printfDx(L"m_lastGroundY:%f\n", m_lastGroundY);
-	//printfDx(L"playerPosY:%f\n", m_pPlayer->GetPos().y);
-	// // プレイヤーの現在のY軸速度を取得
-	VECTOR currentVec = pTargetCharacter->GetVec();
-	playerVecY = currentVec.y;
+	
 	if (isGrounded)
 	{
 		// 1. もし足元が地面より下にあるなら、強制的に地面の上に押し戻す（突き抜け防止）
@@ -143,65 +133,16 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 	}
 	else
 	{
-		pTargetCharacter->SetIsGrounded(true);
+		pTargetCharacter->SetIsGrounded(false);
 	}
-	// 判定結果からプレイヤーに反映
-	// 地面が見つかり、かつ プレイヤーのY座標が地面より下(またはめり込んでいる)場合
-	//if (isGrounded && playerPos.y + pTargetCharacter->GetVec().y <= highestGroundY)
-	//{
-	//	// 上昇中でない場合のみ着地判定
-	//	if (playerVecY <= 0.0f)
-	//	{
-	//		float targetY = highestGroundY;
-	//		playerPos.y = targetY;
-	//		pTargetCharacter->SetVecY(0.0f);
-	//		pTargetCharacter->SetIsJump(false);
-	//		// 地面の法線と現在の移動ベクトルの内積を計算
-	//		float dot = VDot(currentVec, highestGroundNormal);
-	//		// 地面にめり込む方向の速度成分（法線方向の成分）を打ち消す
-	//		// これにより、ベクトルが地面に平行な成分（坂に沿った方向）になる
-	//		VECTOR velocityAlongNormal = VScale(highestGroundNormal, dot);
-	//		VECTOR newVec = VSub(currentVec, velocityAlongNormal);
-	//		// 調整されたXZ成分を速度に反映
-	//		pTargetCharacter->SetVecX(newVec.x);
-	//		pTargetCharacter->SetVecZ(newVec.z);
-	//	}
-	//}
-	//playerPos = VAdd(playerPos, pTargetCharacter->GetVec());
-	//pTargetCharacter->SetPos(playerPos);
 	pTargetCharacter->SetPos(nextPos);
-	//else
-	//{
-	//	// 地面判定失敗時の保険
-	//	if (playerPos.y < m_lastGroundY)
-	//	{
-	//		float targetY = m_lastGroundY;
-	//		playerPos.y = targetY;
-	//		m_pPlayer->SetPos(playerPos);
-	//		m_pPlayer->SetVecY(0.0f);
-	//		m_pPlayer->SetIsJump(false);
-	//	}
-	//	else
-	//	{
-	//		m_pPlayer->SetIsJump(true);
-	//	}
-	//}
-
-	/*if (isGrounded)
-	{
-		DrawLine3D(rayStart,rayEnd,0xff0000);
-	}
-	else
-	{
-		DrawLine3D(rayStart, rayEnd, 0x00ff00);
-	}*/
 }
 
 void WorldCollision::CheckWallCollision(CharacterBase* pTargetCharacter)
 {
 	VECTOR characterPos = pTargetCharacter->GetPos();
 	VECTOR currentVec = pTargetCharacter->GetVec(); // 速度もループ内で更新するためここで取得
-	const auto& wallHandles = m_pStage->GetWallCollisionModelHandles(); // ステージの全ての壁
+	const auto& wallHandles = m_pStage->GetWallCollisionModelHandles(); // ステージの壁
 	for (int iter = 0; iter < kMaxIterations; iter++)
 	{
 		// 当たり判定の準備

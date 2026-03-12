@@ -508,8 +508,8 @@ void UIManager::DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, f
 	// 描画開始位置（バーの中央が敵の真上にくるように調整）
 	int x1 = static_cast<int>(screenPos.x - width / 2);
 	int y1 = static_cast<int>(screenPos.y);
-	int x2 = x1 + width;
-	int y2 = y1 + height;
+	int x2 = x1 + static_cast<int>(width);
+	int y2 = y1 + static_cast<int>(height);
 
 	// 4. 背景（枠）の描画
 	// 元画像(kSrcWidth)を画面上のサイズ(width)に引き伸ばして描画
