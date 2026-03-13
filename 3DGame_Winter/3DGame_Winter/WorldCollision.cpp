@@ -128,7 +128,6 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 				// â“¹‚É‰ˆ‚Á‚½ˆÚ“®•â³(•K—v‚Å‚ ‚ê‚Î)
 			}
 		}
-		
 		pTargetCharacter->SetIsGrounded(true);
 	}
 	else

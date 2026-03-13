@@ -61,6 +61,7 @@ namespace
     constexpr float kAutoAvoidanceFrame = 18.0f; // 回避時間
     constexpr float kAIAvoidSpeed = 20.0f;
     constexpr float kAvoidCooltime = 60.0f; // 自動回避のクールタイム
+    constexpr float kWaitAutoEvadeTime = 10.0f; // 自動回避開始までの時間
     constexpr float kAutoAvoidDistance = 190.0f; // 今すぐ回避アクションをとる判断をする範囲
     constexpr float kAvoidWeightTime = 40.0f;
 
@@ -78,6 +79,7 @@ namespace
     constexpr float kAIComboCoolTime = 10.0f; // AIのコンボ間クールタイム
 
     constexpr float kModelScale = 50.0f; // モデルのスケール
+    // 各種アニメーション
     constexpr int kIdleAnimNo = 1;
     constexpr int kWalkAnimNo = 3;
     constexpr int kAttackAnimNo = 31;
@@ -88,6 +90,7 @@ namespace
     constexpr int kDamageAnimNo = 24;
     constexpr int kDeathAnimNo = 26;
     constexpr int kJumpAnimNo = 10;
+
     constexpr float kAnimIncrement = 0.4f; // アニメーションの再生速度
     constexpr float kIdleAnimIncrement = 0.4f; // 待機アニメーションの再生速度
     constexpr float kWalkAnimIncrement = 1.0f; // 歩行アニメーションの再生速度
@@ -201,7 +204,7 @@ void Player::Update()
         if (m_isEnemyAttackSensing && distSqToEnemy < avoidDistSq && m_playerState != PlayerState::AUTO_EVADE && m_evadeCooldown <= 0.0f)
         {
             m_reactionTimer++; // 感知している時間をカウント
-            if (m_reactionTimer > 10.0f) // 10フレーム後に回避を行う
+            if (m_reactionTimer > kWaitAutoEvadeTime) // 10フレーム後に回避を行う
             {
                 m_reactionTimer = 0.0f;
                 m_invincibilityTimer = kAvoidanceInvincibilityTime;
@@ -221,7 +224,6 @@ void Player::Update()
                 m_attack.timer = 0.0f;
                 m_avoidanceTimer = kAutoAvoidanceFrame; // 回避時間セット
                 m_evadeCooldown = kAvoidCooltime;
-                //m_isEnemyAttackSensing = false;
 
                 m_vec.x = m_retreatDir.x * kAIAvoidSpeed;
                 m_vec.z = m_retreatDir.z * kAIAvoidSpeed;

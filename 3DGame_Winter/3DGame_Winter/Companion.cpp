@@ -45,6 +45,7 @@ namespace
 	constexpr float kSpecialSkilAnimIncriment = 0.6f;
 	constexpr float kAvoidanceAnimIncrement = 0.4f; // 回避アニメーションの再生速度
 	constexpr float kDeathAnimIncrement = 0.4f; // アニメーションの再生速度
+	constexpr int kAttackProbability = 25; // 近距離攻撃の確率
 
 	constexpr int kAttackPower = 10;
 	constexpr int kStrongAttackPower = 30;
@@ -75,6 +76,7 @@ namespace
 	constexpr double kAnalogDeadZone = 0.25; // アナログスティックのデッドゾーン
 
 	constexpr float kAvoidanceFrame = 15.0f;
+	constexpr float kAutoAvoidanceTime = 20.0f;
 	constexpr float kAvoidanceMoveSpeed = 0.2f;
 	constexpr float kRetreatMoveSpeed = 8.0f; // 後退時の速度
 	constexpr float kColRadius = 40.0f;
@@ -419,7 +421,7 @@ void Companion::UpdateAIState()
 				// 0～100の乱数を取得して、行動を決定する
 				int decision = GetRand(100);
 
-				if (decision < 25) // 25%の確率で近接攻撃
+				if (decision < kAttackProbability) // 25%の確率で近接攻撃
 				{
 					m_vec = { 0.0f, 0.0f, 0.0f };
 					OnAttack();
@@ -427,7 +429,7 @@ void Companion::UpdateAIState()
 				}
 				else // 75%の確率で距離を取って遠距離攻撃（仕切り直し）
 				{
-					m_avoidanceTimer = 20.0f;
+					m_avoidanceTimer = kAutoAvoidanceTime;
 					m_companionState = CompanionState::PREPARE_STRONG_ATTACK;
 				}
 			}
