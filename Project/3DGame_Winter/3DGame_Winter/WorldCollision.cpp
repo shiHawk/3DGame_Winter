@@ -125,7 +125,6 @@ void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)
 			{
 				pTargetCharacter->SetVecY(0.0f);
 				pTargetCharacter->SetIsJump(false);
-				// â“¹‚É‰ˆ‚Á‚½ˆÚ“®•â³(•K—v‚Å‚ ‚ê‚Î)
 			}
 		}
 		pTargetCharacter->SetIsGrounded(true);
