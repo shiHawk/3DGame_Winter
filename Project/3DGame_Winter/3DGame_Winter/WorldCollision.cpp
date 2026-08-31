@@ -21,6 +21,8 @@ namespace
 	constexpr float kRightLimit = 1000.0f;  // ステージ右
 	constexpr float kWallOffset = 0.001f;
 	constexpr int kMaxIterations = 4; // // 複数の壁に挟まれた際の補正回数（1回だと角などでめり込むため）
+	constexpr float kCameraWallOffset = 1.0f; // 壁からわずかに離す距離
+	constexpr float kCameraCollisionMargin = 10.0f; // 壁の手前で止める余白
 }
 WorldCollision::WorldCollision():
 	m_lastGroundY(0.0f)
@@ -73,6 +75,51 @@ void WorldCollision::Update()
 			CheckWallCollision(enemy.get());
 		}
 	}
+}
+
+VECTOR WorldCollision::CheckCameraCollision(const VECTOR& pivotPos, const VECTOR& idealCameraPos, float radius)
+{
+	VECTOR toCameraVec = VSub(idealCameraPos, pivotPos);
+	float idealDistance = VSize(toCameraVec);
+	if (idealDistance <= 0.0001f)
+	{
+		return idealCameraPos; // 支点と理想位置がほぼ同じなら何もしない
+	}
+	VECTOR dir = VScale(toCameraVec, 1.0f / idealDistance);
+
+	// 遮るものが無ければ理想距離のまま
+	float closestDistance = idealDistance;
+
+	// 支点から理想カメラ位置までの線分と、指定したポリゴン群との当たり判定を行い
+	// 一番手前でヒットした距離を採用する
+	auto checkSegment = [&](const std::vector<int>& handles)
+		{
+			for (int handle : handles)
+			{
+				if (handle == -1) continue;
+
+				MV1_COLL_RESULT_POLY result = MV1CollCheck_Line(handle, -1, pivotPos, idealCameraPos);
+				if (result.HitFlag == 1)
+				{
+					VECTOR hitVec = VSub(result.HitPosition, pivotPos);
+					// 進行方向(dir)への射影で「支点からの距離」に変換
+					float hitDist = VDot(hitVec, dir);
+					// 半径+余白の分だけ手前で止める(壁にレンズがめり込まないように)
+					hitDist -= (radius + kCameraCollisionMargin);
+					if (hitDist < 0.0f) hitDist = 0.0f;
+
+					if (hitDist < closestDistance)
+					{
+						closestDistance = hitDist;
+					}
+				}
+			}
+		};
+
+	checkSegment(m_pStage->GetWallCollisionModelHandles());
+	checkSegment(m_pStage->GetGroundCollisionModelHandles()); // 階段・床の裏抜け防止
+
+	return VAdd(pivotPos, VScale(dir, closestDistance));
 }
 
 void WorldCollision::CheckGroundCollision(CharacterBase* pTargetCharacter)

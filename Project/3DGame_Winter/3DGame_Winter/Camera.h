@@ -1,11 +1,13 @@
 #pragma once
 #include "DxLib.h"
+#include <memory>
+class WorldCollision;
 class Camera
 {
 public:
 	Camera();
 	~Camera() {};
-	void Init();
+	void Init(std::shared_ptr<WorldCollision> pWorldCollision);
 	void End();
 	void Update();
 	void Draw();
@@ -19,6 +21,7 @@ public:
 	void SetIsLockOn(bool lockFlag) { m_isLockOn = lockFlag; }
 	bool IsBossBattle() { return m_isBossBattle; }
 private:
+	std::shared_ptr<WorldCollision> m_pWorldCollision;
 	// 度数をラジアンに変換する
 	void RadianTranslation(); 
 	int m_lightHandle;
@@ -36,6 +39,7 @@ private:
 	float m_viewRadianAngle; // 視野角
 	VECTOR m_playerPos; // プレイヤーの位置
 	VECTOR m_playerDir; // プレイヤーの向いている方向
+	VECTOR m_cameraDrawPos; // 実際に描画・SetCameraPositionAndTargetに使う位置(Lerp後)
 	bool m_isLockOn; // ロックオン中か
 	VECTOR m_targetToPlayer;
 	float m_targetToPlayerDistance;

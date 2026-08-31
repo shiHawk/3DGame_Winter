@@ -52,7 +52,6 @@ void GameScene::Init()
 	m_pScoreManager = std::make_shared<ScoreManager>();
 	m_pSkyDome = std::make_shared<SkyDome>();
 	m_pChest = std::make_shared<Chest>();
-	m_pCamera->Init();
 	m_pPlayer->Init(m_pCamera,m_pEffectManager);
 	m_pStage->Init();
 	m_pEnemyDataManager->LoadEnemyData("Data/enemyData/enemyData.csv",m_pNormalEnemies,m_pStrongEnemies,
@@ -61,6 +60,7 @@ void GameScene::Init()
 	m_pCompanion->Init(m_pCamera);
 	m_pGameplayCollision->Init(m_pPlayer, m_pCompanion, m_pNormalEnemies, m_pStrongEnemies,m_pBossEnemy);
 	m_pWorldCollision->Init(m_pPlayer, m_pStage, m_pCompanion,m_pNormalEnemies,m_pStrongEnemies);
+	m_pCamera->Init(m_pWorldCollision);
 	m_pFlyingEnemy->Init(m_pPlayer, m_pCompanion);
 	m_pBossEnemy->Init(m_pPlayer, m_pCompanion,m_pEffectManager);
 	//m_pStrongEnemy->Init(m_pPlayer, m_pCompanion);

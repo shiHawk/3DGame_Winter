@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include <cmath>
 #include "Pad.h"
+#include "WorldCollision.h" 
 namespace
 {
 	constexpr float kLerpSpeed = 0.200f;
@@ -33,7 +34,9 @@ namespace
 	constexpr float kStageMaxX = 1000.0f;
 	constexpr float kStageMinZ = -1000.0f;
 	constexpr float kStageMaxZ = 1000.0f;
-	constexpr float kCameraRadius = 2000.0f; // カメラの当たり判定用半径
+	constexpr float kCameraRadius = 20.0f; // カメラの当たり判定用半径
+	constexpr float kCameraCollisionLerpInSpeed = 0.5f;  // 壁に近づく(距離を縮める)時は素早く
+	constexpr float kCameraCollisionLerpOutSpeed = 0.15f;// 壁から離れる(距離を戻す)時はゆっくり
 
 	constexpr float kMaxLockonRange = 800.0f;
 	constexpr float kLockonRotateSpeed = 0.01f;
@@ -57,12 +60,14 @@ Camera::Camera():
 	m_playerDir({ 0.0f,0.0f,0.0f }),
 	m_lockOnHandle(-1),
 	m_lockOnRotateAngle(0.0f),
-	m_isBossBattle(-1)
+	m_isBossBattle(-1),
+	m_cameraDrawPos(kDefaultCameraPos)
 {
 }
 
-void Camera::Init()
+void Camera::Init(std::shared_ptr<WorldCollision> pWorldCollision)
 {
+	m_pWorldCollision = pWorldCollision;
 	// 3D表示の設定
 	SetUseZBuffer3D(true);	  // Zバッファを指定する
 	SetWriteZBuffer3D(true);  // Zバッファへの書き込みを行う
@@ -227,9 +232,36 @@ void Camera::Update()
 	// 垂直方向回転(X軸回転)させたあと水平方向回転(Y軸回転)して更に
 	// 注視点の座標を足したものがカメラの座標
 	m_cameraPos = VAdd(VTransform(VTransform(VGet(0.0f, 0.0f, -kCameraToPlayerLength), rotX), rotY), VGet(m_playerPos.x,m_playerPos.y + kDefaultCameraPos.y,m_playerPos.z));
-	
-	SetCameraPositionAndTarget_UpVecY(m_cameraPos, m_cameraTarget);
-	//printfDx(L"targetPos.x;%f, targetPos.y;%f, targetPos.z;%f\n",m_cameraTarget.x, m_cameraTarget.y, m_cameraTarget.z);
+	// 理想のカメラ位置(壁無視)を算出
+	VECTOR boomPivot = VGet(m_playerPos.x, m_playerPos.y + kDefaultCameraPos.y, m_playerPos.z);
+	VECTOR idealOffset = VTransform(VTransform(VGet(0.0f, 0.0f, -kCameraToPlayerLength), rotX), rotY);
+	VECTOR idealCameraPos = VAdd(idealOffset, boomPivot);
+	m_cameraPos = idealCameraPos; // ロジック上必要なら従来通り保持
+
+	// 壁・床にめり込まない最大距離を算出(支点からの直線上でクランプ)
+	VECTOR correctedPos = idealCameraPos;
+	if (m_pWorldCollision)
+	{
+		correctedPos = m_pWorldCollision->CheckCameraCollision(boomPivot, idealCameraPos, kCameraRadius);
+	}
+
+	// 距離だけをLerpする(位置を直接Lerpしない = 壁を突き抜ける経路を通らない)
+	float targetDistance = VSize(VSub(correctedPos, boomPivot));
+	float currentDistance = VSize(VSub(m_cameraDrawPos, boomPivot));
+	if (currentDistance <= 0.001f)
+	{
+		currentDistance = kCameraToPlayerLength; // 初回のみ
+	}
+
+	// 壁に近づく(距離を縮める)方向は素早く追従させ、突き抜けを防ぐ
+	// 壁から離れる(距離を戻す)方向はゆっくりにして、抜けた瞬間に急にカメラが飛ぶのを防ぐ
+	float lerpSpeed = (targetDistance < currentDistance) ? kCameraCollisionLerpInSpeed : kCameraCollisionLerpOutSpeed;
+	float newDistance = currentDistance + (targetDistance - currentDistance) * lerpSpeed;
+
+	VECTOR dir = VScale(idealOffset, 1.0f / kCameraToPlayerLength); // 現在の見た目の向き(正規化済み)
+	m_cameraDrawPos = VAdd(boomPivot, VScale(dir, newDistance));
+
+	SetCameraPositionAndTarget_UpVecY(m_cameraDrawPos, m_cameraTarget);	
 }
 
 void Camera::Draw()
