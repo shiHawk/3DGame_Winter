@@ -28,7 +28,7 @@ private:
 	void DrawSg();
 	void DrawBossHp();
 	void DrawEnemyHP();
-	void DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, float height, float offsetY);
+	void DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, float height, float offsetY,int weakIconHnadle);
 	void DrawManualUI();
 	void DrawBuffUI();
 	// ‘€ì’†‚©‚ÌƒAƒCƒRƒ“•`‰æ
@@ -89,6 +89,8 @@ private:
 	bool m_isDisplayBossHp;
 	bool m_isOperationWarrior;
 	int m_sgUpIconHandle; // SG UP‚Ì‰æ‘œ
+	int m_weakIconAxeHandle;
+	int m_weakIconstickHandle;
 	PopUpIcon m_sgUpPopUp;
 	std::vector<DamageText> m_damageTexts;
 	std::shared_ptr<Player> m_pPlayer;

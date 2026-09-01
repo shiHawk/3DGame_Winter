@@ -18,6 +18,7 @@ public:
 	void End();
 	void Update();
 	VECTOR CheckCameraCollision(const VECTOR& pivotPos, const VECTOR& idealCameraPos, float radius); // カメラの球体コリジョンを壁・床と当て、めり込まない位置を返す
+
 private:
 	std::shared_ptr<Player> m_pPlayer;
 	std::shared_ptr<Stage> m_pStage;

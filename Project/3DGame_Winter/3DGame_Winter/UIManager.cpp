@@ -34,6 +34,8 @@ namespace
 	constexpr int kEnemyBarFrameSrcY = 142;
 	constexpr int kEnemyBarSrcX = 1304;
 	constexpr int kEnemyBarSrcY = 122;
+	constexpr int kWeakIconOffset = 1;
+	constexpr float kWeakPointIconScale = 5.0f;
 
 	constexpr int kWarriorIconPosX = 70;
 	constexpr int kWarriorIconPosY = 630;
@@ -180,6 +182,8 @@ UIManager::UIManager():
 	m_isDisplayBossHp(false),
 	m_isOperationWarrior(true),
 	m_sgUpIconHandle(-1),
+	m_weakIconAxeHandle(-1),
+	m_weakIconstickHandle(-1),
 	m_sgUpPopUp({ {0.0f,0.0f,0.0f}, 0.0f, 0.0f, false })
 {
 }
@@ -221,6 +225,8 @@ void UIManager::Init(std::shared_ptr<Player> pPlayer, std::shared_ptr<Companion>
 	m_destinationIconHandle = LoadGraph(L"Data/UI/Destination.png");
 	m_manualCloaseHandel = LoadGraph(L"Data/UI/Close.png");
 	m_sgUpIconHandle = LoadGraph(L"Data/UI/SGUP.png");
+	m_weakIconAxeHandle = LoadGraph(L"Data/UI/AxeIcon.png");
+	m_weakIconstickHandle = LoadGraph(L"Data/UI/StickIcon.png");
 	m_fontHandle = CreateFontToHandle(L"Arial Black", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_manualFontHandle = CreateFontToHandle(L"ü‡ñæí© Demibold", kFontSize, kFontThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 	m_smallManualFontHandle = CreateFontToHandle(L"ü‡ñæí© Demibold", kFontSmallSize, kFontSmallThick, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
@@ -258,6 +264,8 @@ void UIManager::End()
 	DeleteFontToHandle(m_manualFontHandle);
 	DeleteFontToHandle(m_smallManualFontHandle);
 	DeleteFontToHandle(m_damageFontHandle);
+	DeleteFontToHandle(m_weakIconAxeHandle);
+	DeleteFontToHandle(m_weakIconstickHandle);
 	m_isDisplayBossHp = false;
 }
 
@@ -371,26 +379,6 @@ void UIManager::Draw()
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		}
 	}
-	/*DINPUT_JOYSTATE input;
-	int i;
-	int Color;
-	GetJoypadDirectInputState(DX_INPUT_PAD1, &input);
-	Color = GetColor(255, 255, 255);
-	DrawFormatString(0, 0, Color, L"X:%d Y:%d Z:%d",
-		input.X, input.Y, input.Z);
-	DrawFormatString(0, 16, Color, L"Rx:%d Ry:%d Rz:%d",
-		input.Rx, input.Ry, input.Rz);
-	DrawFormatString(0, 32, Color, L"Slider 0:%d 1:%d",
-		input.Slider[0], input.Slider[1]);
-	DrawFormatString(0, 48, Color, L"POV 0:%d 1:%d 2:%d 3:%d",
-		input.POV[0], input.POV[1],
-		input.POV[2], input.POV[3]);
-	DrawString(0, 64, L"Button", Color);
-	for (i = 0; i < 32; i++)
-	{
-		DrawFormatString(64 + i % 8 * 64, 64 + i / 8 * 16, Color,
-			L"%2d:%d", i, input.Buttons[i]);
-	}*/
 }
 
 void UIManager::RegisterDamageUI(VECTOR pos, int damage, unsigned int color)
@@ -474,7 +462,7 @@ void UIManager::DrawEnemyHP()
 		// àÍíËãóó£à»â∫Ç…Ç»Ç¡ÇΩÇÁï`âÊ
 		if (VSize(VSub(enemy->GetPos(), m_pPlayer->GetPos())) <= 800.0f || VSize(VSub(enemy->GetPos(), m_pCompanion->GetPos())) <= kDisplayEnemyHp)
 		{
-			DrawSingleEnemyBar(enemy->GetPos(), enemy->GetHp(), enemy->GetMaxHp(),kEnemyBarWidth, kEnemyBarHeight, kNormalEnemyOffsetY);
+			DrawSingleEnemyBar(enemy->GetPos(), enemy->GetHp(), enemy->GetMaxHp(),kEnemyBarWidth, kEnemyBarHeight, kNormalEnemyOffsetY, m_weakIconstickHandle);
 		}
 	}
 
@@ -485,12 +473,12 @@ void UIManager::DrawEnemyHP()
 		if (VSize(VSub(enemy->GetPos(), m_pPlayer->GetPos())) <= 800.0f || VSize(VSub(enemy->GetPos(), m_pCompanion->GetPos())) <= kDisplayEnemyHp)
 		{
 			DrawSingleEnemyBar(enemy->GetPos(), enemy->GetHp(), enemy->GetMaxHp(),
-				kEnemyBarWidth, kEnemyBarHeight, kStrongEnemyOffsetY);
+				kEnemyBarWidth, kEnemyBarHeight, kStrongEnemyOffsetY, m_weakIconAxeHandle);
 		}
 	}
 }
 
-void UIManager::DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, float height, float offsetY)
+void UIManager::DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, float height, float offsetY, int weakIconHnadle)
 {
 	// 1. ìGÇÃì™è„ÇÃ3Dç¿ïWÇåvéZ
 	VECTOR headPos = VGet(pos.x, pos.y + offsetY, pos.z);
@@ -523,6 +511,20 @@ void UIManager::DrawSingleEnemyBar(VECTOR pos, int hp, int maxHp, float width, f
 	if (currentSrcWidth > 0)
 	{
 		DrawRectExtendGraph(x1, y1, currentX2, y2, 0, 0, currentSrcWidth, kEnemyBarSrcY, m_enemyHPHandle, TRUE);
+	}
+
+	if (weakIconHnadle != -1)
+	{
+		int srcW, srcH;
+		GetGraphSize(weakIconHnadle, &srcW, &srcH);
+
+		int iconH = static_cast<int>(height* kWeakPointIconScale);
+		int iconW = static_cast<int>(srcW * (iconH / static_cast<float>(srcH)));
+
+		int iconX = x1 - kWeakIconOffset - iconW;
+		int iconY = y1 - (iconH - static_cast<int>(height)) / 2; // íÜâõÇäÓèÄÇ…è„â∫Ç…çLÇ∞ÇÈ
+
+		DrawExtendGraph(iconX, iconY, iconX + iconW, iconY + iconH, weakIconHnadle, TRUE);
 	}
 }
 

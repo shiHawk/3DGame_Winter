@@ -5,6 +5,7 @@
 #include "NormalEnemy.h"
 #include "StrongEnemy.h"
 #include <cmath>
+#include <cfloat>
 namespace
 {
 	constexpr float kGroundCheckRayOffsetY = 50.0f; // レイの開始Y座標オフセット
