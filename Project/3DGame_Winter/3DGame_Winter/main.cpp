@@ -11,7 +11,7 @@ namespace
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_  HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
 	// windowモード設定
-	ChangeWindowMode(Game::kWindowMode);
+	//ChangeWindowMode(Game::kWindowMode);
 	// ウインドウ名設定
 	SetMainWindowText(L"BraveBuddyQuest");
 	// 画面サイズの設定
